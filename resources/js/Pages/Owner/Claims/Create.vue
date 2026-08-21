@@ -24,7 +24,7 @@ function submit() {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
+            <h2 class="text-h5 font-weight-bold">
                 Reivindicar restaurante
             </h2>
         </template>

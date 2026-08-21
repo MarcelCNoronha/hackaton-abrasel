@@ -18,5 +18,13 @@ export default {
         },
     },
 
+    // Every page is Vuetify now (the last plain-Tailwind Breeze primitives were removed) --
+    // preflight's un-scoped resets (bare `button { background-color: transparent }` has
+    // higher specificity than Vuetify's own :where()-scoped utilities) were winning over
+    // Vuetify's button/field colors app-wide. Utilities stay on; only the reset layer goes.
+    corePlugins: {
+        preflight: false,
+    },
+
     plugins: [forms],
 };

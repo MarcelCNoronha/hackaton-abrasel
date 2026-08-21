@@ -40,7 +40,7 @@ function formatDate(value) {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
+            <h2 class="text-h5 font-weight-bold">
                 Minha conta
             </h2>
         </template>
@@ -55,7 +55,7 @@ function formatDate(value) {
                         <v-card title="Avaliações" :subtitle="String(stats.reviews)" />
                     </v-col>
                     <v-col cols="6" sm="3">
-                        <v-card title="Cupons disponíveis" :subtitle="String(stats.coupons)" />
+                        <v-card title="Cupons" :subtitle="String(stats.coupons)" />
                     </v-col>
                     <v-col cols="6" sm="3">
                         <v-card title="Favoritos" :subtitle="String(stats.favorites)" />

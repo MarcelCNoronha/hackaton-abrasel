@@ -5,10 +5,37 @@
 /* @tailwindcss/forms (base strategy) resets every native <input>/<select>/<textarea> to a white
    background, including the ones Vuetify renders internally for v-text-field etc. — Vuetify
    already manages its own field background via bg-color/theme surface, so this fought with the
-   dark theme (fields on public/guest pages showed as plain white boxes). Scoped to Vuetify's own
-   root class so the still-plain-Tailwind pages (Profile, AuthenticatedLayout) are untouched. */
+   dark theme (fields showed as plain white boxes regardless of corePlugins.preflight below,
+   since @tailwindcss/forms hooks its own base styles in independently of it). */
 .v-application input,
 .v-application select,
 .v-application textarea {
     background-color: transparent;
+}
+
+/* Every page is Vuetify now, and Tailwind preflight's element selectors (button, a, ...) are
+   NOT wrapped in :where() the way its attribute-based ones are (e.g. input:where([type=button])),
+   so they carry normal (0,0,1) specificity — higher than Vuetify's own :where()-scoped utility
+   classes. `.v-btn.bg-primary` was silently losing to preflight's plain `button { background-
+   color: transparent }`, rendering every colored button as plain text; the same would happen to
+   `.text-primary` links against a plain `a { color: ... }` rule. Fixed by disabling preflight
+   entirely (tailwind.config.js corePlugins.preflight) rather than chasing every such collision.
+   That drops two resets this app still wants, so both are reintroduced manually below — wrapped
+   in :where() themselves so they act as low-priority defaults instead of re-creating the exact
+   fight they were added to avoid. */
+:where(*, ::before, ::after) {
+    box-sizing: border-box;
+}
+
+:where(a) {
+    color: inherit;
+    text-decoration: inherit;
+}
+
+/* Vuetify's text-color utility classes (text-primary, text-secondary, ...) are pre-generated
+   only for the colors present in its OWN default theme config at build time — vicosaFoodDark's
+   custom color names never produced them, so every `class="text-primary"` in this app (7 files)
+   was rendering as a no-op, plain inherited text color. Defined for the ones actually in use. */
+.text-primary {
+    color: rgb(var(--v-theme-primary)) !important;
 }

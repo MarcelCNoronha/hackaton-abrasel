@@ -187,7 +187,7 @@ function submitReply(reviewId) {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
+            <h2 class="text-h5 font-weight-bold">
                 Gerenciar: {{ restaurant.name }}
             </h2>
         </template>
@@ -456,7 +456,7 @@ function submitReply(reviewId) {
 
 <style scoped>
 .reply-box {
-    background: #faf7f2;
+    background: rgb(var(--v-theme-background));
     border-radius: 8px;
     padding: 12px;
     margin-top: 8px;

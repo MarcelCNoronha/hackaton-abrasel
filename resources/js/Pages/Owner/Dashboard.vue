@@ -15,11 +15,11 @@ defineProps({
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex items-center justify-between">
-                <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
+            <div class="d-flex align-center justify-space-between">
+                <h2 class="text-h5 font-weight-bold">
                     Painel do estabelecimento
                 </h2>
-                <Link :href="route('owner.claims.create')" class="text-sm font-semibold text-indigo-600 hover:text-indigo-800">
+                <Link :href="route('owner.claims.create')" class="text-body-2 font-weight-bold text-primary text-decoration-none">
                     + Reivindicar restaurante
                 </Link>
             </div>
