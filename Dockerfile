@@ -29,6 +29,10 @@ COPY public ./public
 COPY --from=composer_deps /app/vendor ./vendor
 COPY postcss.config.js tailwind.config.js jsconfig.json* ./
 COPY vite.config.js ./
+# Vite inlines import.meta.env.VITE_* at build time, not runtime -- .env (with the real
+# VITE_APP_NAME) is never copied into this stage, so without this every build silently baked
+# in app.js's 'Laravel' fallback (visible as "Entrar - Laravel" in every page title).
+ENV VITE_APP_NAME=VicosaFood
 RUN npm run build
 
 FROM php:8.4-fpm-alpine AS app

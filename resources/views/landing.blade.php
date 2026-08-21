@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>VicosaFood | A vitrine digital dos restaurantes de Viçosa</title>
 <meta name="description" content="Descubra os melhores restaurantes de Viçosa com cupons exclusivos e avaliações verificadas, ou cadastre seu restaurante e alcance mais clientes sem pagar comissão por pedido." />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 <style>
   :root {
     color-scheme: dark;
