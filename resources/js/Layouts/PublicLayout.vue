@@ -1,22 +1,30 @@
 <script setup>
+import { onMounted } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
+import { useTheme } from 'vuetify';
 
 const page = usePage();
 const user = page.props.auth?.user ?? null;
 const appName = page.props.appName;
+
+// See plugins/vuetify.js: this theme is scoped to the public/guest experience only, switched
+// at runtime instead of being the app-wide default so it never touches the (still plain
+// Tailwind) authenticated dashboards.
+const theme = useTheme();
+onMounted(() => {
+    theme.change('vicosaFoodDark');
+});
 </script>
 
 <template>
     <v-app>
-        <v-app-bar flat color="surface" height="72" border="b">
+        <v-app-bar flat color="surface" height="72" style="border-bottom: 1px solid rgba(249, 115, 22, 0.28)">
             <v-container class="d-flex align-center" fluid style="max-width: 1400px">
                 <Link href="/" class="text-decoration-none d-flex align-center ga-2">
-                    <v-avatar color="primary" size="36" rounded="lg">
+                    <v-avatar size="36" rounded="lg" style="background: linear-gradient(135deg, #f97316, #ef4444)">
                         <v-icon icon="mdi-silverware-fork-knife" color="white" size="20" />
                     </v-avatar>
-                    <span class="text-h6 font-weight-bold" style="color: #241c1a; letter-spacing: -0.02em">{{
-                        appName
-                    }}</span>
+                    <span class="text-h6 font-weight-bold" style="letter-spacing: -0.02em">{{ appName }}</span>
                 </Link>
 
                 <v-spacer />
@@ -35,7 +43,7 @@ const appName = page.props.appName;
             </v-container>
         </v-app-bar>
 
-        <v-main style="background: #faf7f2">
+        <v-main>
             <slot />
         </v-main>
     </v-app>

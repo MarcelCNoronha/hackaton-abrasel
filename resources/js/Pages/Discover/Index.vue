@@ -330,8 +330,8 @@ function clearFilters() {
 }
 
 .search-bar {
-    background: #fff;
-    border-bottom: 1px solid rgba(36, 28, 26, 0.08);
+    background: rgb(var(--v-theme-surface));
+    border-bottom: 1px solid rgba(249, 115, 22, 0.28);
     padding-block: 16px;
     position: sticky;
     top: 72px;
@@ -361,13 +361,13 @@ function clearFilters() {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: rgba(36, 28, 26, 0.6);
+    color: rgba(253, 246, 240, 0.6);
 }
 
 :deep(.chip-selected) {
-    background: #e15241 !important;
-    color: white !important;
-    border-color: #e15241 !important;
+    background: #f97316 !important;
+    color: #2a0f02 !important;
+    border-color: #f97316 !important;
 }
 
 .results-area {
@@ -382,12 +382,12 @@ function clearFilters() {
     max-width: 560px;
     overflow-y: auto;
     padding: 16px;
-    background: #faf7f2;
+    background: rgb(var(--v-theme-background));
 }
 
 .results-count {
     padding: 4px 8px 16px;
-    color: rgba(36, 28, 26, 0.7);
+    color: rgba(253, 246, 240, 0.7);
     font-size: 0.9rem;
 }
 

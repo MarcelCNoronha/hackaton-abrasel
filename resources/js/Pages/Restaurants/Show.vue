@@ -251,11 +251,11 @@ const heroGradient = computed(() => {
 }
 
 .menu-item-card {
-    border-color: rgba(36, 28, 26, 0.1);
+    border-color: rgba(249, 115, 22, 0.28);
 }
 
 .reply-box {
-    background: #faf7f2;
+    background: rgb(var(--v-theme-background));
     border-radius: 8px;
     padding: 12px;
 }

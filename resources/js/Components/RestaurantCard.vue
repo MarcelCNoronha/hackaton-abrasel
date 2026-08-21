@@ -85,7 +85,8 @@ const distanceLabel = computed(() => {
 
 <style scoped>
 .restaurant-card {
-    border: 1px solid rgba(36, 28, 26, 0.08);
+    background: rgb(var(--v-theme-surface));
+    border: 1px solid rgba(249, 115, 22, 0.28);
     overflow: hidden;
     transition:
         transform 0.15s ease,
@@ -95,8 +96,8 @@ const distanceLabel = computed(() => {
 
 .restaurant-card:hover,
 .restaurant-card--highlighted {
-    border-color: #e15241;
-    box-shadow: 0 6px 20px rgba(36, 28, 26, 0.12);
+    border-color: #f97316;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35), 0 0 24px -8px rgba(249, 115, 22, 0.5);
     transform: translateY(-1px);
 }
 

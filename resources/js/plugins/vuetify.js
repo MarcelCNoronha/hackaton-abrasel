@@ -25,10 +25,38 @@ const vicosaFoodTheme = {
     },
 };
 
+// Same warm food palette as the marketing landing page (resources/views/landing.blade.php),
+// used only by the public/guest experience (PublicLayout, GuestLayout and their pages) via
+// useTheme().global.name — kept separate from the default theme above, which the authenticated
+// dashboards (Owner/Admin, still plain Tailwind chrome) still rely on, so switching this one
+// never touches them.
+const vicosaFoodDark = {
+    dark: true,
+    colors: {
+        background: '#120B08',
+        surface: '#1C120C',
+        primary: '#F97316',
+        'primary-darken-1': '#C2410C',
+        secondary: '#22C55E',
+        'secondary-darken-1': '#16A34A',
+        accent: '#FBBF24',
+        error: '#EF4444',
+        info: '#60A5FA',
+        success: '#22C55E',
+        warning: '#FBBF24',
+        'on-background': '#FDF6F0',
+        'on-surface': '#FDF6F0',
+    },
+    variables: {
+        'border-color': '#F97316',
+        'border-opacity': 0.24,
+    },
+};
+
 export default createVuetify({
     theme: {
         defaultTheme: 'vicosaFoodTheme',
-        themes: { vicosaFoodTheme },
+        themes: { vicosaFoodTheme, vicosaFoodDark },
     },
     defaults: {
         VBtn: {

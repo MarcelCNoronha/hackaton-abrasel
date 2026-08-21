@@ -41,9 +41,9 @@ function formatDistance(distanceKm) {
 }
 
 function restaurantIcon(isOpenNow, isHighlighted) {
-    const color = isOpenNow ? '#1F6E43' : '#8A7F7A';
+    const color = isOpenNow ? '#22C55E' : '#8A7F7A';
     const size = isHighlighted ? 34 : 26;
-    const ring = isHighlighted ? `box-shadow:0 0 0 4px ${color}33, 0 2px 8px rgba(0,0,0,.35);` : 'box-shadow:0 2px 6px rgba(0,0,0,.35);';
+    const ring = isHighlighted ? `box-shadow:0 0 0 4px ${color}33, 0 2px 8px rgba(0,0,0,.5);` : 'box-shadow:0 2px 6px rgba(0,0,0,.5);';
 
     return L.divIcon({
         className: '',
@@ -72,25 +72,25 @@ function popupHtml(restaurant) {
     const cuisines = (restaurant.cuisines ?? []).map((c) => c.name).join(' · ');
     const profileUrl = route('restaurants.show', restaurant.slug);
     const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${restaurant.latitude},${restaurant.longitude}`;
-    const statusColor = restaurant.is_open_now ? '#1F6E43' : '#8A7F7A';
+    const statusColor = restaurant.is_open_now ? '#22C55E' : '#A68D7C';
 
     return `
         <div style="min-width:240px;font-family:inherit;">
-            <div style="font-weight:700;font-size:15px;margin-bottom:4px;color:#241C1A;">${restaurant.name}</div>
-            <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#5C524E;margin-bottom:4px;flex-wrap:wrap;">
-                <span><i class="mdi mdi-star" style="color:#F2A93B;"></i> ${Number(restaurant.average_rating).toFixed(1)}</span>
+            <div style="font-weight:700;font-size:15px;margin-bottom:4px;color:#FDF6F0;">${restaurant.name}</div>
+            <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#E3CFC0;margin-bottom:4px;flex-wrap:wrap;">
+                <span><i class="mdi mdi-star" style="color:#FBBF24;"></i> ${Number(restaurant.average_rating).toFixed(1)}</span>
                 ${distance ? `<span><i class="mdi mdi-map-marker-outline"></i> ${distance}</span>` : ''}
-                <span style="font-weight:700;color:#E15241;">${restaurant.price_range ?? ''}</span>
+                <span style="font-weight:700;color:#F97316;">${restaurant.price_range ?? ''}</span>
             </div>
-            ${cuisines ? `<div style="font-size:12px;color:#8A7F7A;margin-bottom:6px;">${cuisines}</div>` : ''}
+            ${cuisines ? `<div style="font-size:12px;color:#A68D7C;margin-bottom:6px;">${cuisines}</div>` : ''}
             <div style="font-size:12px;font-weight:600;color:${statusColor};margin-bottom:10px;">
                 <i class="mdi mdi-circle" style="font-size:8px;"></i>
                 ${restaurant.is_open_now ? 'Aberto agora' : 'Fechado agora'}
             </div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                <a href="${profileUrl}" style="background:#E15241;color:white;padding:6px 10px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none;">Ver perfil</a>
-                <a href="${profileUrl}#cardapio" style="border:1px solid rgba(36,28,26,0.15);padding:6px 10px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none;color:#241C1A;">Cardápio</a>
-                <a href="${directionsUrl}" target="_blank" rel="noopener" style="padding:6px 10px;font-size:12px;font-weight:600;text-decoration:none;color:#241C1A;">Como chegar</a>
+                <a href="${profileUrl}" style="background:#F97316;color:#2A0F02;padding:6px 10px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none;">Ver perfil</a>
+                <a href="${profileUrl}#cardapio" style="border:1px solid rgba(249,115,22,0.35);padding:6px 10px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none;color:#FDF6F0;">Cardápio</a>
+                <a href="${directionsUrl}" target="_blank" rel="noopener" style="padding:6px 10px;font-size:12px;font-weight:600;text-decoration:none;color:#FDF6F0;">Como chegar</a>
             </div>
         </div>
     `;
@@ -139,8 +139,8 @@ function renderUserMarker() {
 
     userMarker = L.circleMarker([props.userLocation.lat, props.userLocation.lng], {
         radius: 7,
-        color: '#2F6FED',
-        fillColor: '#2F6FED',
+        color: '#60A5FA',
+        fillColor: '#60A5FA',
         fillOpacity: 0.9,
         weight: 2,
     }).addTo(map);
@@ -151,8 +151,10 @@ onMounted(() => {
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors',
+    // Dark basemap so the map reads as part of the app's dark theme instead of a bright
+    // white rectangle dropped into it; same tile server family (CartoDB), just the dark variant.
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
         maxZoom: 19,
     }).addTo(map);
 
@@ -191,5 +193,17 @@ watch(
 
 .restaurant-map :deep(.leaflet-popup-content-wrapper) {
     border-radius: 10px;
+    background: #1c120c;
+    border: 1px solid rgba(249, 115, 22, 0.28);
+}
+
+.restaurant-map :deep(.leaflet-popup-tip) {
+    background: #1c120c;
+}
+
+.restaurant-map :deep(.leaflet-control-zoom a) {
+    background: #1c120c;
+    color: #fdf6f0;
+    border-color: rgba(249, 115, 22, 0.28) !important;
 }
 </style>

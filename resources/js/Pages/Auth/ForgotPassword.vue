@@ -1,9 +1,5 @@
 <script setup>
 import GuestLayout from '@/Layouts/GuestLayout.vue';
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 
 defineProps({
@@ -23,46 +19,40 @@ const submit = () => {
 
 <template>
     <GuestLayout>
-        <Head title="Forgot Password" />
+        <Head title="Recuperar senha" />
 
-        <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
-            Forgot your password? No problem. Just let us know your email
-            address and we will email you a password reset link that will allow
-            you to choose a new one.
-        </div>
+        <h1 class="text-h5 font-weight-bold mb-4">Esqueceu a senha?</h1>
 
-        <div
-            v-if="status"
-            class="mb-4 text-sm font-medium text-green-600 dark:text-green-400"
-        >
+        <p class="text-body-2 text-medium-emphasis mb-4">
+            Sem problema. Informe seu e-mail e enviaremos um link pra você escolher uma nova senha.
+        </p>
+
+        <v-alert v-if="status" type="success" variant="tonal" class="mb-4">
             {{ status }}
-        </div>
+        </v-alert>
 
         <form @submit.prevent="submit">
-            <div>
-                <InputLabel for="email" value="Email" />
+            <v-text-field
+                v-model="form.email"
+                label="E-mail"
+                type="email"
+                autocomplete="username"
+                autofocus
+                required
+                :error-messages="form.errors.email"
+            />
 
-                <TextInput
-                    id="email"
-                    type="email"
-                    class="mt-1 block w-full"
-                    v-model="form.email"
-                    required
-                    autofocus
-                    autocomplete="username"
-                />
-
-                <InputError class="mt-2" :message="form.errors.email" />
-            </div>
-
-            <div class="mt-4 flex items-center justify-end">
-                <PrimaryButton
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
-                >
-                    Email Password Reset Link
-                </PrimaryButton>
-            </div>
+            <v-btn
+                type="submit"
+                color="primary"
+                variant="flat"
+                size="large"
+                block
+                class="mt-4"
+                :loading="form.processing"
+            >
+                Enviar link de recuperação
+            </v-btn>
         </form>
     </GuestLayout>
 </template>

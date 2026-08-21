@@ -1,3 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* @tailwindcss/forms (base strategy) resets every native <input>/<select>/<textarea> to a white
+   background, including the ones Vuetify renders internally for v-text-field etc. — Vuetify
+   already manages its own field background via bg-color/theme surface, so this fought with the
+   dark theme (fields on public/guest pages showed as plain white boxes). Scoped to Vuetify's own
+   root class so the still-plain-Tailwind pages (Profile, AuthenticatedLayout) are untouched. */
+.v-application input,
+.v-application select,
+.v-application textarea {
+    background-color: transparent;
+}
