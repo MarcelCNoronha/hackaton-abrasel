@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\ClaimStatus;
+use App\Enums\PriceRange;
 use App\Http\Controllers\Controller;
 use App\Models\Restaurant;
 use App\Models\RestaurantClaim;
@@ -25,7 +26,10 @@ class DashboardController extends Controller
                 ->latest()
                 ->get(),
             'users' => User::orderBy('name')->get(['id', 'name', 'email', 'role']),
-            'restaurants' => Restaurant::orderBy('name')->get(['id', 'slug', 'name', 'address_city', 'is_active', 'claimed_at']),
+            // Full profile columns (not just the ones the table renders) -- the "Editar"
+            // dialog pre-fills its form straight from this same list.
+            'restaurants' => Restaurant::orderBy('name')->get(),
+            'priceRanges' => array_column(PriceRange::cases(), 'value'),
         ]);
     }
 }

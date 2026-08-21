@@ -1,6 +1,6 @@
 <script setup>
 import { computed, reactive, ref } from 'vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, router, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
 const props = defineProps({
@@ -149,6 +149,22 @@ function submitCampaign() {
         preserveScroll: true,
         onSuccess: () => campaignForm.reset(),
     });
+}
+
+function isCampaignPending(campaign) {
+    return campaign.proposed_by !== null && campaign.accepted_at === null;
+}
+
+const pendingCampaigns = computed(() => (props.restaurant.coupon_campaigns ?? []).filter(isCampaignPending));
+const ownCampaigns = computed(() => (props.restaurant.coupon_campaigns ?? []).filter((c) => !isCampaignPending(c)));
+
+function acceptCampaign(campaignId) {
+    router.patch(route('owner.coupon-campaigns.accept', campaignId), {}, { preserveScroll: true });
+}
+
+function rejectCampaign(campaignId) {
+    if (!confirm('Recusar esta sugestão de campanha? Ela será removida.')) return;
+    router.delete(route('owner.coupon-campaigns.reject', campaignId), { preserveScroll: true });
 }
 
 // --- Avaliações ---
@@ -330,7 +346,27 @@ function submitReply(reviewId) {
 
                             <!-- Cupons -->
                             <v-window-item value="cupons">
-                                <v-card v-for="campaign in restaurant.coupon_campaigns" :key="campaign.id" variant="outlined" class="mb-2">
+                                <template v-if="pendingCampaigns.length">
+                                    <h3 class="text-subtitle-1 font-weight-bold mb-2">Sugestões da administração</h3>
+                                    <v-card v-for="campaign in pendingCampaigns" :key="campaign.id" variant="outlined" class="mb-2" style="border-color: rgb(var(--v-theme-warning))">
+                                        <v-card-item>
+                                            <v-card-title>{{ campaign.name }}</v-card-title>
+                                            <v-card-subtitle>{{ campaign.benefit_description }}</v-card-subtitle>
+                                        </v-card-item>
+                                        <v-card-text>
+                                            Vigência: {{ campaign.starts_at }} até {{ campaign.ends_at }} · Limite por cliente: {{ campaign.per_user_limit }}
+                                        </v-card-text>
+                                        <v-card-actions>
+                                            <v-chip size="small" color="warning" variant="tonal">Aguardando sua decisão</v-chip>
+                                            <v-spacer />
+                                            <v-btn size="small" color="secondary" variant="flat" @click="acceptCampaign(campaign.id)">Aceitar</v-btn>
+                                            <v-btn size="small" color="error" variant="outlined" @click="rejectCampaign(campaign.id)">Recusar</v-btn>
+                                        </v-card-actions>
+                                    </v-card>
+                                    <v-divider class="my-4" />
+                                </template>
+
+                                <v-card v-for="campaign in ownCampaigns" :key="campaign.id" variant="outlined" class="mb-2">
                                     <v-card-item>
                                         <v-card-title>{{ campaign.name }}</v-card-title>
                                         <v-card-subtitle>{{ campaign.benefit_description }}</v-card-subtitle>
@@ -342,7 +378,7 @@ function submitReply(reviewId) {
                                         </v-chip>
                                     </v-card-text>
                                 </v-card>
-                                <p v-if="!restaurant.coupon_campaigns?.length" class="text-body-2 text-medium-emphasis mb-4">
+                                <p v-if="!ownCampaigns.length && !pendingCampaigns.length" class="text-body-2 text-medium-emphasis mb-4">
                                     Nenhuma campanha de cupom criada ainda.
                                 </p>
 

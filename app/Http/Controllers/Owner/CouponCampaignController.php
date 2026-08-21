@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
+use App\Models\CouponCampaign;
 use App\Models\Restaurant;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,5 +28,25 @@ class CouponCampaignController extends Controller
         $restaurant->couponCampaigns()->create($data);
 
         return back()->with('status', 'Campanha de cupom criada.');
+    }
+
+    public function accept(Request $request, CouponCampaign $couponCampaign): RedirectResponse
+    {
+        RestaurantController::authorizeOwner($request, $couponCampaign->restaurant);
+        abort_unless($couponCampaign->isPending(), 422, 'Esta campanha não está aguardando aceite.');
+
+        $couponCampaign->update(['is_active' => true, 'accepted_at' => now()]);
+
+        return back()->with('status', 'Campanha aceita e ativada.');
+    }
+
+    public function reject(Request $request, CouponCampaign $couponCampaign): RedirectResponse
+    {
+        RestaurantController::authorizeOwner($request, $couponCampaign->restaurant);
+        abort_unless($couponCampaign->isPending(), 422, 'Esta campanha não está aguardando aceite.');
+
+        $couponCampaign->delete();
+
+        return back()->with('status', 'Sugestão de campanha recusada.');
     }
 }
