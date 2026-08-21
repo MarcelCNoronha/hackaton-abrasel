@@ -6,7 +6,6 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
-use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 
@@ -26,11 +25,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => EnsureUserRole::class,
         ]);
 
-        // Production traffic reaches php-fpm through two nginx hops we control (CatalogIA's
-        // internet-facing nginx on this VPS, then this app's own internal nginx) — trusting
-        // all proxies here is safe because php-fpm is never reachable except through them.
-        // Without this, X-Forwarded-Proto is ignored and Laravel thinks every request is
-        // plain HTTP, breaking secure cookies and https:// URL generation behind the proxy.
+        // Production traffic reaches php-fpm only through this app's own nginx (Cloudflare
+        // connects directly to it via a per-hostname Origin Rule, see docker/nginx/prod.conf)
+        // — trusting it as a proxy is safe since php-fpm is never reachable any other way.
+        // This mainly fixes X-Forwarded-For (real client IP instead of the local nginx's);
+        // prod.conf already sets HTTPS=on directly for scheme detection.
         $middleware->trustProxies(
             at: '*',
             headers: SymfonyRequest::HEADER_X_FORWARDED_FOR
