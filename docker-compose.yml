@@ -1,0 +1,74 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: app
+    image: saborlocal-app:local
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DB_HOST: db
+      REDIS_HOST: redis
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - storage_data:/var/www/html/storage/app
+      - public_storage:/var/www/html/public/storage
+      - public_assets:/srv/public
+
+  queue:
+    image: saborlocal-app:local
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DB_HOST: db
+      REDIS_HOST: redis
+      RUN_MIGRATIONS: "false"
+    depends_on:
+      - app
+      - db
+      - redis
+    command: php artisan queue:work --tries=1 --timeout=0
+    volumes:
+      - storage_data:/var/www/html/storage/app
+      - public_storage:/var/www/html/public/storage
+
+  nginx:
+    image: nginx:1.30-alpine
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "8080:80"
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - public_assets:/srv/public:ro
+      - public_storage:/srv/storage
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-saborlocal}
+      POSTGRES_USER: ${DB_USERNAME:-saborlocal}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-saborlocal}
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+
+volumes:
+  postgres_data:
+  storage_data:
+  public_storage:
+  public_assets:

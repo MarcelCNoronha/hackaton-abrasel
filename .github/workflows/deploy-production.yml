@@ -1,0 +1,159 @@
+name: Deploy Production
+
+# Triggers off CI's own completion (not push directly) so a broken push can't reach production
+# before anyone sees CI go red. `workflow_dispatch` is kept for manual re-deploys (e.g.
+# re-running after a transient VPS issue) without needing a new commit.
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # workflow_run's `branches` filter matches on the PR's BASE branch, not just real pushes to
+    # main — so a green CI run for a PR opened against main would satisfy `branches: [main]` too.
+    # Checking the triggering event was a `push` avoids deploying an unmerged, unreviewed commit.
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.event == 'push' && github.event.workflow_run.conclusion == 'success') }}
+
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          # workflow_run always checks out the default branch by default, ignoring the commit
+          # that actually triggered CI — pin to that commit's SHA. workflow_dispatch has no
+          # workflow_run event, so falls back to the manually dispatched ref (github.sha).
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Set image metadata
+        env:
+          DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          echo "APP_IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+          echo "IMAGE_TAG=sha-${DEPLOY_SHA::7}" >> "$GITHUB_ENV"
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GHCR_USERNAME }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build and push app image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./Dockerfile
+          target: app
+          push: true
+          provenance: false
+          sbom: false
+          cache-from: type=gha,scope=app
+          cache-to: type=gha,mode=max,scope=app
+          tags: |
+            ${{ env.APP_IMAGE }}:latest
+            ${{ env.APP_IMAGE }}:${{ env.IMAGE_TAG }}
+
+      - name: Prepare deploy bundle
+        run: |
+          mkdir -p .deploy/docker/nginx .deploy/scripts
+          cp docker-compose.prod.yml .deploy/docker-compose.prod.yml
+          cp docker/nginx/prod.conf .deploy/docker/nginx/prod.conf
+          cp scripts/prune-production-images.sh .deploy/scripts/prune-production-images.sh
+          cat <<'EOF' > .deploy/.env
+          ${{ secrets.PRODUCTION_ENV_FILE }}
+          EOF
+          {
+            echo "IMAGE_NAME=${{ env.APP_IMAGE }}"
+            echo "IMAGE_TAG=${{ env.IMAGE_TAG }}"
+          } >> .deploy/.env
+
+      - name: Upload and deploy on VPS
+        env:
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_PORT: ${{ secrets.VPS_PORT }}
+          VPS_DEPLOY_PATH: ${{ secrets.VPS_DEPLOY_PATH }}
+          GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+        run: |
+          echo "$VPS_SSH_KEY" > /tmp/deploy_key
+          chmod 600 /tmp/deploy_key
+          SSH_OPTS="-i /tmp/deploy_key -p $VPS_PORT -o StrictHostKeyChecking=no -o ConnectTimeout=60 -o ServerAliveInterval=15 -o ServerAliveCountMax=6"
+
+          upload_ok=0
+          for attempt in $(seq 1 3); do
+            echo "Upload attempt $attempt..."
+            if tar -czf - -C .deploy . | \
+              ssh $SSH_OPTS "$VPS_USER@$VPS_HOST" \
+                "mkdir -p $VPS_DEPLOY_PATH && cd $VPS_DEPLOY_PATH && tar -xzf -"; then
+              echo "Upload succeeded on attempt $attempt"
+              upload_ok=1
+              break
+            fi
+            [ "$attempt" -lt 3 ] && { echo "Waiting 20s before retry..."; sleep 20; }
+          done
+          [ "$upload_ok" -eq 1 ] || { echo "All upload attempts failed"; exit 1; }
+
+          cat > /tmp/remote_deploy.sh << LOCALEOF
+          set -eu
+          DPATH="$VPS_DEPLOY_PATH"
+          GUSER="$GHCR_USERNAME"
+          GTOKEN="$GHCR_TOKEN"
+          cd "\$DPATH"
+          echo "\$GTOKEN" | docker login ghcr.io -u "\$GUSER" --password-stdin
+          docker compose -f docker-compose.prod.yml pull --quiet
+          docker compose -f docker-compose.prod.yml up -d --remove-orphans
+
+          # /up is Laravel's built-in health-check route (bootstrap/app.php) — hitting it
+          # through this app's own nginx exercises the whole chain (nginx -> php-fpm -> app
+          # boot), not just "container is running". Bounded to 5 minutes so a bad migration
+          # or crash-looping container fails the deploy instead of hanging the whole job.
+          # -k: prod.conf terminates TLS with the Cloudflare Origin Certificate, which isn't
+          # in curl's trusted CA list — fine for this same-host liveness check.
+          NGINX_PORT="\$(docker compose -f docker-compose.prod.yml port nginx 443 | awk -F: 'END {print \$NF}')"
+          health_ok=0
+          for i in \$(seq 1 60); do
+            if curl -k -fsS "https://127.0.0.1:\${NGINX_PORT}/up" >/dev/null 2>&1; then
+              health_ok=1
+              break
+            fi
+            sleep 5
+          done
+          if [ "\$health_ok" -ne 1 ]; then
+            echo "App did not become healthy within 5 minutes — dumping recent logs:"
+            docker compose -f docker-compose.prod.yml logs --tail=200 app nginx
+            exit 1
+          fi
+
+          chmod +x scripts/prune-production-images.sh
+          scripts/prune-production-images.sh --execute --keep-recent 3 --min-age-hours 24 --compose-file docker-compose.prod.yml --env-file .env || \
+            echo "Docker image cleanup failed after a healthy deploy; continuing."
+          LOCALEOF
+
+          deploy_ok=0
+          for attempt in $(seq 1 12); do
+            echo "Deploy attempt $attempt..."
+            if ssh $SSH_OPTS "$VPS_USER@$VPS_HOST" bash < /tmp/remote_deploy.sh; then
+              echo "Deploy succeeded on attempt $attempt"
+              deploy_ok=1
+              break
+            fi
+            [ "$attempt" -lt 12 ] && { echo "Waiting 60s before retry..."; sleep 60; }
+          done
+          [ "$deploy_ok" -eq 1 ] || { echo "All deploy attempts failed"; exit 1; }
+
+          rm -f /tmp/deploy_key /tmp/remote_deploy.sh
