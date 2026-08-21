@@ -8,7 +8,8 @@ use App\Http\Controllers\Public\RestaurantController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', [DiscoveryController::class, 'index'])->name('discover');
+Route::view('/', 'landing')->name('landing');
+Route::get('/restaurantes', [DiscoveryController::class, 'index'])->name('discover');
 Route::get('/restaurantes/{restaurant:slug}', [RestaurantController::class, 'show'])->name('restaurants.show');
 
 Route::get('/dashboard', function () {
