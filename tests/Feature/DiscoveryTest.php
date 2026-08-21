@@ -28,7 +28,7 @@ class DiscoveryTest extends TestCase
 
     public function test_home_page_lists_active_restaurants_without_login(): void
     {
-        $this->get('/')
+        $this->get('/restaurantes')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('Discover/Index')
@@ -40,7 +40,7 @@ class DiscoveryTest extends TestCase
     {
         // centro de Vicosa/MG; Burger Local (~170m) e Veggie Green Bowl (~335m) ficam
         // dentro de 500m, os demais estao a 700m+ -- margem confortavel para o teste.
-        $response = $this->get('/?lat=-20.7546&lng=-42.8825&radius_km=0.5');
+        $response = $this->get('/restaurantes?lat=-20.7546&lng=-42.8825&radius_km=0.5');
 
         $response->assertInertia(fn (Assert $page) => $page
             ->component('Discover/Index')
@@ -50,7 +50,7 @@ class DiscoveryTest extends TestCase
 
     public function test_dietary_tags_filter_requires_a_single_dish_matching_all_tags(): void
     {
-        $response = $this->get('/?'.http_build_query([
+        $response = $this->get('/restaurantes?'.http_build_query([
             'dietary_tags' => ['vegano', 'sem-gluten'],
         ]));
 
@@ -63,7 +63,7 @@ class DiscoveryTest extends TestCase
 
     public function test_text_search_matches_menu_item_names(): void
     {
-        $response = $this->get('/?q=bowl');
+        $response = $this->get('/restaurantes?q=bowl');
 
         $response->assertInertia(fn (Assert $page) => $page
             ->has('restaurants', 1)
