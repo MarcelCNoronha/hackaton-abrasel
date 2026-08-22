@@ -21,24 +21,24 @@ class DatabaseSeeder extends Seeder
             CuisineSeeder::class,
             DietaryTagSeeder::class,
             RestaurantSeeder::class,
+            DemoActivitySeeder::class,
         ]);
 
-        User::factory()->create([
-            'name' => 'Admin',
-            'email' => 'admin@vicosafood.test',
-            'role' => UserRole::Admin,
-        ]);
+        // updateOrCreate (nao Factory) -- Factory::definition() chama fake(), que quebra em
+        // producao porque fakerphp/faker e' require-dev e a imagem e' construida com --no-dev.
+        User::updateOrCreate(
+            ['email' => 'admin@vicosafood.test'],
+            ['name' => 'Admin', 'password' => 'password', 'role' => UserRole::Admin, 'email_verified_at' => now()]
+        );
 
-        User::factory()->create([
-            'name' => 'Consumidor Teste',
-            'email' => 'test@example.com',
-            'role' => UserRole::Consumer,
-        ]);
+        User::updateOrCreate(
+            ['email' => 'test@example.com'],
+            ['name' => 'Consumidor Teste', 'password' => 'password', 'role' => UserRole::Consumer, 'email_verified_at' => now()]
+        );
 
-        User::factory()->create([
-            'name' => 'Gestor Teste',
-            'email' => 'gestor@vicosafood.test',
-            'role' => UserRole::Owner,
-        ]);
+        User::updateOrCreate(
+            ['email' => 'gestor@vicosafood.test'],
+            ['name' => 'Gestor Teste', 'password' => 'password', 'role' => UserRole::Owner, 'email_verified_at' => now()]
+        );
     }
 }

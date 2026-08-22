@@ -11,11 +11,12 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
 /**
- * Dados de demonstracao para a tela de descoberta (mapa/busca/filtros) --
- * nao representam estabelecimentos reais existentes em Vicosa. Coordenadas
- * espalhadas em torno do centro de Vicosa/MG (-20.7546, -42.8825), proximo
- * a UFV, como referencia geografica real para o Hackathon ABRASEL (Desafio 1
- * -- Rota Gastronomica Inteligente de Vicosa).
+ * Dados de demonstracao para a tela de descoberta (mapa/busca/filtros) do
+ * Hackathon ABRASEL (Desafio 1 -- Rota Gastronomica Inteligente de Vicosa).
+ * Nomes, bairros, enderecos e coordenadas sao de estabelecimentos reais de
+ * Vicosa/MG (levantados via busca publica), mas nota, numero de avaliacoes,
+ * cardapio e horarios sao aproximados/ilustrativos para fins de demonstracao
+ * -- nao refletem necessariamente os dados reais e atuais de cada casa.
  */
 class RestaurantSeeder extends Seeder
 {
@@ -23,103 +24,169 @@ class RestaurantSeeder extends Seeder
     {
         $restaurants = [
             [
-                'name' => 'Burger Local',
+                'name' => 'Arte & Sabor',
                 'neighborhood' => 'Centro',
-                'category' => 'Hamburgueria',
-                'cuisines' => ['Hambúrguer'],
-                'price_range' => PriceRange::Medium,
-                'lat' => -20.7538, 'lng' => -42.8811,
-                'rating' => 4.7, 'reviews' => 324,
+                'category' => 'Pizzaria',
+                'cuisines' => ['Pizza', 'Brasileiro'],
+                'price_range' => PriceRange::High,
+                'lat' => -20.7557897, 'lng' => -42.8754650,
+                'rating' => 4.6, 'reviews' => 340,
                 'menu' => [
-                    'Hambúrgueres' => [
-                        ['name' => 'Smash Bacon', 'desc' => 'Pão brioche, carne 160g, cheddar, bacon e molho da casa.', 'price' => 32.90, 'tags' => []],
-                        ['name' => 'Smash Veggie', 'desc' => 'Blend de grão-de-bico e cogumelos, queijo vegano e picles.', 'price' => 29.90, 'tags' => ['Vegano', 'Vegetariano']],
+                    'Rodízio' => [
+                        ['name' => 'Rodízio tradicional', 'desc' => 'Pizzas, petiscos, refrigerante e massa liberados.', 'price' => 59.00, 'tags' => []],
+                        ['name' => 'Rodízio premium', 'desc' => 'Inclui camarões empanados, presunto parma com alho-poró e costela ao molho barbecue.', 'price' => 69.00, 'tags' => []],
+                    ],
+                ],
+                'hours' => ['mon-sun' => ['11:00', '23:30']],
+            ],
+            [
+                'name' => 'Sabor e Cia',
+                'neighborhood' => 'Centro',
+                'category' => 'Pizzaria',
+                'cuisines' => ['Pizza', 'Brasileiro'],
+                'price_range' => PriceRange::Medium,
+                'lat' => -20.7550814, 'lng' => -42.8799854,
+                'rating' => 4.0, 'reviews' => 210,
+                'menu' => [
+                    'Pizzas' => [
+                        ['name' => 'Pizza calabresa', 'desc' => 'Calabresa, cebola e mussarela.', 'price' => 39.90, 'tags' => []],
+                        ['name' => 'Pizza vegetariana', 'desc' => 'Legumes grelhados e mussarela.', 'price' => 42.90, 'tags' => ['Vegetariano']],
                     ],
                     'Bebidas' => [
-                        ['name' => 'Limonada suíça', 'desc' => null, 'price' => 9.90, 'tags' => ['Vegano']],
+                        ['name' => 'Chope artesanal', 'desc' => null, 'price' => 12.00, 'tags' => []],
                     ],
                 ],
-                'hours' => ['tue-sun' => ['11:30', '23:00']],
+                'hours' => ['tue-sun' => ['18:00', '00:00']],
             ],
             [
-                'name' => 'Cantina Nonna Rosa',
-                'neighborhood' => 'Bela Vista',
-                'category' => 'Restaurante',
-                'cuisines' => ['Italiano', 'Massas'],
-                'price_range' => PriceRange::High,
-                'lat' => -20.7600, 'lng' => -42.8790,
-                'rating' => 4.5, 'reviews' => 198,
-                'menu' => [
-                    'Massas' => [
-                        ['name' => 'Fettuccine ao Sugo', 'desc' => 'Massa fresca da casa com molho de tomate San Marzano.', 'price' => 48.00, 'tags' => ['Vegetariano']],
-                        ['name' => 'Risoto de Cogumelos', 'desc' => 'Arbóreo, mix de cogumelos e parmesão.', 'price' => 54.00, 'tags' => ['Vegetariano', 'Sem glúten']],
-                    ],
-                ],
-                'hours' => ['tue-sun' => ['12:00', '23:30']],
-            ],
-            [
-                'name' => 'Sushi Kaze',
-                'neighborhood' => 'Nova Viçosa',
+                'name' => 'Sushi Mirim',
+                'neighborhood' => 'Centro',
                 'category' => 'Restaurante',
                 'cuisines' => ['Japonês'],
-                'price_range' => PriceRange::VeryHigh,
-                'lat' => -20.7480, 'lng' => -42.8900,
-                'rating' => 4.8, 'reviews' => 412,
+                'price_range' => PriceRange::Medium,
+                'lat' => -20.7548500, 'lng' => -42.8797000,
+                'rating' => 4.5, 'reviews' => 150,
                 'menu' => [
-                    'Sushi' => [
-                        ['name' => 'Combinado Sakana (20 peças)', 'desc' => null, 'price' => 89.90, 'tags' => []],
-                        ['name' => 'Hossomaki Sem Glúten', 'desc' => 'Molho shoyu sem trigo.', 'price' => 24.90, 'tags' => ['Sem glúten']],
+                    'Combinados' => [
+                        ['name' => 'Combinado 20 peças', 'desc' => 'Sushi e sashimi variados.', 'price' => 64.90, 'tags' => []],
+                        ['name' => 'Temaki salmão', 'desc' => null, 'price' => 22.90, 'tags' => []],
                     ],
                 ],
                 'hours' => ['tue-sun' => ['18:00', '23:30']],
             ],
             [
-                'name' => 'Padoca da Vila',
-                'neighborhood' => 'Clélia Bernardes',
-                'category' => 'Padaria',
-                'cuisines' => ['Café', 'Doces'],
-                'price_range' => PriceRange::Low,
-                'lat' => -20.7490, 'lng' => -42.8760,
-                'rating' => 4.6, 'reviews' => 156,
-                'menu' => [
-                    'Café da manhã' => [
-                        ['name' => 'Pão na chapa', 'desc' => null, 'price' => 8.50, 'tags' => ['Vegetariano']],
-                        ['name' => 'Bolo de fubá sem glúten', 'desc' => null, 'price' => 12.00, 'tags' => ['Sem glúten', 'Vegetariano']],
-                    ],
-                ],
-                'hours' => ['mon-sun' => ['06:30', '20:00']],
-            ],
-            [
-                'name' => 'Churrascaria Fogo Alto',
-                'neighborhood' => 'Santo Antônio',
-                'category' => 'Churrascaria',
-                'cuisines' => ['Churrasco', 'Brasileiro'],
-                'price_range' => PriceRange::High,
-                'lat' => -20.7650, 'lng' => -42.8900,
-                'rating' => 4.4, 'reviews' => 267,
-                'menu' => [
-                    'Rodízio' => [
-                        ['name' => 'Rodízio completo', 'desc' => 'Cortes nobres + buffet de saladas.', 'price' => 129.90, 'tags' => []],
-                        ['name' => 'Buffet vegetariano avulso', 'desc' => null, 'price' => 59.90, 'tags' => ['Vegetariano', 'Sem glúten']],
-                    ],
-                ],
-                'hours' => ['tue-sun' => ['11:30', '22:30']],
-            ],
-            [
-                'name' => 'Veggie Green Bowl',
+                'name' => 'Restaurante Villa Alfa',
                 'neighborhood' => 'Centro',
                 'category' => 'Restaurante',
                 'cuisines' => ['Brasileiro'],
                 'price_range' => PriceRange::Medium,
-                'lat' => -20.7565, 'lng' => -42.8850,
-                'rating' => 4.9, 'reviews' => 88,
+                'lat' => -20.7564514, 'lng' => -42.8775763,
+                'rating' => 4.2, 'reviews' => 95,
                 'menu' => [
-                    'Bowls' => [
-                        ['name' => 'Bowl Buda vegano', 'desc' => 'Grãos, legumes assados, húmus e tahine.', 'price' => 36.00, 'tags' => ['Vegano', 'Vegetariano', 'Sem glúten', 'Sem lactose']],
-                        ['name' => 'Bowl proteico sem lactose', 'desc' => 'Frango grelhado, quinoa e vegetais.', 'price' => 39.00, 'tags' => ['Sem lactose', 'Sem glúten']],
+                    'Pratos executivos' => [
+                        ['name' => 'Filé ao molho madeira', 'desc' => 'Servido com arroz, farofa e vinagrete.', 'price' => 38.90, 'tags' => []],
+                        ['name' => 'Prato vegetariano do dia', 'desc' => null, 'price' => 29.90, 'tags' => ['Vegetariano']],
                     ],
                 ],
-                'hours' => ['mon-sat' => ['11:00', '21:00']],
+                'hours' => ['mon-sun' => ['06:30', '22:00']],
+            ],
+            [
+                'name' => 'Japa Nobre',
+                'neighborhood' => 'Centro',
+                'category' => 'Restaurante',
+                'cuisines' => ['Japonês'],
+                'price_range' => PriceRange::High,
+                'lat' => -20.7572361, 'lng' => -42.8752678,
+                'rating' => 4.3, 'reviews' => 180,
+                'menu' => [
+                    'Combinados' => [
+                        ['name' => 'Combinado Nobre (30 peças)', 'desc' => null, 'price' => 94.90, 'tags' => []],
+                        ['name' => 'Hot roll sem glúten', 'desc' => 'Molho shoyu sem trigo.', 'price' => 26.90, 'tags' => ['Sem glúten']],
+                    ],
+                ],
+                'hours' => ['tue-sun' => ['18:00', '23:00']],
+            ],
+            [
+                'name' => 'O Barbante',
+                'neighborhood' => 'Centro',
+                'category' => 'Bar',
+                'cuisines' => ['Brasileiro', 'Churrasco'],
+                'price_range' => PriceRange::Medium,
+                'lat' => -20.7535348, 'lng' => -42.8815291,
+                'rating' => 4.1, 'reviews' => 220,
+                'menu' => [
+                    'Petiscos' => [
+                        ['name' => 'Picanha na tábua', 'desc' => 'Acompanha farofa e vinagrete.', 'price' => 64.90, 'tags' => []],
+                        ['name' => 'Torresmo de barriga', 'desc' => null, 'price' => 32.90, 'tags' => []],
+                    ],
+                ],
+                'hours' => ['tue-sun' => ['17:00', '00:00']],
+            ],
+            [
+                'name' => 'Pizzaria e Petiscaria Família Mineira',
+                'neighborhood' => 'São José do Triunfo',
+                'category' => 'Pizzaria',
+                'cuisines' => ['Pizza', 'Mineiro'],
+                'price_range' => PriceRange::Medium,
+                'lat' => -20.7513498, 'lng' => -42.8269674,
+                'rating' => 4.4, 'reviews' => 130,
+                'menu' => [
+                    'Pizzas' => [
+                        ['name' => 'Pizza mineira', 'desc' => 'Linguiça, pimenta biquinho e queijo canastra.', 'price' => 44.90, 'tags' => []],
+                    ],
+                    'Petiscos' => [
+                        ['name' => 'Frango com quiabo sem lactose', 'desc' => null, 'price' => 28.90, 'tags' => ['Sem lactose']],
+                    ],
+                ],
+                'hours' => ['tue-sun' => ['18:00', '23:30']],
+            ],
+            [
+                'name' => 'Choperia e Churrascaria Devan',
+                'neighborhood' => 'Santo Antônio',
+                'category' => 'Churrascaria',
+                'cuisines' => ['Churrasco', 'Brasileiro'],
+                'price_range' => PriceRange::Medium,
+                'lat' => -20.7429192, 'lng' => -42.8646143,
+                'rating' => 4.2, 'reviews' => 175,
+                'menu' => [
+                    'Rodízio' => [
+                        ['name' => 'Rodízio de carnes', 'desc' => 'Cortes nobres + buffet de saladas.', 'price' => 89.90, 'tags' => []],
+                        ['name' => 'Buffet vegetariano avulso', 'desc' => null, 'price' => 49.90, 'tags' => ['Vegetariano', 'Sem glúten']],
+                    ],
+                ],
+                'hours' => ['tue-sun' => ['11:00', '23:00']],
+            ],
+            [
+                'name' => 'Beco das Flores',
+                'neighborhood' => 'Lourdes',
+                'category' => 'Restaurante',
+                'cuisines' => ['Brasileiro'],
+                'price_range' => PriceRange::Medium,
+                'lat' => -20.7572438, 'lng' => -42.8872071,
+                'rating' => 4.5, 'reviews' => 160,
+                'menu' => [
+                    'Pratos executivos' => [
+                        ['name' => 'Tutu à mineira com couve', 'desc' => 'Feijão, torresmo e couve refogada.', 'price' => 34.90, 'tags' => []],
+                        ['name' => 'Bowl vegano do dia', 'desc' => 'Grãos, legumes assados e húmus.', 'price' => 32.90, 'tags' => ['Vegano', 'Vegetariano']],
+                    ],
+                ],
+                'hours' => ['mon-sat' => ['11:00', '15:00']],
+            ],
+            [
+                'name' => 'Pizzaria Sabor do Sul',
+                'neighborhood' => 'Centro',
+                'category' => 'Pizzaria',
+                'cuisines' => ['Pizza'],
+                'price_range' => PriceRange::Low,
+                'lat' => -20.7545000, 'lng' => -42.8790000,
+                'rating' => 4.3, 'reviews' => 140,
+                'menu' => [
+                    'Pizzas' => [
+                        ['name' => 'Pizza margherita', 'desc' => null, 'price' => 36.90, 'tags' => ['Vegetariano']],
+                        ['name' => 'Pizza portuguesa', 'desc' => null, 'price' => 41.90, 'tags' => []],
+                    ],
+                ],
+                'hours' => ['tue-sun' => ['18:00', '23:30']],
             ],
         ];
 
