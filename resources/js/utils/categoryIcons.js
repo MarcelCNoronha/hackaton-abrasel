@@ -11,6 +11,7 @@ const EMOJI_BY_CATEGORY_SLUG = {
     sorveteria: '🍦',
     acai: '🥣',
     churrascaria: '🍖',
+    japones: '🍣',
 };
 
 const DEFAULT_EMOJI = '🍽️';

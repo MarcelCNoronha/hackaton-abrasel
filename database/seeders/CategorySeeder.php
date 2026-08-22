@@ -12,7 +12,7 @@ class CategorySeeder extends Seeder
     {
         $categories = [
             'Restaurante', 'Bar', 'Hamburgueria', 'Pizzaria', 'Cafeteria',
-            'Padaria', 'Lanchonete', 'Sorveteria', 'Açaí', 'Churrascaria',
+            'Padaria', 'Lanchonete', 'Sorveteria', 'Açaí', 'Churrascaria', 'Japonês',
         ];
 
         foreach ($categories as $position => $name) {

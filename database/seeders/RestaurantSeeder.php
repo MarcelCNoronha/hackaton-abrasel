@@ -87,7 +87,7 @@ class RestaurantSeeder extends Seeder
             [
                 'name' => 'Sushi Mirim',
                 'neighborhood' => 'Centro',
-                'category' => 'Restaurante',
+                'category' => 'Japonês',
                 'cuisines' => ['Japonês'],
                 'price_range' => PriceRange::Medium,
                 'lat' => -20.7548500, 'lng' => -42.8797000,
@@ -119,7 +119,7 @@ class RestaurantSeeder extends Seeder
             [
                 'name' => 'Japa Nobre',
                 'neighborhood' => 'Centro',
-                'category' => 'Restaurante',
+                'category' => 'Japonês',
                 'cuisines' => ['Japonês'],
                 'price_range' => PriceRange::High,
                 'lat' => -20.7572361, 'lng' => -42.8752678,

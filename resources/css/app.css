@@ -5,12 +5,18 @@
 /* @tailwindcss/forms (base strategy) resets every native <input>/<select>/<textarea> to a white
    background, including the ones Vuetify renders internally for v-text-field etc. — Vuetify
    already manages its own field background via bg-color/theme surface, so this fought with the
-   dark theme (fields showed as plain white boxes regardless of corePlugins.preflight below,
-   since @tailwindcss/forms hooks its own base styles in independently of it). Scoped with
-   :where() (not `.v-application input`) because v-dialog/v-menu/v-overlay content is teleported
-   to a container appended as a *sibling* of the .v-application root, not a descendant of it --
-   an ancestor-scoped selector silently never matched inputs inside any overlay. */
-:where(input, select, textarea) {
+   dark theme (fields showed as plain white boxes). Two things this rule has to get right:
+   1) NOT scoped to `.v-application input` -- v-dialog/v-menu/v-overlay content is teleported to
+      a container appended as a *sibling* of the .v-application root, not a descendant of it, so
+      an ancestor-scoped selector silently never matches inputs inside any overlay.
+   2) NOT wrapped in :where() -- that drops specificity to zero, which LOSES the cascade to
+      @tailwindcss/forms' own plain `textarea, select { background: #fff }` (a real (0,0,1)),
+      breaking every input on the page, not just ones inside overlays (this actually happened;
+      don't wrap this rule in :where() again). Plain element selectors tie that rule's
+      specificity and win on source order since this comes after `@tailwind base` below. */
+input,
+select,
+textarea {
     background-color: transparent;
 }
 

@@ -138,6 +138,13 @@ function renderMarkers() {
         marker.addTo(markersLayer);
         markersById.set(restaurant.id, { marker, restaurant });
     });
+
+    // Sem isso, o mapa fica preso em `center` (localizacao bruta do navegador, que pode
+    // cair longe de qualquer resultado) e a lista de restaurantes nunca aparece na tela --
+    // lia como "mapa quebrado" quando na verdade so estava olhando pro lugar errado.
+    if (markersById.size > 0) {
+        map.fitBounds(markersLayer.getBounds(), { padding: [40, 40], maxZoom: 15 });
+    }
 }
 
 function updateHighlight() {
@@ -209,7 +216,13 @@ watch(() => props.highlightedId, updateHighlight);
 watch(
     () => props.center,
     (center) => {
-        map?.setView([center.lat, center.lng], map.getZoom());
+        // So reposiciona por `center` (ex.: geolocalizacao resolvida de forma assincrona,
+        // depois da 1a renderizacao) quando nao ha resultado nenhum pra enquadrar -- do
+        // contrario isso desfaz o fitBounds de renderMarkers() e volta pro bug de "mapa
+        // vazio" que esse enquadramento existe pra evitar.
+        if (markersById.size === 0) {
+            map?.setView([center.lat, center.lng], map.getZoom());
+        }
     },
 );
 </script>
