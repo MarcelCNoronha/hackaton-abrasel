@@ -7,6 +7,7 @@ const props = defineProps({
     restaurant: { type: Object, required: true },
     priceRanges: { type: Array, default: () => [] },
     foodTagSuggestions: { type: Array, default: () => [] },
+    dietaryTags: { type: Array, default: () => [] },
 });
 
 const weekdayNames = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
@@ -81,6 +82,10 @@ function deleteCategory(categoryId) {
     categoryForm.delete(route('owner.menu-categories.destroy', categoryId), { preserveScroll: true });
 }
 
+const dietaryTagOptions = computed(() =>
+    props.dietaryTags.map((tag) => ({ title: tag.name, value: tag.id, kind: tag.kind })),
+);
+
 const itemDialogCategoryId = ref(null);
 const editingItem = ref(null);
 const itemForm = useForm({
@@ -90,6 +95,7 @@ const itemForm = useForm({
     compare_at_price: '',
     is_available: true,
     food_tags: [],
+    dietary_tags: [],
     photo: null,
 });
 
@@ -98,6 +104,7 @@ function openNewItemDialog(categoryId) {
     itemForm.reset();
     itemForm.is_available = true;
     itemForm.food_tags = [];
+    itemForm.dietary_tags = [];
     itemForm.photo = null;
     itemDialogCategoryId.value = categoryId;
 }
@@ -110,6 +117,7 @@ function openEditItemDialog(item) {
     itemForm.compare_at_price = item.compare_at_price ?? '';
     itemForm.is_available = item.is_available;
     itemForm.food_tags = (item.food_tags ?? []).map((tag) => tag.name);
+    itemForm.dietary_tags = (item.dietary_tags ?? []).map((tag) => tag.id);
     itemForm.photo = null;
     itemDialogCategoryId.value = 'edit';
 }
@@ -359,8 +367,18 @@ function submitReply(reviewId) {
                                                 </v-card-title>
                                                 <v-card-subtitle v-if="item.description">{{ item.description }}</v-card-subtitle>
                                             </v-card-item>
-                                            <v-card-text v-if="item.food_tags?.length" class="pt-0 pb-2">
-                                                <v-chip v-for="tag in item.food_tags" :key="tag.id" size="small" variant="tonal" class="mr-1">
+                                            <v-card-text v-if="item.food_tags?.length || item.dietary_tags?.length" class="pt-0 pb-2">
+                                                <v-chip v-for="tag in item.food_tags" :key="`food-${tag.id}`" size="small" variant="tonal" class="mr-1">
+                                                    {{ tag.name }}
+                                                </v-chip>
+                                                <v-chip
+                                                    v-for="tag in item.dietary_tags"
+                                                    :key="`dietary-${tag.id}`"
+                                                    size="small"
+                                                    variant="tonal"
+                                                    :color="tag.kind === 'allergen' ? 'warning' : 'secondary'"
+                                                    class="mr-1"
+                                                >
                                                     {{ tag.name }}
                                                 </v-chip>
                                             </v-card-text>
@@ -433,6 +451,17 @@ function submitReply(reviewId) {
                                                     chips
                                                     closable-chips
                                                     :error-messages="itemForm.errors.food_tags"
+                                                />
+                                                <v-select
+                                                    v-model="itemForm.dietary_tags"
+                                                    :items="dietaryTagOptions"
+                                                    label="Restrições alimentares (dieta, alergia)"
+                                                    hint="Marque o que esse item atende -- alimenta o filtro de restrição alimentar da busca"
+                                                    persistent-hint
+                                                    multiple
+                                                    chips
+                                                    closable-chips
+                                                    :error-messages="itemForm.errors.dietary_tags"
                                                 />
                                                 <v-switch v-model="itemForm.is_available" color="primary" label="Disponível" class="mt-2" />
                                                 <v-btn type="submit" color="primary" variant="flat" :loading="itemForm.processing">

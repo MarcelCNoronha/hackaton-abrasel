@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Owner;
 
 use App\Enums\PriceRange;
 use App\Http\Controllers\Controller;
+use App\Models\DietaryTag;
 use App\Models\FoodTag;
 use App\Models\Restaurant;
 use Illuminate\Http\RedirectResponse;
@@ -38,6 +39,7 @@ class RestaurantController extends Controller
             'restaurant' => $restaurant,
             'priceRanges' => array_column(PriceRange::cases(), 'value'),
             'foodTagSuggestions' => FoodTag::orderBy('position')->pluck('name'),
+            'dietaryTags' => DietaryTag::orderBy('position')->get(['id', 'name', 'kind']),
         ]);
     }
 

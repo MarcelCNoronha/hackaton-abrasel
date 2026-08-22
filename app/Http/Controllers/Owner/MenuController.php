@@ -58,7 +58,8 @@ class MenuController extends Controller
 
         $data = $this->validateItem($request);
         $foodTagNames = $data['food_tags'] ?? [];
-        unset($data['food_tags']);
+        $dietaryTagIds = $data['dietary_tags'] ?? [];
+        unset($data['food_tags'], $data['dietary_tags']);
 
         if ($request->hasFile('photo')) {
             $data['main_photo_path'] = $request->file('photo')->store('menu-items', 'public');
@@ -70,6 +71,7 @@ class MenuController extends Controller
         ]);
 
         $item->foodTags()->sync($this->resolveFoodTagIds($foodTagNames));
+        $item->dietaryTags()->sync($dietaryTagIds);
 
         return back()->with('status', 'Item adicionado ao cardápio.');
     }
@@ -80,7 +82,8 @@ class MenuController extends Controller
 
         $data = $this->validateItem($request);
         $foodTagNames = $data['food_tags'] ?? [];
-        unset($data['food_tags']);
+        $dietaryTagIds = $data['dietary_tags'] ?? [];
+        unset($data['food_tags'], $data['dietary_tags']);
 
         if ($request->hasFile('photo')) {
             if ($menuItem->main_photo_path) {
@@ -92,6 +95,7 @@ class MenuController extends Controller
 
         $menuItem->update($data);
         $menuItem->foodTags()->sync($this->resolveFoodTagIds($foodTagNames));
+        $menuItem->dietaryTags()->sync($dietaryTagIds);
 
         return back()->with('status', 'Item atualizado.');
     }
@@ -142,6 +146,8 @@ class MenuController extends Controller
             'is_available' => ['required', 'boolean'],
             'food_tags' => ['nullable', 'array'],
             'food_tags.*' => ['string', 'max:50'],
+            'dietary_tags' => ['nullable', 'array'],
+            'dietary_tags.*' => ['integer', 'exists:dietary_tags,id'],
             'photo' => ['nullable', 'image', 'max:4096'],
         ]);
     }
