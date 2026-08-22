@@ -13,6 +13,9 @@ services:
       REDIS_HOST: redis
       INERTIA_SSR_ENABLED: "true"
       INERTIA_SSR_URL: "http://ssr:13714"
+      # Ver comentario equivalente em docker-compose.prod.yml -- bootstrap/ssr/ssr.js so'
+      # existe na imagem "ssr", nunca em "app".
+      INERTIA_SSR_ENSURE_BUNDLE_EXISTS: "false"
     depends_on:
       - db
       - redis

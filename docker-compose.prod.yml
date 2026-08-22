@@ -23,6 +23,12 @@ services:
       # client-side rendering sozinho; nunca quebra a resposta.
       INERTIA_SSR_ENABLED: "true"
       INERTIA_SSR_URL: "http://ssr:13714"
+      # O bundle SSR so' existe na imagem "ssr" (Dockerfile, stage ssr) -- "app" nunca tem
+      # bootstrap/ssr/ssr.js no proprio filesystem. Sem isso, o BundleDetector do pacote nao
+      # encontra o arquivo localmente e HttpGateway::shouldDispatch() retorna false pra
+      # sempre, pulando a chamada HTTP pro servico "ssr" mesmo com ele saudavel -- SSR fica
+      # "ligado" na config mas nunca roda de fato.
+      INERTIA_SSR_ENSURE_BUNDLE_EXISTS: "false"
     depends_on:
       db:
         condition: service_healthy
