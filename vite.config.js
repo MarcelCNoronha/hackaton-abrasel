@@ -7,6 +7,7 @@ export default defineConfig({
     plugins: [
         laravel({
             input: 'resources/js/app.js',
+            ssr: 'resources/js/ssr.js',
             refresh: true,
         }),
         vue({
@@ -19,4 +20,10 @@ export default defineConfig({
         }),
         vuetify({ autoImport: true }),
     ],
+    // Empacota todas as deps no bundle SSR (vue, @vue/server-renderer, @inertiajs/vue3,
+    // vuetify, ...) em vez de deixar como `require()` externo -- assim o container que roda
+    // `node bootstrap/ssr/ssr.js` em produção so precisa desse arquivo, sem node_modules.
+    ssr: {
+        noExternal: true,
+    },
 });

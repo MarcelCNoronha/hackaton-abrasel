@@ -51,6 +51,9 @@ jobs:
       - name: Build frontend assets
         run: npm run build
 
+      - name: Build SSR bundle
+        run: npx vite build --ssr
+
       - name: Prepare .env
         run: |
           cp .env.example .env

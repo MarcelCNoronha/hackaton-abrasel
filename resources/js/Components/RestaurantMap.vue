@@ -1,8 +1,11 @@
 <script setup>
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 import { emojiForRestaurant } from '@/utils/categoryIcons';
+
+// Leaflet toca `window` so' de importar (nao so ao instanciar) -- import estatico quebraria
+// o render em SSR (sem `window` no Node). Carregado dinamicamente dentro de onMounted, que
+// nunca roda no servidor, entao isso nunca executa la'.
+let L = null;
 
 const props = defineProps({
     restaurants: {
@@ -183,7 +186,10 @@ function renderUserMarker() {
     }).addTo(map);
 }
 
-onMounted(() => {
+onMounted(async () => {
+    L = (await import('leaflet')).default;
+    await import('leaflet/dist/leaflet.css');
+
     map = L.map(mapEl.value, { zoomControl: false }).setView([props.center.lat, props.center.lng], 14);
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);

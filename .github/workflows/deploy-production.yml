@@ -66,6 +66,26 @@ jobs:
             ${{ env.APP_IMAGE }}:latest
             ${{ env.APP_IMAGE }}:${{ env.IMAGE_TAG }}
 
+      # Processo Node separado que renderiza as paginas Inertia no servidor (SEO/GEO -- ver
+      # resources/js/ssr.js e docker-compose.prod.yml). Mesmo Dockerfile, stage "ssr" -- reusa
+      # o cache da stage "frontend_build" (onde o bundle SSR e' de fato gerado) do build acima.
+      - name: Build and push SSR image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./Dockerfile
+          target: ssr
+          push: true
+          provenance: false
+          sbom: false
+          cache-from: |
+            type=gha,scope=app
+            type=gha,scope=ssr
+          cache-to: type=gha,mode=max,scope=ssr
+          tags: |
+            ${{ env.APP_IMAGE }}-ssr:latest
+            ${{ env.APP_IMAGE }}-ssr:${{ env.IMAGE_TAG }}
+
       - name: Prepare deploy bundle
         run: |
           mkdir -p .deploy/docker/nginx .deploy/scripts

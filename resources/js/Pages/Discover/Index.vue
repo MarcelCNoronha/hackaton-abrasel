@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue';
-import { Head, router } from '@inertiajs/vue3';
+import { Head, router, usePage } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import RestaurantMap from '@/Components/RestaurantMap.vue';
 import RestaurantCard from '@/Components/RestaurantCard.vue';
@@ -9,6 +9,10 @@ import { emojiForCategorySlug } from '@/utils/categoryIcons';
 function toggleCategory(slug) {
     filters.category = filters.category === slug ? null : slug;
 }
+
+// appUrl (nao route()) pro <Head> canonical/og:url -- precisa funcionar tambem no processo
+// Node do SSR, que nao tem o config de rotas do Ziggy disponivel.
+const discoverUrl = `${usePage().props.appUrl}/restaurantes`;
 
 const props = defineProps({
     restaurants: { type: Array, default: () => [] },
@@ -173,19 +177,19 @@ function clearFilters() {
 
 <template>
     <Head>
-        <title>Restaurantes em Viçosa, MG | VicosaFood</title>
+        <title>Restaurantes em Viçosa, MG</title>
         <meta
             name="description"
             content="Descubra restaurantes, bares e lanchonetes em Viçosa/MG. Filtre por tipo de comida, prato ou restrição alimentar, veja avaliações reais e cupons exclusivos."
         />
-        <link rel="canonical" :href="route('discover')" />
+        <link rel="canonical" :href="discoverUrl" />
         <meta property="og:type" content="website" />
         <meta property="og:title" content="Restaurantes em Viçosa, MG | VicosaFood" />
         <meta
             property="og:description"
             content="Descubra restaurantes, bares e lanchonetes em Viçosa/MG, com avaliações reais e cupons exclusivos."
         />
-        <meta property="og:url" :content="route('discover')" />
+        <meta property="og:url" :content="discoverUrl" />
         <meta property="og:locale" content="pt_BR" />
     </Head>
 

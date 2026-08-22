@@ -11,15 +11,26 @@ services:
     environment:
       DB_HOST: db
       REDIS_HOST: redis
+      INERTIA_SSR_ENABLED: "true"
+      INERTIA_SSR_URL: "http://ssr:13714"
     depends_on:
       - db
       - redis
+      - ssr
     # Nao monta nada em public/storage -- entrypoint.sh cria o symlink pro disco "public"
     # (storage/app/public, dentro de storage_data) ali; um volume por cima impediria isso
     # e deixaria uploads gravados mas inacessiveis via /storage/... -- ver nginx abaixo.
     volumes:
       - storage_data:/var/www/html/storage/app
       - public_assets:/srv/public
+
+  ssr:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: ssr
+    image: saborlocal-ssr:local
+    restart: unless-stopped
 
   queue:
     image: saborlocal-app:local

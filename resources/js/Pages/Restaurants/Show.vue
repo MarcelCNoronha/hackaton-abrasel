@@ -1,11 +1,15 @@
 <script setup>
 import { computed, ref } from 'vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 
 const props = defineProps({
     restaurant: { type: Object, required: true },
 });
+
+// appUrl (nao route()/window.location) -- precisa funcionar tambem no processo Node do SSR,
+// onde nao ha window nem o config de rotas do Ziggy.
+const appUrl = usePage().props.appUrl;
 
 const weekdayNames = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
@@ -76,7 +80,7 @@ const heroStyle = computed(() => {
 
 const reviewsDialog = ref(false);
 
-const canonicalUrl = computed(() => route('restaurants.show', props.restaurant.slug));
+const canonicalUrl = computed(() => `${appUrl}/restaurantes/${props.restaurant.slug}`);
 
 const metaDescription = computed(() => {
     const r = props.restaurant;
@@ -88,7 +92,7 @@ const metaDescription = computed(() => {
 
 const ogImage = computed(() => {
     const path = props.restaurant.banner_photo_path ?? props.restaurant.cover_photo_path;
-    return path ? `${window.location.origin}/storage/${path}` : null;
+    return path ? `${appUrl}/storage/${path}` : null;
 });
 
 // schema.org/Restaurant -- rich snippets (nota, endereco, geo, horario) pra busca local
@@ -146,7 +150,7 @@ const jsonLd = computed(() => {
 
 <template>
     <Head>
-        <title>{{ restaurant.name }} em Viçosa, MG | VicosaFood</title>
+        <title>{{ restaurant.name }} em Viçosa, MG</title>
         <meta name="description" :content="metaDescription" />
         <link rel="canonical" :href="canonicalUrl" />
 

@@ -32,6 +32,9 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'appName' => config('app.name'),
+            // Pras paginas montarem URL absoluta (canonical, og:url, og:image) sem depender
+            // de window.location -- indisponivel no processo Node do SSR.
+            'appUrl' => rtrim(config('app.url'), '/'),
             'auth' => [
                 'user' => $request->user(),
             ],

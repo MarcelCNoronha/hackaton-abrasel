@@ -17,11 +17,19 @@ services:
     environment:
       DB_HOST: db
       REDIS_HOST: redis
+      # Renderiza as paginas Inertia no servidor pra SEO/GEO (meta tags, JSON-LD) chegarem
+      # prontas no HTML, sem depender de JS -- ver resources/js/ssr.js e o servico "ssr"
+      # abaixo. Se esse servico cair ou nao responder, Inertia\Ssr\HttpGateway cai pra
+      # client-side rendering sozinho; nunca quebra a resposta.
+      INERTIA_SSR_ENABLED: "true"
+      INERTIA_SSR_URL: "http://ssr:13714"
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
+      ssr:
+        condition: service_started
     # Nao monta nada em public/storage -- e' onde docker/entrypoint.sh cria o symlink pro
     # disco "public" (storage/app/public, dentro do volume storage_data acima). Um volume
     # montado ali por cima impediria esse symlink de existir (o Docker sempre materializa
@@ -33,6 +41,24 @@ services:
     mem_limit: 512m
     mem_reservation: 128m
     cpus: 0.6
+
+  # Node rodando o bundle SSR do Inertia (resources/js/ssr.js) -- "app" fala com ele por
+  # HTTP (INERTIA_SSR_URL acima). Sem volumes/env_file: o bundle e' auto-contido
+  # (ssr.noExternal:true no vite.config.js) e nao precisa de nenhuma config do Laravel.
+  ssr:
+    image: ${IMAGE_NAME}-ssr:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    pull_policy: always
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:13714/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    mem_limit: 256m
+    mem_reservation: 64m
+    cpus: 0.3
 
   queue:
     image: ${IMAGE_NAME}:${IMAGE_TAG:-latest}

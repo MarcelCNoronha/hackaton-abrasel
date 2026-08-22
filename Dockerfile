@@ -33,7 +33,7 @@ COPY vite.config.js ./
 # VITE_APP_NAME) is never copied into this stage, so without this every build silently baked
 # in app.js's 'Laravel' fallback (visible as "Entrar - Laravel" in every page title).
 ENV VITE_APP_NAME=VicosaFood
-RUN npm run build
+RUN npm run build && npx vite build --ssr
 
 FROM php:8.4-fpm-alpine AS app
 WORKDIR /var/www/html
@@ -78,3 +78,14 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh \
 EXPOSE 9000
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["php-fpm"]
+
+# Processo separado que roda o bundle SSR do Inertia (ver resources/js/ssr.js) -- so' precisa
+# do Node e do que o Vite gerou em bootstrap/ssr (empacotado com ssr.noExternal:true no
+# vite.config.js, entao sem node_modules aqui). PHP fala com ele via HTTP (INERTIA_SSR_URL);
+# se esse servico cair ou nao existir, Inertia\Ssr\HttpGateway cai pra client-side rendering
+# sozinho -- nunca quebra a resposta, so' perde o beneficio de SEO desse request.
+FROM node:24-alpine AS ssr
+WORKDIR /var/www/html
+COPY --from=frontend_build /app/bootstrap/ssr ./bootstrap/ssr
+EXPOSE 13714
+CMD ["node", "bootstrap/ssr/ssr.js"]
