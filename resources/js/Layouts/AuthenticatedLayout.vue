@@ -53,6 +53,22 @@ function logout() {
                         Cadastrar restaurante
                     </v-btn>
                     <v-btn
+                        v-if="['owner', 'admin'].includes(user.role)"
+                        variant="text"
+                        :href="route('owner.freelancers.index')"
+                        :active="route().current('owner.freelancers.*')"
+                    >
+                        Freelancers
+                    </v-btn>
+                    <v-btn
+                        v-if="user.freelancer_enabled_at"
+                        variant="text"
+                        :href="route('freelancer.hires.index')"
+                        :active="route().current('freelancer.*')"
+                    >
+                        Meus pedidos
+                    </v-btn>
+                    <v-btn
                         v-if="user.role === 'admin'"
                         variant="text"
                         :href="route('admin.dashboard')"
@@ -71,6 +87,7 @@ function logout() {
                         </template>
                         <v-list density="compact">
                             <v-list-item :href="route('profile.edit')" title="Perfil" />
+                            <v-list-item v-if="user.freelancer_enabled_at" :href="route('freelancer.profile.edit')" title="Meu perfil de freelancer" />
                             <v-list-item title="Sair" @click="logout" />
                         </v-list>
                     </v-menu>
@@ -104,6 +121,20 @@ function logout() {
                     prepend-icon="mdi-storefront-outline"
                 />
                 <v-list-item
+                    v-if="['owner', 'admin'].includes(user.role)"
+                    :href="route('owner.freelancers.index')"
+                    :active="route().current('owner.freelancers.*')"
+                    title="Freelancers"
+                    prepend-icon="mdi-account-hard-hat-outline"
+                />
+                <v-list-item
+                    v-if="user.freelancer_enabled_at"
+                    :href="route('freelancer.hires.index')"
+                    :active="route().current('freelancer.*')"
+                    title="Meus pedidos"
+                    prepend-icon="mdi-briefcase-outline"
+                />
+                <v-list-item
                     v-if="user.role === 'admin'"
                     :href="route('admin.dashboard')"
                     :active="route().current('admin.*')"
@@ -112,6 +143,12 @@ function logout() {
                 />
                 <v-divider class="my-2" />
                 <v-list-item :href="route('profile.edit')" title="Perfil" prepend-icon="mdi-account-outline" />
+                <v-list-item
+                    v-if="user.freelancer_enabled_at"
+                    :href="route('freelancer.profile.edit')"
+                    title="Meu perfil de freelancer"
+                    prepend-icon="mdi-card-account-details-outline"
+                />
                 <v-list-item title="Sair" prepend-icon="mdi-logout" @click="logout" />
             </v-list>
         </v-navigation-drawer>

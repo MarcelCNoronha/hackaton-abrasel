@@ -91,6 +91,10 @@ function updateRole(user, role) {
     router.patch(route('admin.users.update-role', user.id), { role }, { preserveScroll: true });
 }
 
+function toggleFreelancerAccess(user) {
+    router.patch(route('admin.users.toggle-freelancer', user.id), {}, { preserveScroll: true });
+}
+
 // --- Restaurantes: ativar/desativar ---
 function toggleRestaurant(restaurant) {
     router.patch(route('admin.restaurants.toggle-active', restaurant.slug), {}, { preserveScroll: true });
@@ -302,6 +306,7 @@ function submitCampaignSuggestion() {
                                     <th>Nome</th>
                                     <th>E-mail</th>
                                     <th style="min-width: 160px">Permissão</th>
+                                    <th>Empregabilidade</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -317,6 +322,16 @@ function submitCampaignSuggestion() {
                                             variant="outlined"
                                             @update:model-value="(role) => updateRole(user, role)"
                                         />
+                                    </td>
+                                    <td>
+                                        <v-chip
+                                            :color="user.freelancer_enabled_at ? 'secondary' : undefined"
+                                            variant="tonal"
+                                            size="small"
+                                            @click="toggleFreelancerAccess(user)"
+                                        >
+                                            {{ user.freelancer_enabled_at ? 'Liberado' : 'Liberar módulo' }}
+                                        </v-chip>
                                     </td>
                                 </tr>
                             </tbody>
