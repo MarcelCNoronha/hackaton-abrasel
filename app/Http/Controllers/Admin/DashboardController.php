@@ -43,7 +43,7 @@ class DashboardController extends Controller
                 ->get(),
             // Full profile columns (not just the ones the table renders) -- the "Editar"
             // dialog pre-fills its form straight from this same list.
-            'users' => $this->paginate($usersQuery, ['id', 'name', 'email', 'role'], 'users_page'),
+            'users' => $this->paginate($usersQuery, ['id', 'name', 'email', 'role', 'freelancer_enabled_at'], 'users_page'),
             'restaurants' => $this->paginate($restaurantsQuery, ['*'], 'restaurants_page'),
             'filters' => [
                 'users_search' => $usersSearch ?: null,

@@ -1,0 +1,62 @@
+<?php
+
+namespace App\Http\Controllers\Freelancer;
+
+use App\Enums\HireRequestStatus;
+use App\Http\Controllers\Controller;
+use App\Models\HireRequest;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class HireController extends Controller
+{
+    public function index(Request $request): Response
+    {
+        $profile = $request->user()->freelancerProfile()->firstOrCreate([]);
+
+        $hireRequests = $profile->hireRequests()
+            ->with(['restaurant:id,name,slug', 'review'])
+            ->latest()
+            ->get();
+
+        // feedback_to_owners e' pra outros donos lerem como referencia, nao pro proprio
+        // freelancer -- ver Owner\FreelancerController::show(), que faz o oposto (esconde
+        // feedback_to_freelancer). Os dois nunca aparecem juntos pro mesmo publico.
+        $hireRequests->pluck('review')->filter()->each->makeHidden('feedback_to_owners');
+
+        return Inertia::render('Freelancer/Requests/Index', [
+            'hireRequests' => $hireRequests,
+        ]);
+    }
+
+    public function accept(Request $request, HireRequest $hireRequest): RedirectResponse
+    {
+        $this->authorizeFreelancer($request, $hireRequest);
+        abort_unless($hireRequest->isPending(), 422, 'Este pedido já foi respondido.');
+
+        $hireRequest->update(['status' => HireRequestStatus::Accepted, 'responded_at' => now()]);
+
+        return back()->with('status', 'Pedido de contratação aceito.');
+    }
+
+    public function decline(Request $request, HireRequest $hireRequest): RedirectResponse
+    {
+        $this->authorizeFreelancer($request, $hireRequest);
+        abort_unless($hireRequest->isPending(), 422, 'Este pedido já foi respondido.');
+
+        $hireRequest->update(['status' => HireRequestStatus::Declined, 'responded_at' => now()]);
+
+        return back()->with('status', 'Pedido de contratação recusado.');
+    }
+
+    private function authorizeFreelancer(Request $request, HireRequest $hireRequest): void
+    {
+        abort_unless(
+            $hireRequest->freelancerProfile->user_id === $request->user()->id,
+            403,
+            'Este pedido não é seu.',
+        );
+    }
+}

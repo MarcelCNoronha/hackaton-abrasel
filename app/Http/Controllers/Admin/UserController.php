@@ -27,4 +27,18 @@ class UserController extends Controller
 
         return back()->with('status', 'Permissão atualizada.');
     }
+
+    public function toggleFreelancerAccess(User $user): RedirectResponse
+    {
+        // Fora do #[Fillable] de proposito (mesmo padrao de restaurants.claimed_at) --
+        // forceFill, nunca update() em massa.
+        $user->forceFill([
+            'freelancer_enabled_at' => $user->isFreelancerEnabled() ? null : now(),
+        ])->save();
+
+        return back()->with(
+            'status',
+            $user->isFreelancerEnabled() ? 'Módulo de empregabilidade liberado.' : 'Módulo de empregabilidade removido.',
+        );
+    }
 }
