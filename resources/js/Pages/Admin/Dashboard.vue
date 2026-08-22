@@ -6,8 +6,8 @@ import { Head, router, useForm } from '@inertiajs/vue3';
 const props = defineProps({
     stats: { type: Object, required: true },
     pendingClaims: { type: Array, default: () => [] },
-    users: { type: Array, default: () => [] },
-    restaurants: { type: Array, default: () => [] },
+    users: { type: Object, required: true },
+    restaurants: { type: Object, required: true },
     priceRanges: { type: Array, default: () => [] },
 });
 
@@ -16,6 +16,12 @@ const roleOptions = [
     { title: 'Gestor', value: 'owner' },
     { title: 'Administrador', value: 'admin' },
 ];
+
+const activeTab = ref('claims');
+
+function goToPage(pageName, page) {
+    router.get(route('admin.dashboard'), { [pageName]: page }, { preserveState: true, preserveScroll: true, only: ['users', 'restaurants'] });
+}
 
 // --- Reivindicações ---
 function approveClaim(claim) {
@@ -166,17 +172,35 @@ function submitCampaignSuggestion() {
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <v-row class="mb-2">
                     <v-col cols="12" sm="4">
-                        <v-card title="Usuários" :subtitle="String(stats.users)" />
+                        <v-card
+                            title="Usuários"
+                            :subtitle="String(stats.users)"
+                            :class="{ 'tab-card--active': activeTab === 'users' }"
+                            class="tab-card"
+                            @click="activeTab = 'users'"
+                        />
                     </v-col>
                     <v-col cols="12" sm="4">
-                        <v-card title="Estabelecimentos" :subtitle="String(stats.restaurants)" />
+                        <v-card
+                            title="Estabelecimentos"
+                            :subtitle="String(stats.restaurants)"
+                            :class="{ 'tab-card--active': activeTab === 'restaurants' }"
+                            class="tab-card"
+                            @click="activeTab = 'restaurants'"
+                        />
                     </v-col>
                     <v-col cols="12" sm="4">
-                        <v-card title="Reivindicações pendentes" :subtitle="String(stats.pendingClaims)" />
+                        <v-card
+                            title="Reivindicações pendentes"
+                            :subtitle="String(stats.pendingClaims)"
+                            :class="{ 'tab-card--active': activeTab === 'claims' }"
+                            class="tab-card"
+                            @click="activeTab = 'claims'"
+                        />
                     </v-col>
                 </v-row>
 
-                <v-card class="mt-6">
+                <v-card v-if="activeTab === 'claims'" class="mt-6">
                     <v-card-title>Reivindicações pendentes</v-card-title>
                     <v-card-text>
                         <v-alert v-if="pendingClaims.length === 0" type="info" variant="tonal">
@@ -210,7 +234,7 @@ function submitCampaignSuggestion() {
                     </v-card-text>
                 </v-card>
 
-                <v-card class="mt-6">
+                <v-card v-if="activeTab === 'users'" class="mt-6">
                     <v-card-title>Usuários</v-card-title>
                     <v-card-text>
                         <v-table>
@@ -222,7 +246,7 @@ function submitCampaignSuggestion() {
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="user in users" :key="user.id">
+                                <tr v-for="user in users.data" :key="user.id">
                                     <td>{{ user.name }}</td>
                                     <td>{{ user.email }}</td>
                                     <td>
@@ -238,10 +262,19 @@ function submitCampaignSuggestion() {
                                 </tr>
                             </tbody>
                         </v-table>
+                        <div class="d-flex justify-center mt-4">
+                            <v-pagination
+                                v-if="users.meta.last_page > 1"
+                                :model-value="users.meta.current_page"
+                                :length="users.meta.last_page"
+                                density="comfortable"
+                                @update:model-value="(page) => goToPage('users_page', page)"
+                            />
+                        </div>
                     </v-card-text>
                 </v-card>
 
-                <v-card class="mt-6">
+                <v-card v-if="activeTab === 'restaurants'" class="mt-6">
                     <v-card-title class="d-flex align-center justify-space-between">
                         Estabelecimentos
                         <v-btn size="small" color="primary" variant="flat" prepend-icon="mdi-plus" @click="openNewRestaurant">
@@ -254,16 +287,21 @@ function submitCampaignSuggestion() {
                                 <tr>
                                     <th>Nome</th>
                                     <th>Cidade</th>
-                                    <th>Reivindicado</th>
+                                    <th>Responsável</th>
                                     <th>Status</th>
                                     <th></th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="restaurant in restaurants" :key="restaurant.id">
+                                <tr v-for="restaurant in restaurants.data" :key="restaurant.id">
                                     <td>{{ restaurant.name }}</td>
                                     <td>{{ restaurant.address_city || '—' }}</td>
-                                    <td>{{ restaurant.claimed_at ? 'Sim' : 'Não' }}</td>
+                                    <td>
+                                        <span v-if="restaurant.owners?.length">
+                                            {{ restaurant.owners.map((o) => o.name).join(', ') }}
+                                        </span>
+                                        <span v-else class="text-medium-emphasis">Não reivindicado</span>
+                                    </td>
                                     <td>
                                         <v-chip size="small" :color="restaurant.is_active ? 'secondary' : undefined" variant="tonal">
                                             {{ restaurant.is_active ? 'Ativo' : 'Inativo' }}
@@ -280,6 +318,15 @@ function submitCampaignSuggestion() {
                                 </tr>
                             </tbody>
                         </v-table>
+                        <div class="d-flex justify-center mt-4">
+                            <v-pagination
+                                v-if="restaurants.meta.last_page > 1"
+                                :model-value="restaurants.meta.current_page"
+                                :length="restaurants.meta.last_page"
+                                density="comfortable"
+                                @update:model-value="(page) => goToPage('restaurants_page', page)"
+                            />
+                        </div>
                     </v-card-text>
                 </v-card>
             </div>
@@ -437,3 +484,15 @@ function submitCampaignSuggestion() {
         </v-dialog>
     </AuthenticatedLayout>
 </template>
+
+<style scoped>
+.tab-card {
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+    border: 2px solid transparent;
+}
+
+.tab-card--active {
+    border-color: rgb(var(--v-theme-primary));
+}
+</style>

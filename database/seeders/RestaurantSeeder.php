@@ -6,6 +6,7 @@ use App\Enums\PriceRange;
 use App\Models\Category;
 use App\Models\Cuisine;
 use App\Models\DietaryTag;
+use App\Models\FoodTag;
 use App\Models\Restaurant;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
@@ -22,7 +23,32 @@ class RestaurantSeeder extends Seeder
 {
     public function run(): void
     {
-        $restaurants = [
+        $restaurants = self::restaurantsData();
+
+        foreach ($restaurants as $data) {
+            $this->createRestaurant($data);
+        }
+    }
+
+    /**
+     * Slugs dos restaurantes atualmente definidos aqui -- usado por DemoActivitySeeder para
+     * nunca gerar donos/avaliacoes/cupons para restaurantes obsoletos que ainda estejam no
+     * banco (a descricao padrao sozinha nao basta pra distinguir, ela e' igual pra qualquer
+     * restaurante que algum dia passou por este seeder, mesmo removido da lista abaixo).
+     *
+     * @return array<int, string>
+     */
+    public static function slugs(): array
+    {
+        return array_map(fn (array $r) => Str::slug($r['name']), self::restaurantsData());
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private static function restaurantsData(): array
+    {
+        return [
             [
                 'name' => 'Arte & Sabor',
                 'neighborhood' => 'Centro',
@@ -33,8 +59,8 @@ class RestaurantSeeder extends Seeder
                 'rating' => 4.6, 'reviews' => 340,
                 'menu' => [
                     'Rodízio' => [
-                        ['name' => 'Rodízio tradicional', 'desc' => 'Pizzas, petiscos, refrigerante e massa liberados.', 'price' => 59.00, 'tags' => []],
-                        ['name' => 'Rodízio premium', 'desc' => 'Inclui camarões empanados, presunto parma com alho-poró e costela ao molho barbecue.', 'price' => 59.00, 'compare_at_price' => 69.00, 'tags' => []],
+                        ['name' => 'Rodízio tradicional', 'desc' => 'Pizzas, petiscos, refrigerante e massa liberados.', 'price' => 59.00, 'tags' => [], 'food_tags' => ['Rodízio', 'Pizza']],
+                        ['name' => 'Rodízio premium', 'desc' => 'Inclui camarões empanados, presunto parma com alho-poró e costela ao molho barbecue.', 'price' => 59.00, 'compare_at_price' => 69.00, 'tags' => [], 'food_tags' => ['Rodízio', 'Frutos do Mar']],
                     ],
                 ],
                 'hours' => ['mon-sun' => ['11:00', '23:30']],
@@ -49,8 +75,8 @@ class RestaurantSeeder extends Seeder
                 'rating' => 4.0, 'reviews' => 210,
                 'menu' => [
                     'Pizzas' => [
-                        ['name' => 'Pizza calabresa', 'desc' => 'Calabresa, cebola e mussarela.', 'price' => 32.90, 'compare_at_price' => 39.90, 'tags' => []],
-                        ['name' => 'Pizza vegetariana', 'desc' => 'Legumes grelhados e mussarela.', 'price' => 42.90, 'tags' => ['Vegetariano']],
+                        ['name' => 'Pizza calabresa', 'desc' => 'Calabresa, cebola e mussarela.', 'price' => 32.90, 'compare_at_price' => 39.90, 'tags' => [], 'food_tags' => ['Pizza']],
+                        ['name' => 'Pizza vegetariana', 'desc' => 'Legumes grelhados e mussarela.', 'price' => 42.90, 'tags' => ['Vegetariano'], 'food_tags' => ['Pizza']],
                     ],
                     'Bebidas' => [
                         ['name' => 'Chope artesanal', 'desc' => null, 'price' => 12.00, 'tags' => []],
@@ -68,8 +94,8 @@ class RestaurantSeeder extends Seeder
                 'rating' => 4.5, 'reviews' => 150,
                 'menu' => [
                     'Combinados' => [
-                        ['name' => 'Combinado 20 peças', 'desc' => 'Sushi e sashimi variados.', 'price' => 54.90, 'compare_at_price' => 64.90, 'tags' => []],
-                        ['name' => 'Temaki salmão', 'desc' => null, 'price' => 22.90, 'tags' => []],
+                        ['name' => 'Combinado 20 peças', 'desc' => 'Sushi e sashimi variados.', 'price' => 54.90, 'compare_at_price' => 64.90, 'tags' => [], 'food_tags' => ['Sushi', 'Frutos do Mar']],
+                        ['name' => 'Temaki salmão', 'desc' => null, 'price' => 22.90, 'tags' => [], 'food_tags' => ['Temaki', 'Sushi']],
                     ],
                 ],
                 'hours' => ['tue-sun' => ['18:00', '23:30']],
@@ -84,8 +110,8 @@ class RestaurantSeeder extends Seeder
                 'rating' => 4.2, 'reviews' => 95,
                 'menu' => [
                     'Pratos executivos' => [
-                        ['name' => 'Filé ao molho madeira', 'desc' => 'Servido com arroz, farofa e vinagrete.', 'price' => 38.90, 'tags' => []],
-                        ['name' => 'Prato vegetariano do dia', 'desc' => null, 'price' => 29.90, 'tags' => ['Vegetariano']],
+                        ['name' => 'Filé ao molho madeira', 'desc' => 'Servido com arroz, farofa e vinagrete.', 'price' => 38.90, 'tags' => [], 'food_tags' => ['Prato Executivo', 'Arroz e Feijão']],
+                        ['name' => 'Prato vegetariano do dia', 'desc' => null, 'price' => 29.90, 'tags' => ['Vegetariano'], 'food_tags' => ['Prato Executivo']],
                     ],
                 ],
                 'hours' => ['mon-sun' => ['06:30', '22:00']],
@@ -100,8 +126,8 @@ class RestaurantSeeder extends Seeder
                 'rating' => 4.3, 'reviews' => 180,
                 'menu' => [
                     'Combinados' => [
-                        ['name' => 'Combinado Nobre (30 peças)', 'desc' => null, 'price' => 94.90, 'tags' => []],
-                        ['name' => 'Hot roll sem glúten', 'desc' => 'Molho shoyu sem trigo.', 'price' => 26.90, 'tags' => ['Sem glúten']],
+                        ['name' => 'Combinado Nobre (30 peças)', 'desc' => null, 'price' => 94.90, 'tags' => [], 'food_tags' => ['Sushi', 'Frutos do Mar']],
+                        ['name' => 'Hot roll sem glúten', 'desc' => 'Molho shoyu sem trigo.', 'price' => 26.90, 'tags' => ['Sem glúten'], 'food_tags' => ['Sushi']],
                     ],
                 ],
                 'hours' => ['tue-sun' => ['18:00', '23:00']],
@@ -116,8 +142,8 @@ class RestaurantSeeder extends Seeder
                 'rating' => 4.1, 'reviews' => 220,
                 'menu' => [
                     'Petiscos' => [
-                        ['name' => 'Picanha na tábua', 'desc' => 'Acompanha farofa e vinagrete.', 'price' => 64.90, 'tags' => []],
-                        ['name' => 'Torresmo de barriga', 'desc' => null, 'price' => 32.90, 'tags' => []],
+                        ['name' => 'Picanha na tábua', 'desc' => 'Acompanha farofa e vinagrete.', 'price' => 64.90, 'tags' => [], 'food_tags' => ['Picanha', 'Churrasco', 'Petiscos']],
+                        ['name' => 'Torresmo de barriga', 'desc' => null, 'price' => 32.90, 'tags' => [], 'food_tags' => ['Petiscos']],
                     ],
                 ],
                 'hours' => ['tue-sun' => ['17:00', '00:00']],
@@ -132,10 +158,11 @@ class RestaurantSeeder extends Seeder
                 'rating' => 4.4, 'reviews' => 130,
                 'menu' => [
                     'Pizzas' => [
-                        ['name' => 'Pizza mineira', 'desc' => 'Linguiça, pimenta biquinho e queijo canastra.', 'price' => 44.90, 'tags' => []],
+                        ['name' => 'Pizza mineira', 'desc' => 'Linguiça, pimenta biquinho e queijo canastra.', 'price' => 44.90, 'tags' => [], 'food_tags' => ['Pizza']],
                     ],
                     'Petiscos' => [
-                        ['name' => 'Frango com quiabo sem lactose', 'desc' => null, 'price' => 28.90, 'tags' => ['Sem lactose']],
+                        ['name' => 'Frango com quiabo sem lactose', 'desc' => null, 'price' => 28.90, 'tags' => ['Sem lactose'], 'food_tags' => ['Frango', 'Arroz e Feijão']],
+                        ['name' => 'Feijão tropeiro', 'desc' => 'Feijão, couve, torresmo, bacon e farinha de mandioca.', 'price' => 26.90, 'tags' => [], 'food_tags' => ['Feijão Tropeiro', 'Arroz e Feijão']],
                     ],
                 ],
                 'hours' => ['tue-sun' => ['18:00', '23:30']],
@@ -150,8 +177,8 @@ class RestaurantSeeder extends Seeder
                 'rating' => 4.2, 'reviews' => 175,
                 'menu' => [
                     'Rodízio' => [
-                        ['name' => 'Rodízio de carnes', 'desc' => 'Cortes nobres + buffet de saladas.', 'price' => 89.90, 'tags' => []],
-                        ['name' => 'Buffet vegetariano avulso', 'desc' => null, 'price' => 49.90, 'tags' => ['Vegetariano', 'Sem glúten']],
+                        ['name' => 'Rodízio de carnes', 'desc' => 'Cortes nobres + buffet de saladas.', 'price' => 89.90, 'tags' => [], 'food_tags' => ['Rodízio', 'Churrasco', 'Picanha']],
+                        ['name' => 'Buffet vegetariano avulso', 'desc' => null, 'price' => 49.90, 'tags' => ['Vegetariano', 'Sem glúten'], 'food_tags' => ['Arroz e Feijão']],
                     ],
                 ],
                 'hours' => ['tue-sun' => ['11:00', '23:00']],
@@ -166,8 +193,8 @@ class RestaurantSeeder extends Seeder
                 'rating' => 4.5, 'reviews' => 160,
                 'menu' => [
                     'Pratos executivos' => [
-                        ['name' => 'Tutu à mineira com couve', 'desc' => 'Feijão, torresmo e couve refogada.', 'price' => 34.90, 'tags' => []],
-                        ['name' => 'Bowl vegano do dia', 'desc' => 'Grãos, legumes assados e húmus.', 'price' => 32.90, 'tags' => ['Vegano', 'Vegetariano']],
+                        ['name' => 'Tutu à mineira com couve', 'desc' => 'Feijão, torresmo e couve refogada.', 'price' => 34.90, 'tags' => [], 'food_tags' => ['Prato Executivo', 'Arroz e Feijão']],
+                        ['name' => 'Bowl vegano do dia', 'desc' => 'Grãos, legumes assados e húmus.', 'price' => 32.90, 'tags' => ['Vegano', 'Vegetariano'], 'food_tags' => ['Bowls']],
                     ],
                 ],
                 'hours' => ['mon-sat' => ['11:00', '15:00']],
@@ -182,17 +209,13 @@ class RestaurantSeeder extends Seeder
                 'rating' => 4.3, 'reviews' => 140,
                 'menu' => [
                     'Pizzas' => [
-                        ['name' => 'Pizza margherita', 'desc' => null, 'price' => 36.90, 'tags' => ['Vegetariano']],
-                        ['name' => 'Pizza portuguesa', 'desc' => null, 'price' => 41.90, 'tags' => []],
+                        ['name' => 'Pizza margherita', 'desc' => null, 'price' => 36.90, 'tags' => ['Vegetariano'], 'food_tags' => ['Pizza']],
+                        ['name' => 'Pizza portuguesa', 'desc' => null, 'price' => 41.90, 'tags' => [], 'food_tags' => ['Pizza']],
                     ],
                 ],
                 'hours' => ['tue-sun' => ['18:00', '23:30']],
             ],
         ];
-
-        foreach ($restaurants as $data) {
-            $this->createRestaurant($data);
-        }
     }
 
     private function createRestaurant(array $data): void
@@ -291,6 +314,11 @@ class RestaurantSeeder extends Seeder
                 if (! empty($item['tags'])) {
                     $tagIds = DietaryTag::whereIn('slug', array_map(Str::slug(...), $item['tags']))->pluck('id');
                     $menuItem->dietaryTags()->sync($tagIds);
+                }
+
+                if (! empty($item['food_tags'])) {
+                    $foodTagIds = FoodTag::whereIn('slug', array_map(Str::slug(...), $item['food_tags']))->pluck('id');
+                    $menuItem->foodTags()->sync($foodTagIds);
                 }
             }
         }

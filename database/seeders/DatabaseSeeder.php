@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
             CuisineSeeder::class,
             DietaryTagSeeder::class,
+            FoodTagSeeder::class,
             RestaurantSeeder::class,
             DemoActivitySeeder::class,
         ]);

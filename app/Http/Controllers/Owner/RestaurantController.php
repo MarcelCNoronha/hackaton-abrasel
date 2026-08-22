@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Owner;
 
 use App\Enums\PriceRange;
 use App\Http\Controllers\Controller;
+use App\Models\FoodTag;
 use App\Models\Restaurant;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,6 +26,7 @@ class RestaurantController extends Controller
         $restaurant->load([
             'businessHours',
             'menus.categories.items.dietaryTags',
+            'menus.categories.items.foodTags',
             'couponCampaigns',
             'reviews' => fn ($query) => $query->latest()->with(['user:id,name', 'reply']),
             'activeQrToken',
@@ -33,6 +35,7 @@ class RestaurantController extends Controller
         return Inertia::render('Owner/Restaurants/Edit', [
             'restaurant' => $restaurant,
             'priceRanges' => array_column(PriceRange::cases(), 'value'),
+            'foodTagSuggestions' => FoodTag::orderBy('position')->pluck('name'),
         ]);
     }
 

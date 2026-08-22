@@ -8,12 +8,13 @@ use App\Http\Controllers\Controller;
 use App\Models\Restaurant;
 use App\Models\RestaurantClaim;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
         return Inertia::render('Admin/Dashboard', [
             'stats' => [
@@ -25,10 +26,15 @@ class DashboardController extends Controller
                 ->with(['restaurant:id,name', 'user:id,name,email'])
                 ->latest()
                 ->get(),
-            'users' => User::orderBy('name')->get(['id', 'name', 'email', 'role']),
+            'users' => User::orderBy('name')
+                ->paginate(15, ['id', 'name', 'email', 'role'], 'users_page')
+                ->withQueryString(),
             // Full profile columns (not just the ones the table renders) -- the "Editar"
             // dialog pre-fills its form straight from this same list.
-            'restaurants' => Restaurant::orderBy('name')->get(),
+            'restaurants' => Restaurant::orderBy('name')
+                ->with('owners:id,name,email')
+                ->paginate(15, ['*'], 'restaurants_page')
+                ->withQueryString(),
             'priceRanges' => array_column(PriceRange::cases(), 'value'),
         ]);
     }

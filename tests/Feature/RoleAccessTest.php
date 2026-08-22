@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\UserRole;
+use App\Models\Restaurant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -55,5 +56,29 @@ class RoleAccessTest extends TestCase
     {
         $this->get('/gestor')->assertRedirect('/login');
         $this->get('/admin')->assertRedirect('/login');
+    }
+
+    public function test_a_plain_consumer_can_claim_an_unclaimed_restaurant(): void
+    {
+        // Reivindicar e' o unico caminho de auto-servico pra um consumidor virar gestor -- a
+        // tela em si nao pode exigir role:owner de quem ainda nao o tem (ver routes/web.php).
+        $consumer = User::factory()->create(['role' => UserRole::Consumer]);
+        $restaurant = Restaurant::create([
+            'name' => 'Restaurante Sem Dono',
+            'slug' => 'restaurante-sem-dono',
+            'latitude' => -20.7546,
+            'longitude' => -42.8825,
+        ]);
+
+        $this->actingAs($consumer)->get('/gestor/reivindicar')->assertOk();
+
+        $this->actingAs($consumer)
+            ->post('/gestor/reivindicar', ['restaurant_id' => $restaurant->id])
+            ->assertRedirect(route('owner.dashboard', absolute: false));
+
+        $this->assertDatabaseHas('restaurant_claims', [
+            'user_id' => $consumer->id,
+            'restaurant_id' => $restaurant->id,
+        ]);
     }
 }

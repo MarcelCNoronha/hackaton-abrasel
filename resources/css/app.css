@@ -6,10 +6,11 @@
    background, including the ones Vuetify renders internally for v-text-field etc. — Vuetify
    already manages its own field background via bg-color/theme surface, so this fought with the
    dark theme (fields showed as plain white boxes regardless of corePlugins.preflight below,
-   since @tailwindcss/forms hooks its own base styles in independently of it). */
-.v-application input,
-.v-application select,
-.v-application textarea {
+   since @tailwindcss/forms hooks its own base styles in independently of it). Scoped with
+   :where() (not `.v-application input`) because v-dialog/v-menu/v-overlay content is teleported
+   to a container appended as a *sibling* of the .v-application root, not a descendant of it --
+   an ancestor-scoped selector silently never matched inputs inside any overlay. */
+:where(input, select, textarea) {
     background-color: transparent;
 }
 

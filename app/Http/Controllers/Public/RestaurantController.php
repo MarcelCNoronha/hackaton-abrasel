@@ -21,6 +21,7 @@ class RestaurantController extends Controller
             'menus.categories' => fn ($q) => $q->orderBy('position'),
             'menus.categories.items' => fn ($q) => $q->orderBy('position'),
             'menus.categories.items.dietaryTags',
+            'menus.categories.items.foodTags',
             'reviews' => fn ($q) => $q->where('status', 'published')->latest()->limit(20),
             'reviews.user:id,name',
             'reviews.reply',

@@ -10,6 +10,7 @@ const props = defineProps({
     categories: { type: Array, default: () => [] },
     cuisines: { type: Array, default: () => [] },
     dietaryTags: { type: Array, default: () => [] },
+    foodTags: { type: Array, default: () => [] },
     filters: { type: Object, default: () => ({}) },
 });
 
@@ -18,6 +19,7 @@ const filters = reactive({
     category: props.filters.category ?? null,
     cuisines: props.filters.cuisines ?? [],
     dietary_tags: props.filters.dietary_tags ?? [],
+    food_tags: props.filters.food_tags ?? [],
     radius_km: props.filters.radius_km ?? null,
     price_range: props.filters.price_range ?? null,
     min_rating: props.filters.min_rating ?? null,
@@ -30,6 +32,7 @@ const activeFilterCount = computed(
         (filters.category ? 1 : 0) +
         filters.cuisines.length +
         filters.dietary_tags.length +
+        filters.food_tags.length +
         (filters.radius_km ? 1 : 0) +
         (filters.price_range ? 1 : 0) +
         (filters.min_rating ? 1 : 0) +
@@ -108,6 +111,7 @@ function applyFilters({ immediate = false } = {}) {
                 category: filters.category || undefined,
                 cuisines: filters.cuisines.length ? filters.cuisines : undefined,
                 dietary_tags: filters.dietary_tags.length ? filters.dietary_tags : undefined,
+                food_tags: filters.food_tags.length ? filters.food_tags : undefined,
                 radius_km: filters.radius_km || undefined,
                 price_range: filters.price_range || undefined,
                 min_rating: filters.min_rating || undefined,
@@ -133,6 +137,7 @@ watch(
         filters.category,
         filters.cuisines,
         filters.dietary_tags,
+        filters.food_tags,
         filters.radius_km,
         filters.price_range,
         filters.min_rating,
@@ -148,6 +153,7 @@ function clearFilters() {
     filters.category = null;
     filters.cuisines = [];
     filters.dietary_tags = [];
+    filters.food_tags = [];
     filters.radius_km = null;
     filters.price_range = null;
     filters.min_rating = null;
@@ -224,6 +230,15 @@ function clearFilters() {
                                 <v-chip-group v-model="filters.cuisines" selected-class="chip-selected" column multiple>
                                     <v-chip v-for="cuisine in cuisines" :key="cuisine.id" :value="cuisine.slug" filter variant="outlined">
                                         {{ cuisine.name }}
+                                    </v-chip>
+                                </v-chip-group>
+                            </div>
+
+                            <div class="filter-group">
+                                <span class="filter-label">Prato ou ingrediente</span>
+                                <v-chip-group v-model="filters.food_tags" selected-class="chip-selected" column multiple>
+                                    <v-chip v-for="tag in foodTags" :key="tag.id" :value="tag.slug" filter variant="outlined">
+                                        {{ tag.name }}
                                     </v-chip>
                                 </v-chip-group>
                             </div>

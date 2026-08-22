@@ -87,7 +87,7 @@ const heroGradient = computed(() => {
                     </div>
 
                     <div class="d-flex flex-wrap ga-2">
-                        <v-btn color="white" variant="flat" prepend-icon="mdi-directions" :href="directionsUrl" target="_blank" rel="noopener">
+                        <v-btn color="primary" variant="flat" prepend-icon="mdi-directions" :href="directionsUrl" target="_blank" rel="noopener">
                             Como chegar
                         </v-btn>
                         <v-btn v-if="restaurant.phone" variant="outlined" color="white" prepend-icon="mdi-phone" :href="`tel:${restaurant.phone}`">

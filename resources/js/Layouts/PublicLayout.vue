@@ -20,7 +20,7 @@ onMounted(() => {
     <v-app>
         <v-app-bar flat color="surface" height="72" style="border-bottom: 1px solid rgba(249, 115, 22, 0.28)">
             <v-container class="d-flex align-center" fluid style="max-width: 1400px">
-                <Link href="/" class="text-decoration-none d-flex align-center ga-2">
+                <Link :href="user ? route('discover') : '/'" class="text-decoration-none d-flex align-center ga-2">
                     <v-avatar size="36" rounded="lg" style="background: linear-gradient(135deg, #f97316, #ef4444)">
                         <v-icon icon="mdi-silverware-fork-knife" color="white" size="20" />
                     </v-avatar>

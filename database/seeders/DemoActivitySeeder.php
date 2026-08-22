@@ -58,10 +58,10 @@ class DemoActivitySeeder extends Seeder
     {
         $consumers = $this->createConsumers();
 
-        // Restrito aos restaurantes semeados pelo RestaurantSeeder (marcados pela descrição
-        // padrao) -- evita gerar donos/avaliacoes/cupons para restaurantes de outras origens,
-        // como fixtures deixadas por testes E2E.
-        Restaurant::where('description', 'like', '%Hackathon ABRASEL%')->get()->each(function (Restaurant $restaurant) use ($consumers) {
+        // Restrito aos slugs atualmente definidos em RestaurantSeeder -- a descricao padrao
+        // sozinha nao serve de filtro porque e' igual pra qualquer restaurante que algum dia
+        // passou por aquele seeder, mesmo um ja removido da lista (mas ainda no banco).
+        Restaurant::whereIn('slug', RestaurantSeeder::slugs())->get()->each(function (Restaurant $restaurant) use ($consumers) {
             $owner = $this->createOwner($restaurant);
             $reviews = $this->createVisitsAndReviews($restaurant, $consumers, $owner);
             $this->createFavorites($restaurant, $consumers);

@@ -6,6 +6,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 const props = defineProps({
     restaurant: { type: Object, required: true },
     priceRanges: { type: Array, default: () => [] },
+    foodTagSuggestions: { type: Array, default: () => [] },
 });
 
 const weekdayNames = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
@@ -78,12 +79,14 @@ const itemForm = useForm({
     price: '',
     compare_at_price: '',
     is_available: true,
+    food_tags: [],
 });
 
 function openNewItemDialog(categoryId) {
     editingItem.value = null;
     itemForm.reset();
     itemForm.is_available = true;
+    itemForm.food_tags = [];
     itemDialogCategoryId.value = categoryId;
 }
 
@@ -94,6 +97,7 @@ function openEditItemDialog(item) {
     itemForm.price = item.price;
     itemForm.compare_at_price = item.compare_at_price ?? '';
     itemForm.is_available = item.is_available;
+    itemForm.food_tags = (item.food_tags ?? []).map((tag) => tag.name);
     itemDialogCategoryId.value = 'edit';
 }
 
@@ -301,6 +305,11 @@ function submitReply(reviewId) {
                                                 </v-card-title>
                                                 <v-card-subtitle v-if="item.description">{{ item.description }}</v-card-subtitle>
                                             </v-card-item>
+                                            <v-card-text v-if="item.food_tags?.length" class="pt-0 pb-2">
+                                                <v-chip v-for="tag in item.food_tags" :key="tag.id" size="small" variant="tonal" class="mr-1">
+                                                    {{ tag.name }}
+                                                </v-chip>
+                                            </v-card-text>
                                             <v-card-actions>
                                                 <v-chip v-if="!item.is_available" size="small" color="warning" variant="tonal">Indisponível</v-chip>
                                                 <v-spacer />
@@ -343,7 +352,18 @@ function submitReply(reviewId) {
                                                         :error-messages="itemForm.errors.price"
                                                     />
                                                 </div>
-                                                <v-switch v-model="itemForm.is_available" color="primary" label="Disponível" />
+                                                <v-combobox
+                                                    v-model="itemForm.food_tags"
+                                                    :items="foodTagSuggestions"
+                                                    label="Tags (ingredientes, tipo de prato)"
+                                                    hint="Ex.: Frango, Feijão, Hambúrguer -- digite e aperte Enter para criar uma nova"
+                                                    persistent-hint
+                                                    multiple
+                                                    chips
+                                                    closable-chips
+                                                    :error-messages="itemForm.errors.food_tags"
+                                                />
+                                                <v-switch v-model="itemForm.is_available" color="primary" label="Disponível" class="mt-2" />
                                                 <v-btn type="submit" color="primary" variant="flat" :loading="itemForm.processing">
                                                     Salvar
                                                 </v-btn>

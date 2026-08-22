@@ -40,6 +40,14 @@ function logout() {
                     Painel do estabelecimento
                 </v-btn>
                 <v-btn
+                    v-else
+                    variant="text"
+                    :href="route('owner.claims.create')"
+                    :active="route().current('owner.claims.*')"
+                >
+                    Cadastrar restaurante
+                </v-btn>
+                <v-btn
                     v-if="user.role === 'admin'"
                     variant="text"
                     :href="route('admin.dashboard')"

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Cuisine;
 use App\Models\DietaryTag;
+use App\Models\FoodTag;
 use App\Models\Restaurant;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -35,7 +36,13 @@ class DiscoveryController extends Controller
             $query->where(function ($sub) use ($q) {
                 $sub->where('name', 'ilike', "%{$q}%")
                     ->orWhereHas('menus.categories.items', function ($items) use ($q) {
-                        $items->where('is_available', true)->where('name', 'ilike', "%{$q}%");
+                        // nome/descricao do prato ou uma food tag (ex.: "arroz", "feijão
+                        // tropeiro") -- cobre tanto o texto livre quanto a tag estruturada.
+                        $items->where('is_available', true)->where(function ($item) use ($q) {
+                            $item->where('name', 'ilike', "%{$q}%")
+                                ->orWhere('description', 'ilike', "%{$q}%")
+                                ->orWhereHas('foodTags', fn ($ft) => $ft->where('name', 'ilike', "%{$q}%"));
+                        });
                     });
             });
         }
@@ -57,6 +64,15 @@ class DiscoveryController extends Controller
                 foreach ($dietaryTags as $slug) {
                     $items->whereHas('dietaryTags', fn ($dt) => $dt->where('slug', $slug));
                 }
+            });
+        }
+
+        // food_tags e' "ou" (qualquer prato com qualquer uma das tags) -- diferente de
+        // dietary_tags, que exige 1 prato so satisfazendo TODAS as restricoes ao mesmo tempo.
+        if ($foodTags = array_filter((array) $request->input('food_tags', []))) {
+            $query->whereHas('menus.categories.items', function ($items) use ($foodTags) {
+                $items->where('is_available', true)
+                    ->whereHas('foodTags', fn ($ft) => $ft->whereIn('slug', $foodTags));
             });
         }
 
@@ -89,6 +105,7 @@ class DiscoveryController extends Controller
             'categories' => Category::orderBy('position')->get(),
             'cuisines' => Cuisine::orderBy('position')->get(),
             'dietaryTags' => DietaryTag::orderBy('position')->get(),
+            'foodTags' => FoodTag::orderBy('position')->get(),
             // chaves sempre presentes (mesmo vazias/null) -- um array PHP sem
             // nenhuma delas presente na query string serializa como `[]` em JSON,
             // e no front `filters.sort` colidiria com o Array.prototype.sort nativo.
@@ -97,6 +114,7 @@ class DiscoveryController extends Controller
                 'category' => $request->input('category'),
                 'cuisines' => array_values($cuisines ?? []),
                 'dietary_tags' => array_values($dietaryTags ?? []),
+                'food_tags' => array_values($foodTags ?? []),
                 'radius_km' => $request->input('radius_km'),
                 'price_range' => $request->input('price_range'),
                 'min_rating' => $request->input('min_rating'),

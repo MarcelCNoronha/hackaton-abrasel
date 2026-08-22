@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
+use App\Models\FoodTag;
 use App\Models\Menu;
 use App\Models\MenuCategory;
 use App\Models\MenuItem;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class MenuController extends Controller
 {
@@ -54,10 +56,14 @@ class MenuController extends Controller
         $this->authorizeCategory($request, $menuCategory);
 
         $data = $this->validateItem($request);
+        $foodTagNames = $data['food_tags'] ?? [];
+        unset($data['food_tags']);
 
-        $menuCategory->items()->create($data + [
+        $item = $menuCategory->items()->create($data + [
             'position' => $menuCategory->items()->count(),
         ]);
+
+        $item->foodTags()->sync($this->resolveFoodTagIds($foodTagNames));
 
         return back()->with('status', 'Item adicionado ao cardápio.');
     }
@@ -66,9 +72,41 @@ class MenuController extends Controller
     {
         $this->authorizeItem($request, $menuItem);
 
-        $menuItem->update($this->validateItem($request));
+        $data = $this->validateItem($request);
+        $foodTagNames = $data['food_tags'] ?? [];
+        unset($data['food_tags']);
+
+        $menuItem->update($data);
+        $menuItem->foodTags()->sync($this->resolveFoodTagIds($foodTagNames));
 
         return back()->with('status', 'Item atualizado.');
+    }
+
+    /**
+     * Tags de comida sao livres -- o gestor digita ingredientes/tipo de prato (ex.: "Frango",
+     * "Feijão") e cada nome novo vira uma FoodTag reaproveitavel por slug, sem tela de
+     * cadastro separada. Isso e' o que alimenta o filtro de busca por prato/ingrediente.
+     *
+     * @param  array<int, string>  $names
+     * @return array<int, int>
+     */
+    private function resolveFoodTagIds(array $names): array
+    {
+        $position = FoodTag::max('position') + 1;
+
+        return array_map(function (string $name) use (&$position) {
+            $name = trim($name);
+            $tag = FoodTag::firstOrCreate(
+                ['slug' => Str::slug($name)],
+                ['name' => $name, 'position' => $position]
+            );
+
+            if ($tag->wasRecentlyCreated) {
+                $position++;
+            }
+
+            return $tag->id;
+        }, array_filter($names, fn ($name) => trim((string) $name) !== ''));
     }
 
     public function destroyItem(Request $request, MenuItem $menuItem): RedirectResponse
@@ -88,6 +126,8 @@ class MenuController extends Controller
             'price' => ['required', 'numeric', 'min:0'],
             'compare_at_price' => ['nullable', 'numeric', 'gt:price'],
             'is_available' => ['required', 'boolean'],
+            'food_tags' => ['nullable', 'array'],
+            'food_tags.*' => ['string', 'max:50'],
         ]);
     }
 

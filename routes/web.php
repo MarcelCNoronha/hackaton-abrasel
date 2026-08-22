@@ -32,13 +32,16 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::post('/visitas/{visit}/avaliacao', [ReviewController::class, 'store'])->name('reviews.store');
+
+    // Fora do grupo role:owner de proposito -- reivindicar um restaurante e' o unico jeito de
+    // um consumidor comum virar gestor (ver ClaimController@approve), entao a propria tela de
+    // reivindicacao nao pode exigir esse role de quem ainda nao o tem.
+    Route::get('/gestor/reivindicar', [OwnerClaimController::class, 'create'])->name('owner.claims.create');
+    Route::post('/gestor/reivindicar', [OwnerClaimController::class, 'store'])->name('owner.claims.store');
 });
 
 Route::middleware(['auth', 'role:owner'])->prefix('gestor')->name('owner.')->group(function () {
     Route::get('/', [OwnerDashboardController::class, 'index'])->name('dashboard');
-
-    Route::get('/reivindicar', [OwnerClaimController::class, 'create'])->name('claims.create');
-    Route::post('/reivindicar', [OwnerClaimController::class, 'store'])->name('claims.store');
 
     Route::get('/restaurantes/{restaurant}', [OwnerRestaurantController::class, 'edit'])->name('restaurants.edit');
     Route::patch('/restaurantes/{restaurant}', [OwnerRestaurantController::class, 'update'])->name('restaurants.update');

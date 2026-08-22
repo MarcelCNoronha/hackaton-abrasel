@@ -49,6 +49,11 @@ class MenuItem extends Model
         return $this->belongsToMany(DietaryTag::class, 'menu_item_dietary_tags')->withTimestamps();
     }
 
+    public function foodTags(): BelongsToMany
+    {
+        return $this->belongsToMany(FoodTag::class, 'menu_item_food_tags')->withTimestamps();
+    }
+
     public function restaurant(): ?Restaurant
     {
         return $this->category?->menu?->restaurant;
