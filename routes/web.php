@@ -28,6 +28,7 @@ use App\Http\Controllers\Owner\RestaurantController as OwnerRestaurantController
 use App\Http\Controllers\Owner\ReviewReplyController as OwnerReviewReplyController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Public\DiscoveryController;
+use App\Http\Controllers\Public\EventController;
 use App\Http\Controllers\Public\RestaurantController;
 use App\Http\Controllers\Public\SitemapController;
 use App\Http\Controllers\ReviewController;
@@ -37,6 +38,7 @@ Route::view('/', 'landing')->name('landing');
 Route::get('/restaurantes', [DiscoveryController::class, 'index'])->name('discover');
 Route::get('/restaurantes/{restaurant:slug}', [RestaurantController::class, 'show'])->name('restaurants.show');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+Route::post('/eventos/rastrear', [EventController::class, 'track'])->name('events.track');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 

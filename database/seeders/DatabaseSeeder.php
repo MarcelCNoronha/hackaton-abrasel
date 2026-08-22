@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
             RestaurantSeeder::class,
             DemoActivitySeeder::class,
             DemoFreelancerSeeder::class,
+            DemoTrafficSeeder::class,
         ]);
 
         // updateOrCreate (nao Factory) -- Factory::definition() chama fake(), que quebra em

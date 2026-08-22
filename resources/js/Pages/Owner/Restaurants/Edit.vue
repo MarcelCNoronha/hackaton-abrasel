@@ -3,6 +3,7 @@ import { computed, reactive, ref } from 'vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import PhotoInputField from '@/Components/PhotoInputField.vue';
+import TrafficHeatmap from '@/Components/TrafficHeatmap.vue';
 import { formatBRL } from '@/utils/formatCurrency';
 
 const props = defineProps({
@@ -11,6 +12,7 @@ const props = defineProps({
     foodTagSuggestions: { type: Array, default: () => [] },
     dietaryTags: { type: Array, default: () => [] },
     jobSkillSuggestions: { type: Array, default: () => [] },
+    trafficReport: { type: Object, default: () => ({ total: 0, by_hour: [], peak_hour: null, quiet_hour: null, by_segment: [] }) },
 });
 
 const weekdayNames = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
@@ -282,6 +284,7 @@ const applicationStatusLabels = {
                         <v-tab value="qrcode">QR Code</v-tab>
                         <v-tab value="cupons">Cupons</v-tab>
                         <v-tab value="avaliacoes">Avaliações</v-tab>
+                        <v-tab value="movimento">Movimento</v-tab>
                         <v-tab value="empregabilidade">Empregabilidade</v-tab>
                     </v-tabs>
 
@@ -647,6 +650,37 @@ const applicationStatusLabels = {
                                             </v-btn>
                                         </v-form>
                                     </v-card-text>
+                                </v-card>
+                            </v-window-item>
+
+                            <!-- Movimento -->
+                            <v-window-item value="movimento">
+                                <v-card variant="outlined" class="pa-4 mb-4">
+                                    <h3 class="text-subtitle-1 font-weight-bold mb-3">Movimento estimado por horário</h3>
+                                    <TrafficHeatmap
+                                        :by-hour="trafficReport.by_hour"
+                                        :peak-hour="trafficReport.peak_hour"
+                                        :quiet-hour="trafficReport.quiet_hour"
+                                    />
+                                </v-card>
+
+                                <v-card variant="outlined" class="pa-4">
+                                    <h3 class="text-subtitle-1 font-weight-bold mb-3">Volume por segmento</h3>
+                                    <v-alert v-if="!trafficReport.by_segment.length" type="info" variant="tonal">
+                                        Ainda não há interações registradas.
+                                    </v-alert>
+                                    <div v-for="segment in trafficReport.by_segment" :key="segment.type" class="mb-3">
+                                        <div class="d-flex justify-space-between text-body-2 mb-1">
+                                            <span>{{ segment.label }}</span>
+                                            <strong>{{ segment.count }}</strong>
+                                        </div>
+                                        <v-progress-linear
+                                            :model-value="trafficReport.by_segment[0].count ? (segment.count / trafficReport.by_segment[0].count) * 100 : 0"
+                                            color="primary"
+                                            height="6"
+                                            rounded
+                                        />
+                                    </div>
                                 </v-card>
                             </v-window-item>
 

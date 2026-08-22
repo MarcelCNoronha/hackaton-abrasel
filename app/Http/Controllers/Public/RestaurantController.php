@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers\Public;
 
+use App\Enums\EventType;
 use App\Http\Controllers\Controller;
+use App\Models\Event;
 use App\Models\Restaurant;
+use App\Support\RestaurantTrafficReport;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -36,8 +39,11 @@ class RestaurantController extends Controller
             )->find($restaurant->id)->distance_km;
         }
 
+        Event::create(['type' => EventType::RestaurantView, 'restaurant_id' => $restaurant->id, 'user_id' => $request->user()?->id]);
+
         return Inertia::render('Restaurants/Show', [
             'restaurant' => $restaurant,
+            'trafficInsights' => RestaurantTrafficReport::publicSummary(RestaurantTrafficReport::for($restaurant)),
         ]);
     }
 }

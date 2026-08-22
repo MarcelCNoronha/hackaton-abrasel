@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\EventType;
 use App\Models\Coupon;
+use App\Models\Event;
 use App\Models\Visit;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,6 +29,8 @@ class ReviewController extends Controller
             'comment' => $data['comment'] ?? null,
         ]);
 
+        Event::create(['type' => EventType::ReviewCreated, 'restaurant_id' => $visit->restaurant_id, 'user_id' => $visit->user_id]);
+
         // A avaliacao vira cupom quando existe uma campanha ativa e aceita pelo dono, com
         // vaga e limite por usuario disponiveis -- ver CouponCampaign::isOpenForIssuance().
         // Nunca depende da nota, so da visita real ser avaliada (docs/SPEC.md #18).
@@ -45,6 +49,8 @@ class ReviewController extends Controller
                 'issued_at' => now(),
                 'expires_at' => now()->addDays($campaign->coupon_validity_days),
             ]);
+
+            Event::create(['type' => EventType::CouponIssued, 'restaurant_id' => $visit->restaurant_id, 'user_id' => $visit->user_id]);
         }
 
         return back()->with(

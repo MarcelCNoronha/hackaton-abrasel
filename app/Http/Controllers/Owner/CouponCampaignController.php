@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Owner;
 
 use App\Enums\CouponStatus;
+use App\Enums\EventType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCouponCampaignRequest;
 use App\Models\Coupon;
 use App\Models\CouponCampaign;
+use App\Models\Event;
 use App\Models\Restaurant;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -73,6 +75,8 @@ class CouponCampaignController extends Controller
             'redeemed_by' => $request->user()->id,
             'redeemed_at' => now(),
         ]);
+
+        Event::create(['type' => EventType::CouponUsed, 'restaurant_id' => $restaurant->id, 'user_id' => $request->user()->id]);
 
         return back()->with('status', "Cupom {$coupon->code} resgatado com sucesso.");
     }

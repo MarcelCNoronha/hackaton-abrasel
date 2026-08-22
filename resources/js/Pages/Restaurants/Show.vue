@@ -2,11 +2,20 @@
 import { computed, ref } from 'vue';
 import { Head, usePage } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
+import TrafficHeatmap from '@/Components/TrafficHeatmap.vue';
 import { formatBRL } from '@/utils/formatCurrency';
 
 const props = defineProps({
     restaurant: { type: Object, required: true },
+    trafficInsights: { type: Object, default: null },
 });
+
+// Fire-and-forget -- telefone/whatsapp/rota saem por link externo que o backend nunca ve,
+// entao o clique precisa ser registrado do lado do cliente. Nunca deve travar a navegacao:
+// se falhar (offline, adblock, etc.) o link continua funcionando normalmente.
+function trackEvent(type) {
+    window.axios?.post(route('events.track'), { restaurant_id: props.restaurant.id, type }).catch(() => {});
+}
 
 // appUrl (nao route()/window.location) -- precisa funcionar tambem no processo Node do SSR,
 // onde nao ha window nem o config de rotas do Ziggy.
@@ -30,6 +39,8 @@ const directionsUrl = computed(
 // sido concedida mesmo com a do app. Sem geolocalizacao disponivel, cai no href normal
 // (sem origin), que o Maps ja resolve como "sua localizacao" por conta propria.
 function openDirections(event) {
+    trackEvent('directions_click');
+
     if (!navigator.geolocation) return;
 
     event.preventDefault();
@@ -257,10 +268,10 @@ const jsonLd = computed(() => {
                         <v-btn color="primary" variant="flat" prepend-icon="mdi-directions" :href="directionsUrl" target="_blank" rel="noopener" @click="openDirections">
                             Como chegar
                         </v-btn>
-                        <v-btn v-if="restaurant.phone" variant="outlined" color="white" prepend-icon="mdi-phone" :href="`tel:${restaurant.phone}`">
+                        <v-btn v-if="restaurant.phone" variant="outlined" color="white" prepend-icon="mdi-phone" :href="`tel:${restaurant.phone}`" @click="trackEvent('phone_click')">
                             Ligar
                         </v-btn>
-                        <v-btn v-if="whatsappUrl" variant="outlined" color="white" prepend-icon="mdi-whatsapp" :href="whatsappUrl" target="_blank" rel="noopener">
+                        <v-btn v-if="whatsappUrl" variant="outlined" color="white" prepend-icon="mdi-whatsapp" :href="whatsappUrl" target="_blank" rel="noopener" @click="trackEvent('whatsapp_click')">
                             WhatsApp
                         </v-btn>
                     </div>
@@ -281,6 +292,14 @@ const jsonLd = computed(() => {
             <p v-if="restaurant.description" class="text-body-1 text-medium-emphasis mb-6" style="max-width: 640px">
                 {{ restaurant.description }}
             </p>
+
+            <v-card v-if="trafficInsights" variant="outlined" class="pa-4 mb-6">
+                <div class="d-flex align-center ga-2 mb-3">
+                    <v-icon icon="mdi-chart-bar" color="primary" />
+                    <h2 class="text-h6 font-weight-bold">Horários mais movimentados</h2>
+                </div>
+                <TrafficHeatmap :by-hour="trafficInsights.by_hour" :peak-hour="trafficInsights.peak_hour" :quiet-hour="trafficInsights.quiet_hour" simplified />
+            </v-card>
 
             <div class="d-flex align-center ga-2 mb-4">
                 <v-icon icon="mdi-book-open-variant" color="primary" />

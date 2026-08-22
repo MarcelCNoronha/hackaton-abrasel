@@ -11,6 +11,7 @@ use App\Models\FreelancerProfile;
 use App\Models\JobPosting;
 use App\Models\JobSkill;
 use App\Models\Restaurant;
+use App\Support\RestaurantTrafficReport;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -60,6 +61,7 @@ class RestaurantController extends Controller
             'foodTagSuggestions' => FoodTag::orderBy('position')->pluck('name'),
             'dietaryTags' => DietaryTag::orderBy('position')->get(['id', 'name', 'kind']),
             'jobSkillSuggestions' => JobSkill::orderBy('position')->pluck('name'),
+            'trafficReport' => RestaurantTrafficReport::for($restaurant),
         ]);
     }
 
