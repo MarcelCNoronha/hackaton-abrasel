@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureFreelancerEnabled;
 use App\Http\Middleware\EnsureUserRole;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
@@ -23,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'role' => EnsureUserRole::class,
+            'freelancer' => EnsureFreelancerEnabled::class,
         ]);
 
         // Production traffic reaches php-fpm only through this app's own nginx (Cloudflare

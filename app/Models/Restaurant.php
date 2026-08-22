@@ -151,6 +151,11 @@ class Restaurant extends Model
         return $this->hasMany(Coupon::class);
     }
 
+    public function hireRequests(): HasMany
+    {
+        return $this->hasMany(HireRequest::class);
+    }
+
     public function events(): HasMany
     {
         return $this->hasMany(Event::class);

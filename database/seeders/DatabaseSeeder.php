@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             CuisineSeeder::class,
             DietaryTagSeeder::class,
             FoodTagSeeder::class,
+            JobSkillSeeder::class,
             RestaurantSeeder::class,
             DemoActivitySeeder::class,
         ]);
@@ -41,5 +42,12 @@ class DatabaseSeeder extends Seeder
             ['email' => 'gestor@vicosafood.test'],
             ['name' => 'Gestor Teste', 'password' => 'password', 'role' => UserRole::Owner, 'email_verified_at' => now()]
         );
+
+        // freelancer_enabled_at fora do Fillable de proposito -- forceFill aqui, nao update().
+        $freelancer = User::updateOrCreate(
+            ['email' => 'freelancer@vicosafood.test'],
+            ['name' => 'Freelancer Teste', 'password' => 'password', 'role' => UserRole::Consumer, 'email_verified_at' => now()]
+        );
+        $freelancer->forceFill(['freelancer_enabled_at' => now()])->save();
     }
 }

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -35,6 +36,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'role' => UserRole::class,
+            'freelancer_enabled_at' => 'datetime',
         ];
     }
 
@@ -46,6 +48,16 @@ class User extends Authenticatable
     public function isOwner(): bool
     {
         return $this->role === UserRole::Owner;
+    }
+
+    public function isFreelancerEnabled(): bool
+    {
+        return $this->freelancer_enabled_at !== null;
+    }
+
+    public function freelancerProfile(): HasOne
+    {
+        return $this->hasOne(FreelancerProfile::class);
     }
 
     public function ownedRestaurants(): BelongsToMany
