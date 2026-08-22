@@ -188,7 +188,23 @@ function clearFilters() {
                             class="search-field"
                             bg-color="surface"
                         />
+                    </div>
 
+                    <div class="category-quickbar">
+                        <button
+                            v-for="category in categories"
+                            :key="category.id"
+                            type="button"
+                            class="category-quickbar__item"
+                            :class="{ 'category-quickbar__item--active': filters.category === category.slug }"
+                            @click="toggleCategory(category.slug)"
+                        >
+                            <span class="category-quickbar__emoji">{{ emojiForCategorySlug(category.slug) }}</span>
+                            <span class="category-quickbar__label">{{ category.name }}</span>
+                        </button>
+                    </div>
+
+                    <div class="d-flex flex-wrap align-center ga-3 mt-3">
                         <v-btn
                             :variant="showFilters ? 'flat' : 'tonal'"
                             :color="showFilters ? 'primary' : undefined"
@@ -224,38 +240,38 @@ function clearFilters() {
                         </v-btn>
                     </div>
 
-                    <div class="category-quickbar">
-                        <button
-                            v-for="category in categories"
-                            :key="category.id"
-                            type="button"
-                            class="category-quickbar__item"
-                            :class="{ 'category-quickbar__item--active': filters.category === category.slug }"
-                            @click="toggleCategory(category.slug)"
-                        >
-                            <span class="category-quickbar__emoji">{{ emojiForCategorySlug(category.slug) }}</span>
-                            <span class="category-quickbar__label">{{ category.name }}</span>
-                        </button>
-                    </div>
-
                     <v-expand-transition>
                         <div v-if="showFilters" class="filters-panel">
                             <div class="filter-group">
                                 <span class="filter-label">Tipo de comida</span>
-                                <v-chip-group v-model="filters.cuisines" selected-class="chip-selected" column multiple>
-                                    <v-chip v-for="cuisine in cuisines" :key="cuisine.id" :value="cuisine.slug" filter variant="outlined">
-                                        {{ cuisine.name }}
-                                    </v-chip>
-                                </v-chip-group>
+                                <v-autocomplete
+                                    v-model="filters.cuisines"
+                                    :items="cuisines.map((c) => ({ title: c.name, value: c.slug }))"
+                                    placeholder="Digite pra buscar..."
+                                    multiple
+                                    chips
+                                    closable-chips
+                                    clearable
+                                    hide-details
+                                    density="compact"
+                                    bg-color="surface"
+                                />
                             </div>
 
                             <div class="filter-group">
                                 <span class="filter-label">Prato ou ingrediente</span>
-                                <v-chip-group v-model="filters.food_tags" selected-class="chip-selected" column multiple>
-                                    <v-chip v-for="tag in foodTags" :key="tag.id" :value="tag.slug" filter variant="outlined">
-                                        {{ tag.name }}
-                                    </v-chip>
-                                </v-chip-group>
+                                <v-autocomplete
+                                    v-model="filters.food_tags"
+                                    :items="foodTags.map((t) => ({ title: t.name, value: t.slug }))"
+                                    placeholder="Digite pra buscar..."
+                                    multiple
+                                    chips
+                                    closable-chips
+                                    clearable
+                                    hide-details
+                                    density="compact"
+                                    bg-color="surface"
+                                />
                             </div>
 
                             <div class="filter-group">
