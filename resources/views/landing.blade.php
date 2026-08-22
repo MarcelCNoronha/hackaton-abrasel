@@ -559,9 +559,9 @@
     </div>
     <nav class="nav-sections">
       <a class="section-link" href="#como-funciona">Como funciona</a>
-      <a class="section-link" href="#empregabilidade">Empregabilidade</a>
       <a class="section-link" href="#recursos">Recursos</a>
       <a class="section-link" href="#para-restaurantes">Para restaurantes</a>
+      <a class="section-link" href="#empregabilidade">Empregabilidade</a>
     </nav>
   </div>
 </header>
@@ -727,77 +727,6 @@
     </div>
   </section>
 
-  <section id="empregabilidade">
-    <div class="wrap">
-      <div class="section-head">
-        <span class="eyebrow">Novo · Empregabilidade</span>
-        <h2>Também conectamos quem serve com quem contrata</h2>
-        <p>Sushiman, churrasqueiro(a), cozinheiro(a), garçom -- um espaço pra profissionais do setor aparecerem pros restaurantes de Viçosa, e pros donos acharem gente de confiança rápido.</p>
-        <a class="btn btn-primary" href="{{ route('register') }}" style="margin-top: 1rem">Cadastrar perfil profissional</a>
-      </div>
-      <div class="grid-2">
-        <div class="track reveal">
-          <div class="track-head">
-            <span class="tag">Profissional</span>
-            <h3>Pra quem trabalha no setor</h3>
-          </div>
-          <div class="steps">
-            <div class="step">
-              <div class="num"></div>
-              <div>
-                <h4>Monte seu perfil</h4>
-                <p>Suas habilidades (sushiman, churrasqueiro, garçom...) e um pouco sobre sua experiência.</p>
-              </div>
-            </div>
-            <div class="step">
-              <div class="num"></div>
-              <div>
-                <h4>Marque sua disponibilidade</h4>
-                <p>Verde pra agora, amarela pros dias combinados, vermelha quando estiver fechado(a).</p>
-              </div>
-            </div>
-            <div class="step">
-              <div class="num"></div>
-              <div>
-                <h4>Receba pedidos e construa reputação</h4>
-                <p>Cada contratação aceita pode virar uma avaliação -- sua referência entre os donos da cidade.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="track reveal">
-          <div class="track-head">
-            <span class="tag">Restaurante</span>
-            <h3>Pra quem precisa contratar</h3>
-          </div>
-          <div class="steps">
-            <div class="step">
-              <div class="num"></div>
-              <div>
-                <h4>Busque por habilidade</h4>
-                <p>Filtre por função e disponibilidade até achar quem você precisa pro seu turno.</p>
-              </div>
-            </div>
-            <div class="step">
-              <div class="num"></div>
-              <div>
-                <h4>Envie um pedido de contratação</h4>
-                <p>O profissional aceita ou recusa -- sem intermediário, sem comissão.</p>
-              </div>
-            </div>
-            <div class="step">
-              <div class="num"></div>
-              <div>
-                <h4>Avalie e ajude outros donos</h4>
-                <p>Sua referência fica visível pra outros restaurantes que também estejam contratando.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <section id="recursos">
     <div class="wrap">
       <div class="section-head">
@@ -858,6 +787,77 @@
           <div class="compare-row good">
             <span class="mark">✅</span>
             <span class="label">VicosaFood: check-in confirma a visita, avaliação e cupom nascem dessa visita real.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="empregabilidade">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Novo · Empregabilidade</span>
+        <h2>Também conectamos quem serve com quem contrata</h2>
+        <p>Sushiman, churrasqueiro(a), cozinheiro(a), garçom -- um espaço pra profissionais do setor aparecerem pros restaurantes de Viçosa, e pros donos acharem gente de confiança rápido.</p>
+        <a class="btn btn-primary" href="{{ route('profile.edit') }}" style="margin-top: 1rem">Cadastrar perfil profissional</a>
+      </div>
+      <div class="grid-2">
+        <div class="track reveal">
+          <div class="track-head">
+            <span class="tag">Profissional</span>
+            <h3>Pra quem trabalha no setor</h3>
+          </div>
+          <div class="steps">
+            <div class="step">
+              <div class="num"></div>
+              <div>
+                <h4>Monte seu perfil</h4>
+                <p>Suas habilidades (sushiman, churrasqueiro, garçom...) e um pouco sobre sua experiência.</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="num"></div>
+              <div>
+                <h4>Marque sua disponibilidade</h4>
+                <p>Verde pra agora, amarela pros dias combinados, vermelha quando estiver fechado(a).</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="num"></div>
+              <div>
+                <h4>Receba pedidos e construa reputação</h4>
+                <p>Cada contratação aceita pode virar uma avaliação -- sua referência entre os donos da cidade.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="track reveal">
+          <div class="track-head">
+            <span class="tag">Restaurante</span>
+            <h3>Pra quem precisa contratar</h3>
+          </div>
+          <div class="steps">
+            <div class="step">
+              <div class="num"></div>
+              <div>
+                <h4>Busque por habilidade</h4>
+                <p>Filtre por função e disponibilidade até achar quem você precisa pro seu turno.</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="num"></div>
+              <div>
+                <h4>Envie um pedido de contratação</h4>
+                <p>O profissional aceita ou recusa -- sem intermediário, sem comissão.</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="num"></div>
+              <div>
+                <h4>Avalie e ajude outros donos</h4>
+                <p>Sua referência fica visível pra outros restaurantes que também estejam contratando.</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>

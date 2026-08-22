@@ -7,11 +7,12 @@ use App\Http\Controllers\Admin\InviteController as AdminInviteController;
 use App\Http\Controllers\Admin\RestaurantController as AdminRestaurantController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Freelancer\AccessController as FreelancerAccessController;
 use App\Http\Controllers\Freelancer\HireController as FreelancerHireController;
 use App\Http\Controllers\Freelancer\JobApplicationController as FreelancerJobApplicationController;
-use App\Http\Controllers\Freelancer\JobPostingController as FreelancerJobPostingController;
 use App\Http\Controllers\Freelancer\ProfileController as FreelancerProfileController;
 use App\Http\Controllers\Freelancer\ReviewApprovalController as FreelancerReviewApprovalController;
+use App\Http\Controllers\Freelancer\WorkspaceController as FreelancerWorkspaceController;
 use App\Http\Controllers\Owner\ClaimController as OwnerClaimController;
 use App\Http\Controllers\Owner\CouponCampaignController as OwnerCouponCampaignController;
 use App\Http\Controllers\Owner\DashboardController as OwnerDashboardController;
@@ -50,20 +51,29 @@ Route::middleware('auth')->group(function () {
     // reivindicacao nao pode exigir esse role de quem ainda nao o tem.
     Route::get('/gestor/reivindicar', [OwnerClaimController::class, 'create'])->name('owner.claims.create');
     Route::post('/gestor/reivindicar', [OwnerClaimController::class, 'store'])->name('owner.claims.store');
+
+    // Diferente do modulo de dono (so ativa via reivindicacao + aprovacao do admin), o modulo
+    // de freelancer o proprio usuario liga/desliga na hora, direto do /profile -- por isso fica
+    // fora do grupo do middleware 'freelancer', que exige o acesso que essa rota concede.
+    Route::patch('/freelancer/acesso', [FreelancerAccessController::class, 'activate'])->name('freelancer.access.activate');
+    Route::delete('/freelancer/acesso', [FreelancerAccessController::class, 'deactivate'])->name('freelancer.access.deactivate');
 });
 
 Route::middleware(['auth', 'freelancer'])->prefix('freelancer')->name('freelancer.')->group(function () {
-    Route::get('/perfil', [FreelancerProfileController::class, 'edit'])->name('profile.edit');
+    // Os 3 GETs abaixo caem todos na mesma pagina com abas (Freelancer/Workspace.vue) --
+    // so muda qual aba abre por padrao. Ver WorkspaceController.
+    Route::get('/perfil', [FreelancerWorkspaceController::class, 'profile'])->name('profile.edit');
+    Route::get('/vagas', [FreelancerWorkspaceController::class, 'jobs'])->name('jobs.index');
+    Route::get('/pedidos', [FreelancerWorkspaceController::class, 'hires'])->name('hires.index');
+
     Route::patch('/perfil', [FreelancerProfileController::class, 'update'])->name('profile.update');
 
-    Route::get('/pedidos', [FreelancerHireController::class, 'index'])->name('hires.index');
     Route::patch('/pedidos/{hireRequest}/aceitar', [FreelancerHireController::class, 'accept'])->name('hires.accept');
     Route::patch('/pedidos/{hireRequest}/recusar', [FreelancerHireController::class, 'decline'])->name('hires.decline');
 
     Route::patch('/avaliacoes/{freelancerReview}/aprovar', [FreelancerReviewApprovalController::class, 'approve'])->name('reviews.approve');
     Route::patch('/avaliacoes/{freelancerReview}/rejeitar', [FreelancerReviewApprovalController::class, 'reject'])->name('reviews.reject');
 
-    Route::get('/vagas', [FreelancerJobPostingController::class, 'index'])->name('jobs.index');
     Route::post('/vagas/{jobPosting}/candidatar', [FreelancerJobApplicationController::class, 'store'])->name('job-applications.store');
     Route::delete('/candidaturas/{jobApplication}', [FreelancerJobApplicationController::class, 'destroy'])->name('job-applications.destroy');
 });

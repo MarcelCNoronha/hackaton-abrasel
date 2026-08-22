@@ -7,30 +7,9 @@ use App\Http\Controllers\Controller;
 use App\Models\HireRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Inertia\Response;
 
 class HireController extends Controller
 {
-    public function index(Request $request): Response
-    {
-        $profile = $request->user()->freelancerProfile()->firstOrCreate([]);
-
-        $hireRequests = $profile->hireRequests()
-            ->with(['restaurant:id,name,slug', 'review'])
-            ->latest()
-            ->get();
-
-        // feedback_to_owners e' pra outros donos lerem como referencia, nao pro proprio
-        // freelancer -- ver Owner\FreelancerController::show(), que faz o oposto (esconde
-        // feedback_to_freelancer). Os dois nunca aparecem juntos pro mesmo publico.
-        $hireRequests->pluck('review')->filter()->each->makeHidden('feedback_to_owners');
-
-        return Inertia::render('Freelancer/Requests/Index', [
-            'hireRequests' => $hireRequests,
-        ]);
-    }
-
     public function accept(Request $request, HireRequest $hireRequest): RedirectResponse
     {
         $this->authorizeFreelancer($request, $hireRequest);

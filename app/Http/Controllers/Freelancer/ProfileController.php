@@ -11,23 +11,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Enum;
-use Inertia\Inertia;
-use Inertia\Response;
 
 class ProfileController extends Controller
 {
-    public function edit(Request $request): Response
-    {
-        $profile = $this->profileFor($request);
-        $profile->load(['jobSkills', 'availabilitySlots']);
-
-        return Inertia::render('Freelancer/Profile/Edit', [
-            'profile' => $profile,
-            'availabilityStatuses' => array_column(AvailabilityStatus::cases(), 'value'),
-            'jobSkillSuggestions' => JobSkill::orderBy('position')->pluck('name'),
-        ]);
-    }
-
     public function update(Request $request): RedirectResponse
     {
         $profile = $this->profileFor($request);

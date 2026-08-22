@@ -53,6 +53,17 @@ function logout() {
                         Cadastrar restaurante
                     </v-btn>
                     <v-btn
+                        v-if="user.role === 'admin'"
+                        variant="text"
+                        :href="route('admin.dashboard')"
+                        :active="route().current('admin.*')"
+                    >
+                        Administração
+                    </v-btn>
+
+                    <v-divider vertical class="mx-1" style="align-self: center; height: 24px" />
+
+                    <v-btn
                         v-if="['owner', 'admin'].includes(user.role)"
                         variant="text"
                         :href="route('owner.freelancers.index')"
@@ -75,14 +86,6 @@ function logout() {
                         :active="route().current('freelancer.hires.*')"
                     >
                         Meus pedidos
-                    </v-btn>
-                    <v-btn
-                        v-if="user.role === 'admin'"
-                        variant="text"
-                        :href="route('admin.dashboard')"
-                        :active="route().current('admin.*')"
-                    >
-                        Administração
                     </v-btn>
 
                     <v-spacer />
@@ -129,6 +132,14 @@ function logout() {
                     prepend-icon="mdi-storefront-outline"
                 />
                 <v-list-item
+                    v-if="user.role === 'admin'"
+                    :href="route('admin.dashboard')"
+                    :active="route().current('admin.*')"
+                    title="Administração"
+                    prepend-icon="mdi-shield-crown-outline"
+                />
+                <v-divider class="my-2" />
+                <v-list-item
                     v-if="['owner', 'admin'].includes(user.role)"
                     :href="route('owner.freelancers.index')"
                     :active="route().current('owner.freelancers.*')"
@@ -148,13 +159,6 @@ function logout() {
                     :active="route().current('freelancer.hires.*')"
                     title="Meus pedidos"
                     prepend-icon="mdi-briefcase-outline"
-                />
-                <v-list-item
-                    v-if="user.role === 'admin'"
-                    :href="route('admin.dashboard')"
-                    :active="route().current('admin.*')"
-                    title="Administração"
-                    prepend-icon="mdi-shield-crown-outline"
                 />
                 <v-divider class="my-2" />
                 <v-list-item :href="route('profile.edit')" title="Perfil" prepend-icon="mdi-account-outline" />
