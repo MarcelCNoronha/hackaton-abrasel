@@ -66,7 +66,7 @@ const primaryCuisine = computed(() => props.restaurant.cuisines?.[0] ?? null);
                 </span>
             </div>
 
-            <div class="flex-grow-1 pa-3">
+            <div class="flex-grow-1 pa-3" style="min-width: 0">
                 <div class="d-flex align-start justify-space-between ga-2">
                     <div class="text-subtitle-1 font-weight-bold text-truncate">
                         {{ restaurant.name }}
@@ -163,6 +163,7 @@ const primaryCuisine = computed(() => props.restaurant.cuisines?.[0] ?? null);
     display: flex;
     align-items: center;
     gap: 8px;
+    min-width: 0;
     padding: 6px 8px;
     border-radius: 8px;
     background: rgba(var(--v-theme-accent), 0.1);
@@ -198,6 +199,7 @@ const primaryCuisine = computed(() => props.restaurant.cuisines?.[0] ?? null);
 
 .featured-strip__price {
     font-weight: 700;
+    white-space: nowrap;
     color: rgb(var(--v-theme-accent));
 }
 
