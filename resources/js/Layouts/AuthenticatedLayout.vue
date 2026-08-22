@@ -84,7 +84,7 @@ function logout() {
         </v-app-bar>
 
         <v-navigation-drawer v-model="drawerOpen" temporary location="right" width="280">
-            <v-list density="compact" nav>
+            <v-list nav>
                 <v-list-item :title="user.name" :subtitle="user.email" class="mb-2" />
                 <v-divider class="mb-2" />
                 <v-list-item :href="route('discover')" :active="route().current('discover')" title="Descobrir" prepend-icon="mdi-compass-outline" />

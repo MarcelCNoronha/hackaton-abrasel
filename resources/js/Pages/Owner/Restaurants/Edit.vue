@@ -231,7 +231,7 @@ function submitReply(reviewId) {
         </template>
 
         <div class="py-8">
-            <div class="mx-auto max-w-5xl sm:px-6 lg:px-8">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                 <v-card>
                     <v-tabs v-model="tab" color="primary" show-arrows>
                         <v-tab value="perfil">Perfil</v-tab>
@@ -331,12 +331,12 @@ function submitReply(reviewId) {
                             <!-- Horários -->
                             <v-window-item value="horarios">
                                 <v-form @submit.prevent="submitHours">
-                                    <div v-for="(day, index) in hoursForm.hours" :key="day.weekday" class="d-flex align-center ga-3 mb-2">
-                                        <span style="width: 100px" class="text-body-2 font-weight-medium">{{ weekdayNames[day.weekday] }}</span>
+                                    <div v-for="(day, index) in hoursForm.hours" :key="day.weekday" class="d-flex flex-wrap align-center ga-3 mb-2">
+                                        <span style="min-width: 90px" class="text-body-2 font-weight-medium">{{ weekdayNames[day.weekday] }}</span>
                                         <v-switch v-model="day.is_closed" color="primary" density="compact" hide-details label="Fechado" />
                                         <template v-if="!day.is_closed">
-                                            <v-text-field v-model="hoursForm.hours[index].opens_at" type="time" label="Abre" density="compact" hide-details style="max-width: 140px" />
-                                            <v-text-field v-model="hoursForm.hours[index].closes_at" type="time" label="Fecha" density="compact" hide-details style="max-width: 140px" />
+                                            <v-text-field v-model="hoursForm.hours[index].opens_at" type="time" label="Abre" density="compact" hide-details style="max-width: 140px; flex: 1 1 120px" />
+                                            <v-text-field v-model="hoursForm.hours[index].closes_at" type="time" label="Fecha" density="compact" hide-details style="max-width: 140px; flex: 1 1 120px" />
                                         </template>
                                     </div>
                                     <v-btn type="submit" color="primary" variant="flat" class="mt-3" :loading="hoursForm.processing">
@@ -355,7 +355,7 @@ function submitReply(reviewId) {
                                                 <v-btn size="small" variant="text" prepend-icon="mdi-plus" @click="openNewItemDialog(category.id)">
                                                     Item
                                                 </v-btn>
-                                                <v-btn size="small" variant="text" color="error" icon="mdi-delete-outline" @click="deleteCategory(category.id)" />
+                                                <v-btn variant="text" color="error" icon="mdi-delete-outline" @click="deleteCategory(category.id)" />
                                             </div>
                                         </div>
 
@@ -503,7 +503,7 @@ function submitReply(reviewId) {
                             <!-- Cupons -->
                             <v-window-item value="cupons">
                                 <h3 class="text-subtitle-1 font-weight-bold mb-2">Resgatar cupom no balcão</h3>
-                                <v-form @submit.prevent="redeemCoupon" class="d-flex ga-2 align-start mb-6">
+                                <v-form @submit.prevent="redeemCoupon" class="d-flex flex-wrap ga-2 align-start mb-6">
                                     <v-text-field
                                         v-model="redeemForm.code"
                                         label="Código do cupom"

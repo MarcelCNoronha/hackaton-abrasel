@@ -511,6 +511,7 @@ function clearFilters() {
 .results-map {
     flex: 1 1 auto;
     position: relative;
+    overflow: hidden;
 }
 
 @media (max-width: 960px) {
@@ -521,6 +522,7 @@ function clearFilters() {
     .results-list,
     .results-map {
         width: 100%;
+        min-width: 0;
         max-width: none;
     }
 

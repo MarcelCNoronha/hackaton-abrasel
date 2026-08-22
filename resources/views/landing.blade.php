@@ -112,10 +112,19 @@
     font-size: 1rem;
   }
 
-  .nav-links { display: flex; align-items: center; gap: 1.75rem; }
-  .nav-links a.section-link { color: var(--text-secondary); text-decoration: none; font-size: 0.92rem; }
+  .nav-links { display: flex; align-items: center; justify-content: space-between; gap: 1.25rem; flex: 1; min-width: 0; }
+  .nav-links a.section-link { color: var(--text-secondary); text-decoration: none; font-size: 0.92rem; white-space: nowrap; }
   .nav-links a.section-link:hover { color: var(--text-primary); }
-  .nav-cta { display: flex; align-items: center; gap: 0.75rem; }
+  .nav-cta { display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0; }
+  .nav-sections {
+    display: flex;
+    align-items: center;
+    gap: 1.75rem;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav-sections::-webkit-scrollbar { display: none; }
 
   .btn {
     position: relative;
@@ -125,6 +134,7 @@
     justify-content: center;
     gap: 0.4rem;
     padding: 0.6rem 1.15rem;
+    min-height: 44px;
     border-radius: var(--radius-md);
     font-size: 0.92rem;
     font-weight: 600;
@@ -513,7 +523,7 @@
   @media (max-width: 860px) {
     .grid-4 { grid-template-columns: 1fr 1fr; }
     .diff { grid-template-columns: 1fr; padding: 1.75rem; }
-    .nav-links .section-link { display: none; }
+    .nav-sections { gap: 1.1rem; }
   }
 
   @media (max-width: 560px) {
@@ -534,9 +544,11 @@
       <span>VicosaFood</span>
     </a>
     <nav class="nav-links">
-      <a class="section-link" href="#como-funciona">Como funciona</a>
-      <a class="section-link" href="#recursos">Recursos</a>
-      <a class="section-link" href="#para-restaurantes">Para restaurantes</a>
+      <div class="nav-sections">
+        <a class="section-link" href="#como-funciona">Como funciona</a>
+        <a class="section-link" href="#recursos">Recursos</a>
+        <a class="section-link" href="#para-restaurantes">Para restaurantes</a>
+      </div>
       <div class="nav-cta">
         <a class="btn btn-ghost" href="{{ route('login') }}">Entrar</a>
         <a class="btn btn-primary" href="{{ route('discover') }}">Descobrir restaurantes</a>

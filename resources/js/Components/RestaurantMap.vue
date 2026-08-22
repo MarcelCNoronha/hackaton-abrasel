@@ -76,6 +76,7 @@ function restaurantIcon(restaurant, isHighlighted) {
                     position:absolute;left:${size + 6}px;top:50%;transform:translateY(-50%);
                     background:rgba(28,18,12,.92);color:#fdf6f0;
                     padding:2px 8px;border-radius:6px;font-size:12px;font-weight:600;
+                    max-width:140px;overflow:hidden;text-overflow:ellipsis;
                     white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.4);
                     cursor:pointer;
                 ">${name}</div>
@@ -251,6 +252,15 @@ watch(
     width: 100%;
     height: 100%;
     min-height: 400px;
+}
+
+/* Abaixo de 960px o pai (.results-map no Discover) reserva so' 45vh pro mapa -- em telas
+   baixas isso fica abaixo de 400px, e o min-height acima vencia e empurrava o mapa por
+   cima da lista de resultados. */
+@media (max-width: 960px) {
+    .restaurant-map {
+        min-height: 260px;
+    }
 }
 
 .restaurant-map :deep(.leaflet-popup-content-wrapper) {

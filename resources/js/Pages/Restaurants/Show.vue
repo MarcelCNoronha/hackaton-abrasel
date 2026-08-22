@@ -391,14 +391,20 @@ const jsonLd = computed(() => {
 
 .hero-chip {
     border-color: rgba(255, 255, 255, 0.6) !important;
+    min-height: 36px;
 }
 
 .hero-meta {
     opacity: 0.95;
 }
 
+/* min-height + vertical padding so the whole row, not just the text's line-height, is
+   tappable -- these were bare <span> elements with no built-in touch target on mobile. */
 .hero-meta-trigger {
     cursor: pointer;
+    padding-block: 10px;
+    margin-block: -10px;
+    min-height: 44px;
 }
 
 .hero-meta-trigger:hover {

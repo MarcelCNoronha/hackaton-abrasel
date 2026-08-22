@@ -57,7 +57,7 @@ function submit() {
                                 :error-messages="form.errors.notes"
                             />
 
-                            <v-btn type="submit" color="primary" variant="flat" :loading="form.processing" :disabled="!form.restaurant_id">
+                            <v-btn type="submit" color="primary" variant="flat" block :loading="form.processing" :disabled="!form.restaurant_id">
                                 Enviar pedido
                             </v-btn>
                         </v-form>

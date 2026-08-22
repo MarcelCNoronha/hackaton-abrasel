@@ -301,13 +301,13 @@ function submitCampaignSuggestion() {
                                 <tr>
                                     <th>Nome</th>
                                     <th>E-mail</th>
-                                    <th style="width: 200px">Permissão</th>
+                                    <th style="min-width: 160px">Permissão</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr v-for="user in users.data" :key="user.id">
                                     <td>{{ user.name }}</td>
-                                    <td>{{ user.email }}</td>
+                                    <td class="text-truncate" style="max-width: 220px">{{ user.email }}</td>
                                     <td>
                                         <v-select
                                             :model-value="user.role"
@@ -383,7 +383,6 @@ function submitCampaignSuggestion() {
                                             <v-chip
                                                 v-for="owner in restaurant.owners"
                                                 :key="owner.id"
-                                                size="small"
                                                 variant="tonal"
                                                 closable
                                                 @click:close="removeOwner(restaurant, owner)"
@@ -398,13 +397,21 @@ function submitCampaignSuggestion() {
                                             {{ restaurant.is_active ? 'Ativo' : 'Inativo' }}
                                         </v-chip>
                                     </td>
-                                    <td class="text-right text-no-wrap">
-                                        <v-btn size="small" variant="text" @click="openEditRestaurant(restaurant)">Editar</v-btn>
-                                        <v-btn size="small" variant="text" @click="openInvite(restaurant)">Convidar</v-btn>
-                                        <v-btn size="small" variant="text" @click="openSuggestCampaign(restaurant)">Sugerir cupom</v-btn>
-                                        <v-btn size="small" variant="text" @click="toggleRestaurant(restaurant)">
-                                            {{ restaurant.is_active ? 'Desativar' : 'Reativar' }}
-                                        </v-btn>
+                                    <td class="text-right">
+                                        <v-menu>
+                                            <template #activator="{ props: menuProps }">
+                                                <v-btn icon="mdi-dots-vertical" variant="text" v-bind="menuProps" />
+                                            </template>
+                                            <v-list density="comfortable">
+                                                <v-list-item title="Editar" @click="openEditRestaurant(restaurant)" />
+                                                <v-list-item title="Convidar" @click="openInvite(restaurant)" />
+                                                <v-list-item title="Sugerir cupom" @click="openSuggestCampaign(restaurant)" />
+                                                <v-list-item
+                                                    :title="restaurant.is_active ? 'Desativar' : 'Reativar'"
+                                                    @click="toggleRestaurant(restaurant)"
+                                                />
+                                            </v-list>
+                                        </v-menu>
                                     </td>
                                 </tr>
                             </tbody>

@@ -63,9 +63,9 @@ function formatDate(value) {
                 </v-row>
 
                 <v-card class="mt-4">
-                    <v-card-title class="d-flex align-center justify-space-between">
+                    <v-card-title class="d-flex align-center justify-space-between flex-wrap ga-1">
                         Meus cupons
-                        <v-btn size="small" variant="text" color="primary" :href="route('discover')">
+                        <v-btn variant="text" color="primary" class="tap-target" :href="route('discover')">
                             Descobrir restaurantes
                         </v-btn>
                     </v-card-title>
@@ -99,11 +99,15 @@ function formatDate(value) {
                         </v-alert>
                         <v-card v-for="visit in visits" :key="visit.id" variant="outlined" class="mb-3">
                             <v-card-item>
-                                <v-card-title class="d-flex align-center justify-space-between">
-                                    <Link :href="route('restaurants.show', visit.restaurant?.slug)" class="text-decoration-none">
+                                <v-card-title class="d-flex align-center ga-2" style="flex-wrap: nowrap">
+                                    <Link
+                                        :href="route('restaurants.show', visit.restaurant?.slug)"
+                                        class="text-decoration-none text-truncate"
+                                        style="min-width: 0"
+                                    >
                                         {{ visit.restaurant?.name }}
                                     </Link>
-                                    <span class="text-caption text-medium-emphasis">{{ formatDate(visit.visited_at) }}</span>
+                                    <span class="text-caption text-medium-emphasis flex-shrink-0">{{ formatDate(visit.visited_at) }}</span>
                                 </v-card-title>
                             </v-card-item>
                             <v-card-text>
@@ -121,12 +125,12 @@ function formatDate(value) {
                                             rows="2"
                                             :error-messages="reviewForm(visit.id).errors.comment"
                                         />
-                                        <v-btn type="submit" color="primary" variant="flat" size="small" :loading="reviewForm(visit.id).processing">
+                                        <v-btn type="submit" color="primary" variant="flat" class="tap-target" :loading="reviewForm(visit.id).processing">
                                             Enviar avaliação
                                         </v-btn>
                                     </v-form>
                                 </template>
-                                <v-btn v-else size="small" variant="tonal" color="primary" @click="openReviewFormFor[visit.id] = true">
+                                <v-btn v-else variant="tonal" color="primary" class="tap-target" @click="openReviewFormFor[visit.id] = true">
                                     Avaliar visita
                                 </v-btn>
                             </v-card-text>
@@ -155,3 +159,9 @@ function formatDate(value) {
         </div>
     </AuthenticatedLayout>
 </template>
+
+<style scoped>
+.tap-target {
+    min-height: 44px;
+}
+</style>

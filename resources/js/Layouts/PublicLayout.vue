@@ -24,7 +24,7 @@ onMounted(() => {
                     <v-avatar size="36" rounded="lg" style="background: linear-gradient(135deg, #f97316, #ef4444)">
                         <v-icon icon="mdi-silverware-fork-knife" color="white" size="20" />
                     </v-avatar>
-                    <span class="text-h6 font-weight-bold" style="letter-spacing: -0.02em">{{ appName }}</span>
+                    <span class="text-h6 font-weight-bold d-none d-sm-inline" style="letter-spacing: -0.02em">{{ appName }}</span>
                 </Link>
 
                 <v-spacer />
