@@ -43,4 +43,17 @@ class InviteController extends Controller
 
         return back()->with('status', "{$user->name} agora gerencia {$restaurant->name}.");
     }
+
+    public function destroy(Restaurant $restaurant, User $user): RedirectResponse
+    {
+        $restaurant->owners()->detach($user->id);
+
+        // Sem nenhum gestor restante, o estabelecimento volta a aparecer na lista de
+        // reivindicacao (ver Owner\ClaimController@create, que filtra por claimed_at nulo).
+        if ($restaurant->owners()->count() === 0) {
+            $restaurant->forceFill(['claimed_at' => null])->save();
+        }
+
+        return back()->with('status', "{$user->name} não gerencia mais {$restaurant->name}.");
+    }
 }

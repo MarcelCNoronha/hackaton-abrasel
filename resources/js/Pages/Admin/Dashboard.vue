@@ -96,6 +96,12 @@ function toggleRestaurant(restaurant) {
     router.patch(route('admin.restaurants.toggle-active', restaurant.slug), {}, { preserveScroll: true });
 }
 
+// --- Restaurantes: remover gestor ---
+function removeOwner(restaurant, owner) {
+    if (!confirm(`Remover ${owner.name} da gestão de ${restaurant.name}?`)) return;
+    router.delete(route('admin.restaurants.owners.destroy', [restaurant.slug, owner.id]), { preserveScroll: true });
+}
+
 // --- Restaurantes: criar/editar ---
 const editingRestaurant = ref(null); // null = fechado, {} = novo, objeto = editando
 const restaurantForm = useForm({
@@ -373,9 +379,18 @@ function submitCampaignSuggestion() {
                                     <td>{{ restaurant.name }}</td>
                                     <td>{{ restaurant.address_city || '—' }}</td>
                                     <td>
-                                        <span v-if="restaurant.owners?.length">
-                                            {{ restaurant.owners.map((o) => o.name).join(', ') }}
-                                        </span>
+                                        <div v-if="restaurant.owners?.length" class="d-flex flex-wrap ga-1">
+                                            <v-chip
+                                                v-for="owner in restaurant.owners"
+                                                :key="owner.id"
+                                                size="small"
+                                                variant="tonal"
+                                                closable
+                                                @click:close="removeOwner(restaurant, owner)"
+                                            >
+                                                {{ owner.name }}
+                                            </v-chip>
+                                        </div>
                                         <span v-else class="text-medium-emphasis">Não reivindicado</span>
                                     </td>
                                     <td>

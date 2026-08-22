@@ -75,6 +75,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::patch('/restaurantes/{restaurant}', [AdminRestaurantController::class, 'update'])->name('restaurants.update');
     Route::patch('/restaurantes/{restaurant}/status', [AdminRestaurantController::class, 'toggleActive'])->name('restaurants.toggle-active');
     Route::post('/restaurantes/{restaurant}/convidar', [AdminInviteController::class, 'store'])->name('restaurants.invite');
+    Route::delete('/restaurantes/{restaurant}/gestores/{user}', [AdminInviteController::class, 'destroy'])->name('restaurants.owners.destroy');
     Route::post('/restaurantes/{restaurant}/campanhas', [AdminCouponCampaignController::class, 'store'])->name('coupon-campaigns.suggest');
 });
 
