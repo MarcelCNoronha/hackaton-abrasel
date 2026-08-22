@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use App\Enums\ReviewStatus;
+use App\Observers\ReviewObserver;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -14,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
     'food_rating', 'service_rating', 'ambience_rating', 'value_rating',
     'comment', 'status',
 ])]
+#[ObservedBy(ReviewObserver::class)]
 class Review extends Model
 {
     protected $attributes = [
