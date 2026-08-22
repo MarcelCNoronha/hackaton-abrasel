@@ -160,12 +160,22 @@ onMounted(() => {
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-    // Dark basemap so the map reads as part of the app's dark theme instead of a bright
-    // white rectangle dropped into it; same tile server family (CartoDB), just the dark variant.
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    // Voyager (CartoDB): ruas, nomes e POIs legiveis como no Google Maps, sem precisar de
+    // API key/faturamento -- a variante "dark_all" ficava praticamente preta em zoom de
+    // bairro, com pouco detalhe pra uma cidade pequena como Vicosa.
+    const streets = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
         maxZoom: 19,
     }).addTo(map);
+
+    // Satelite via Esri World Imagery -- tambem gratuito e sem API key, mesmo padrao usado
+    // por incontaveis projetos open-source pra essa camada.
+    const satellite = L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        { attribution: 'Tiles &copy; Esri', maxZoom: 19 },
+    );
+
+    L.control.layers({ Mapa: streets, Satélite: satellite }, {}, { position: 'bottomright' }).addTo(map);
 
     markersLayer = L.layerGroup().addTo(map);
 
@@ -214,5 +224,15 @@ watch(
     background: #1c120c;
     color: #fdf6f0;
     border-color: rgba(249, 115, 22, 0.28) !important;
+}
+
+.restaurant-map :deep(.leaflet-control-layers) {
+    background: #1c120c;
+    color: #fdf6f0;
+    border: 1px solid rgba(249, 115, 22, 0.28);
+}
+
+.restaurant-map :deep(.leaflet-control-layers-toggle) {
+    filter: invert(1);
 }
 </style>
