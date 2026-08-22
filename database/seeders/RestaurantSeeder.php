@@ -44,6 +44,16 @@ class RestaurantSeeder extends Seeder
     }
 
     /**
+     * @return array<string, string> slug => nome da categoria
+     */
+    public static function categoriesBySlug(): array
+    {
+        $pairs = array_map(fn (array $r) => [Str::slug($r['name']), $r['category']], self::restaurantsData());
+
+        return array_column($pairs, 1, 0);
+    }
+
+    /**
      * @return array<int, array<string, mixed>>
      */
     private static function restaurantsData(): array
