@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue';
+import { emojiForRestaurant } from '@/utils/categoryIcons';
 
 const props = defineProps({
     restaurant: { type: Object, required: true },
@@ -36,8 +37,17 @@ const distanceLabel = computed(() => {
         :href="route('restaurants.show', restaurant.slug)"
     >
         <div class="d-flex">
-            <div class="restaurant-thumb" :style="{ background: gradient }">
-                <v-icon icon="mdi-silverware-fork-knife" color="white" size="28" />
+            <div
+                class="restaurant-thumb"
+                :style="restaurant.cover_photo_path ? {} : { background: gradient }"
+            >
+                <img
+                    v-if="restaurant.cover_photo_path"
+                    :src="`/storage/${restaurant.cover_photo_path}`"
+                    :alt="restaurant.name"
+                    class="restaurant-thumb__photo"
+                />
+                <span v-else class="restaurant-thumb__emoji">{{ emojiForRestaurant(restaurant.categories) }}</span>
             </div>
 
             <div class="flex-grow-1 pa-3">
@@ -107,5 +117,16 @@ const distanceLabel = computed(() => {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.restaurant-thumb__photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.restaurant-thumb__emoji {
+    font-size: 32px;
+    line-height: 1;
 }
 </style>

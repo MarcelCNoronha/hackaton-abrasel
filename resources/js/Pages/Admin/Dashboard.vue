@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { reactive, ref } from 'vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
 
@@ -8,6 +8,8 @@ const props = defineProps({
     pendingClaims: { type: Array, default: () => [] },
     users: { type: Object, required: true },
     restaurants: { type: Object, required: true },
+    filters: { type: Object, default: () => ({}) },
+    categories: { type: Array, default: () => [] },
     priceRanges: { type: Array, default: () => [] },
 });
 
@@ -19,8 +21,47 @@ const roleOptions = [
 
 const activeTab = ref('claims');
 
+const listFilters = reactive({
+    users_search: props.filters.users_search ?? '',
+    restaurants_search: props.filters.restaurants_search ?? '',
+    restaurants_category: props.filters.restaurants_category ?? null,
+});
+
+let searchDebounce = null;
+
+// Toda navegacao passa os filtros atuais de novo -- sem isso, ir pra pagina 2 (ou so trocar
+// o filtro da outra lista) apagaria silenciosamente a busca em andamento.
+function reloadLists({ immediate = false } = {}) {
+    clearTimeout(searchDebounce);
+
+    const run = () => {
+        router.get(
+            route('admin.dashboard'),
+            {
+                users_page: 1,
+                restaurants_page: 1,
+                users_search: listFilters.users_search || undefined,
+                restaurants_search: listFilters.restaurants_search || undefined,
+                restaurants_category: listFilters.restaurants_category || undefined,
+            },
+            { preserveState: true, preserveScroll: true, only: ['users', 'restaurants', 'filters'] },
+        );
+    };
+
+    immediate ? run() : (searchDebounce = setTimeout(run, 400));
+}
+
 function goToPage(pageName, page) {
-    router.get(route('admin.dashboard'), { [pageName]: page }, { preserveState: true, preserveScroll: true, only: ['users', 'restaurants'] });
+    router.get(
+        route('admin.dashboard'),
+        {
+            [pageName]: page,
+            users_search: listFilters.users_search || undefined,
+            restaurants_search: listFilters.restaurants_search || undefined,
+            restaurants_category: listFilters.restaurants_category || undefined,
+        },
+        { preserveState: true, preserveScroll: true, only: ['users', 'restaurants', 'filters'] },
+    );
 }
 
 // --- Reivindicações ---
@@ -237,6 +278,18 @@ function submitCampaignSuggestion() {
                 <v-card v-if="activeTab === 'users'" class="mt-6">
                     <v-card-title>Usuários</v-card-title>
                     <v-card-text>
+                        <v-text-field
+                            v-model="listFilters.users_search"
+                            label="Buscar por nome"
+                            prepend-inner-icon="mdi-magnify"
+                            density="compact"
+                            clearable
+                            hide-details
+                            class="mb-4"
+                            style="max-width: 360px"
+                            @update:model-value="reloadLists()"
+                            @click:clear="reloadLists({ immediate: true })"
+                        />
                         <v-table>
                             <thead>
                                 <tr>
@@ -282,6 +335,29 @@ function submitCampaignSuggestion() {
                         </v-btn>
                     </v-card-title>
                     <v-card-text>
+                        <div class="d-flex flex-wrap ga-3 mb-4">
+                            <v-text-field
+                                v-model="listFilters.restaurants_search"
+                                label="Buscar por nome"
+                                prepend-inner-icon="mdi-magnify"
+                                density="compact"
+                                clearable
+                                hide-details
+                                style="max-width: 300px"
+                                @update:model-value="reloadLists()"
+                                @click:clear="reloadLists({ immediate: true })"
+                            />
+                            <v-select
+                                v-model="listFilters.restaurants_category"
+                                :items="categories.map((c) => ({ title: c.name, value: c.slug }))"
+                                label="Tipo de estabelecimento"
+                                density="compact"
+                                clearable
+                                hide-details
+                                style="max-width: 260px"
+                                @update:model-value="reloadLists({ immediate: true })"
+                            />
+                        </div>
                         <v-table>
                             <thead>
                                 <tr>
