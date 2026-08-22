@@ -509,8 +509,11 @@ function clearFilters() {
         height: 45vh;
     }
 
+    /* Fixo (nao vh) de proposito -- em vh, uma janela alta (comum ao so encolher a
+       LARGURA do navegador pra simular mobile) deixa passar bem mais que 3 cards antes
+       de cortar, escondendo o mapa la' embaixo. ~150px por card (thumb + conteudo + margem). */
     .results-list {
-        max-height: 55vh;
+        max-height: 460px;
     }
 
     .search-bar {
