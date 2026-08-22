@@ -144,7 +144,11 @@ const jsonLd = computed(() => {
             }));
     }
 
-    return JSON.stringify(data);
+    // JSON.stringify nao escapa "<" -- um nome/telefone/endereco (texto livre, editavel pelo
+    // gestor) contendo a tag de fechamento deste elemento seguida de outra igual fecharia
+    // este script prematuramente e injetaria HTML/JS de verdade na pagina de todo visitante,
+    // sem precisar de clique nenhum. Escapar "<" evita isso.
+    return JSON.stringify(data).replace(/</g, '\\u003c');
 });
 </script>
 

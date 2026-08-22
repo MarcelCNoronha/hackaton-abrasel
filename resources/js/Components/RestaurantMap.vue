@@ -89,7 +89,10 @@ function restaurantIcon(restaurant, isHighlighted) {
 
 function popupHtml(restaurant) {
     const distance = formatDistance(restaurant.distance_km);
-    const cuisines = (restaurant.cuisines ?? []).map((c) => c.name).join(' · ');
+    // escapeHtml -- nome do restaurante e das cozinhas sao texto livre (editavel pelo gestor),
+    // interpolados aqui direto num innerHTML; sem isso e' XSS armazenado pra quem clicar no pino.
+    const name = escapeHtml(restaurant.name);
+    const cuisines = escapeHtml((restaurant.cuisines ?? []).map((c) => c.name).join(' · '));
     const profileUrl = route('restaurants.show', restaurant.slug);
     // Com a localizacao do usuario ja em maos (props.userLocation), passa como origin
     // explicito -- sem isso o Google Maps pede a localizacao de novo, com sua propria
@@ -100,7 +103,7 @@ function popupHtml(restaurant) {
 
     return `
         <div style="min-width:260px;font-family:inherit;">
-            <div style="font-weight:700;font-size:15px;margin-bottom:4px;color:#FDF6F0;">${restaurant.name}</div>
+            <div style="font-weight:700;font-size:15px;margin-bottom:4px;color:#FDF6F0;">${name}</div>
             <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#E3CFC0;margin-bottom:4px;flex-wrap:wrap;">
                 <span><i class="mdi mdi-star" style="color:#FBBF24;"></i> ${Number(restaurant.average_rating).toFixed(1)}</span>
                 ${distance ? `<span><i class="mdi mdi-map-marker-outline"></i> ${distance}</span>` : ''}
