@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Freelancer;
 use App\Enums\AvailabilityStatus;
 use App\Http\Controllers\Controller;
 use App\Models\FreelancerProfile;
+use App\Models\FreelancerRestaurantReview;
 use App\Models\JobPosting;
 use App\Models\JobSkill;
 use Illuminate\Http\Request;
@@ -41,7 +42,7 @@ class WorkspaceController extends Controller
 
         $jobPostingsQuery = JobPosting::query()
             ->where('status', 'open')
-            ->with(['restaurant:id,name,slug,address_neighborhood', 'jobSkills']);
+            ->with(['restaurant:id,name,slug,address_neighborhood,freelancer_average_rating,freelancer_reviews_count', 'jobSkills']);
 
         if ($skills = array_filter((array) $request->input('job_skills', []))) {
             $jobPostingsQuery->whereHas('jobSkills', fn ($s) => $s->whereIn('slug', $skills));
@@ -54,14 +55,25 @@ class WorkspaceController extends Controller
             ->get()
             ->keyBy('job_posting_id');
 
-        $jobPostings->each(function (JobPosting $posting) use ($myApplicationByPosting) {
+        // So' visivel pra outros freelancers (ver FreelancerRestaurantReview) -- por isso
+        // isso mora aqui e nunca em Owner\JobPostingController/RestaurantController.
+        $restaurantIds = $jobPostings->pluck('restaurant_id')->unique();
+        $recentReviewsByRestaurant = FreelancerRestaurantReview::whereIn('restaurant_id', $restaurantIds)
+            ->with('freelancerProfile.user:id,name')
+            ->latest()
+            ->get()
+            ->groupBy('restaurant_id');
+
+        $jobPostings->each(function (JobPosting $posting) use ($myApplicationByPosting, $recentReviewsByRestaurant) {
             $application = $myApplicationByPosting->get($posting->id);
             $posting->my_application_status = $application?->status;
             $posting->my_application_id = $application?->id;
+            $posting->restaurant->makeVisible(['freelancer_average_rating', 'freelancer_reviews_count']);
+            $posting->restaurant->recent_freelancer_reviews = $recentReviewsByRestaurant->get($posting->restaurant_id, collect())->take(3)->values();
         });
 
         $hireRequests = $profile->hireRequests()
-            ->with(['restaurant:id,name,slug', 'review'])
+            ->with(['restaurant:id,name,slug', 'review', 'restaurantReview'])
             ->latest()
             ->get();
 

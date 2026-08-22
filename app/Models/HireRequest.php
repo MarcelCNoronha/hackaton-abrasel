@@ -43,6 +43,11 @@ class HireRequest extends Model
         return $this->hasOne(FreelancerReview::class);
     }
 
+    public function restaurantReview(): HasOne
+    {
+        return $this->hasOne(FreelancerRestaurantReview::class);
+    }
+
     public function isPending(): bool
     {
         return $this->status === HireRequestStatus::Pending;
@@ -51,5 +56,10 @@ class HireRequest extends Model
     public function isReviewable(): bool
     {
         return $this->status === HireRequestStatus::Accepted && $this->review === null;
+    }
+
+    public function isReviewableByFreelancer(): bool
+    {
+        return $this->status === HireRequestStatus::Accepted && $this->restaurantReview === null;
     }
 }

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\PriceRange;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,6 +19,10 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
     'latitude', 'longitude', 'phone', 'whatsapp', 'social_links',
     'price_range', 'cover_photo_path', 'banner_photo_path', 'is_active',
 ])]
+// Escondido por padrao -- so' Freelancer\WorkspaceController chama makeVisible() nisso, pra
+// nunca vazar sem querer pro dono (Owner\RestaurantController::edit()) ou pro publico
+// (Public\RestaurantController/DiscoveryController, que serializam o model inteiro).
+#[Hidden(['freelancer_average_rating', 'freelancer_reviews_count'])]
 class Restaurant extends Model
 {
     protected $attributes = [
@@ -25,6 +30,8 @@ class Restaurant extends Model
         'average_rating' => 0,
         'reviews_count' => 0,
         'verified_reviews_count' => 0,
+        'freelancer_average_rating' => 0,
+        'freelancer_reviews_count' => 0,
     ];
 
     protected function casts(): array
@@ -36,6 +43,7 @@ class Restaurant extends Model
             'rating_distribution' => 'array',
             'price_range' => PriceRange::class,
             'average_rating' => 'decimal:2',
+            'freelancer_average_rating' => 'decimal:2',
             'is_active' => 'boolean',
             'claimed_at' => 'datetime',
         ];
@@ -159,6 +167,13 @@ class Restaurant extends Model
     public function jobPostings(): HasMany
     {
         return $this->hasMany(JobPosting::class);
+    }
+
+    // Visivel so' pra outros freelancers (ver FreelancerRestaurantReview) -- nunca serializar
+    // essa relacao em nada que o dono ou o publico enxerguem.
+    public function freelancerReviews(): HasMany
+    {
+        return $this->hasMany(FreelancerRestaurantReview::class);
     }
 
     public function events(): HasMany

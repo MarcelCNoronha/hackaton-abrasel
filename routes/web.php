@@ -11,6 +11,7 @@ use App\Http\Controllers\Freelancer\AccessController as FreelancerAccessControll
 use App\Http\Controllers\Freelancer\HireController as FreelancerHireController;
 use App\Http\Controllers\Freelancer\JobApplicationController as FreelancerJobApplicationController;
 use App\Http\Controllers\Freelancer\ProfileController as FreelancerProfileController;
+use App\Http\Controllers\Freelancer\RestaurantReviewController as FreelancerRestaurantReviewController;
 use App\Http\Controllers\Freelancer\ReviewApprovalController as FreelancerReviewApprovalController;
 use App\Http\Controllers\Freelancer\WorkspaceController as FreelancerWorkspaceController;
 use App\Http\Controllers\Owner\ClaimController as OwnerClaimController;
@@ -70,6 +71,7 @@ Route::middleware(['auth', 'freelancer'])->prefix('freelancer')->name('freelance
 
     Route::patch('/pedidos/{hireRequest}/aceitar', [FreelancerHireController::class, 'accept'])->name('hires.accept');
     Route::patch('/pedidos/{hireRequest}/recusar', [FreelancerHireController::class, 'decline'])->name('hires.decline');
+    Route::post('/pedidos/{hireRequest}/avaliar-restaurante', [FreelancerRestaurantReviewController::class, 'store'])->name('restaurant-reviews.store');
 
     Route::patch('/avaliacoes/{freelancerReview}/aprovar', [FreelancerReviewApprovalController::class, 'approve'])->name('reviews.approve');
     Route::patch('/avaliacoes/{freelancerReview}/rejeitar', [FreelancerReviewApprovalController::class, 'reject'])->name('reviews.reject');

@@ -138,6 +138,25 @@ function rejectReview(review) {
     router.patch(route('freelancer.reviews.reject', review.id), {}, { preserveScroll: true });
 }
 
+const restaurantReviewDialogFor = ref(null);
+const restaurantReviewForm = useForm({ rating: 5, comment: '' });
+
+function openRestaurantReviewDialog(hireRequest) {
+    restaurantReviewDialogFor.value = hireRequest.id;
+    restaurantReviewForm.reset();
+}
+
+function submitRestaurantReview() {
+    restaurantReviewForm.post(route('freelancer.restaurant-reviews.store', restaurantReviewDialogFor.value), {
+        preserveScroll: true,
+        onSuccess: () => {
+            restaurantReviewDialogFor.value = null;
+        },
+    });
+}
+
+const reviewsDialogFor = ref(null);
+
 function formatDate(value) {
     return new Date(value).toLocaleDateString('pt-BR');
 }
@@ -298,9 +317,20 @@ function formatDate(value) {
                             </v-card-item>
                             <v-card-text>
                                 <p v-if="posting.description" class="mb-2">{{ posting.description }}</p>
-                                <v-chip v-for="skill in posting.job_skills" :key="skill.id" size="small" variant="tonal" class="mr-1">
+                                <v-chip v-for="skill in posting.job_skills" :key="skill.id" size="small" variant="tonal" class="mr-1 mb-2">
                                     {{ skill.name }}
                                 </v-chip>
+                                <div v-if="posting.restaurant?.freelancer_reviews_count > 0" class="d-flex align-center ga-1 mt-1">
+                                    <v-icon icon="mdi-star" color="accent" size="16" />
+                                    <strong>{{ Number(posting.restaurant.freelancer_average_rating).toFixed(1) }}</strong>
+                                    <v-btn
+                                        variant="text" size="small" density="compact" color="primary"
+                                        @click="reviewsDialogFor = posting.id"
+                                    >
+                                        {{ posting.restaurant.freelancer_reviews_count }} avaliação(ões) de freelancers
+                                    </v-btn>
+                                </div>
+                                <p v-else class="text-caption text-medium-emphasis mt-1 mb-0">Ainda sem avaliações de freelancers.</p>
                             </v-card-text>
                             <v-card-actions>
                                 <v-spacer />
@@ -365,6 +395,23 @@ function formatDate(value) {
                                 </p>
                                 <p v-else class="text-medium-emphasis mb-0">O restaurante não deixou um comentário pra você.</p>
                             </v-card-text>
+                            <template v-if="hireRequest.status === 'accepted'">
+                                <v-divider v-if="hireRequest.review" />
+                                <v-card-text v-if="hireRequest.restaurant_review" class="pt-2">
+                                    <p class="text-caption text-medium-emphasis mb-1">Sua avaliação deste restaurante (só outros freelancers veem):</p>
+                                    <div class="d-flex align-center ga-1 mb-1">
+                                        <v-icon icon="mdi-star" color="accent" size="16" />
+                                        <strong>{{ hireRequest.restaurant_review.rating }}/5</strong>
+                                    </div>
+                                    <p v-if="hireRequest.restaurant_review.comment" class="mb-0">"{{ hireRequest.restaurant_review.comment }}"</p>
+                                </v-card-text>
+                                <v-card-actions v-else>
+                                    <v-spacer />
+                                    <v-btn variant="tonal" color="primary" size="small" @click="openRestaurantReviewDialog(hireRequest)">
+                                        Avaliar restaurante
+                                    </v-btn>
+                                </v-card-actions>
+                            </template>
                         </v-card>
                     </v-window-item>
 
@@ -416,6 +463,59 @@ function formatDate(value) {
                             Enviar candidatura
                         </v-btn>
                     </v-form>
+                </v-card-text>
+            </v-card>
+        </v-dialog>
+
+        <v-dialog :model-value="restaurantReviewDialogFor !== null" max-width="440" @update:model-value="restaurantReviewDialogFor = null">
+            <v-card>
+                <v-card-title>Avaliar restaurante</v-card-title>
+                <v-card-text>
+                    <p class="text-caption text-medium-emphasis mb-3">
+                        Essa avaliação é só pra outros freelancers verem, ajuda quem tiver pensando em aceitar
+                        uma vaga desse restaurante. O estabelecimento não tem acesso a ela.
+                    </p>
+                    <v-form @submit.prevent="submitRestaurantReview">
+                        <v-rating v-model="restaurantReviewForm.rating" length="5" class="mb-2" />
+                        <v-textarea
+                            v-model="restaurantReviewForm.comment"
+                            label="Comentário (opcional)"
+                            hint="Ex.: pontualidade no pagamento, clima de trabalho, organização"
+                            persistent-hint
+                            rows="3"
+                            :error-messages="restaurantReviewForm.errors.comment"
+                        />
+                        <v-btn type="submit" color="primary" variant="flat" class="mt-3" :loading="restaurantReviewForm.processing">
+                            Enviar avaliação
+                        </v-btn>
+                    </v-form>
+                </v-card-text>
+            </v-card>
+        </v-dialog>
+
+        <v-dialog :model-value="reviewsDialogFor !== null" max-width="480" @update:model-value="reviewsDialogFor = null">
+            <v-card v-if="reviewsDialogFor !== null">
+                <v-card-title>Avaliações de freelancers</v-card-title>
+                <v-card-text>
+                    <template v-for="posting in jobPostings.filter((p) => p.id === reviewsDialogFor)" :key="posting.id">
+                        <v-card
+                            v-for="review in posting.restaurant.recent_freelancer_reviews"
+                            :key="review.id"
+                            variant="outlined"
+                            class="mb-2"
+                        >
+                            <v-card-text>
+                                <div class="d-flex align-center justify-space-between mb-1">
+                                    <div class="d-flex align-center ga-1">
+                                        <v-icon icon="mdi-star" color="accent" size="16" />
+                                        <strong>{{ review.rating }}/5</strong>
+                                    </div>
+                                    <span class="text-caption text-medium-emphasis">{{ review.freelancer_profile?.user?.name }}</span>
+                                </div>
+                                <p v-if="review.comment" class="mb-0">"{{ review.comment }}"</p>
+                            </v-card-text>
+                        </v-card>
+                    </template>
                 </v-card-text>
             </v-card>
         </v-dialog>

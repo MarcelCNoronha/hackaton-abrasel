@@ -7,6 +7,7 @@ use App\Enums\HireRequestStatus;
 use App\Enums\JobApplicationStatus;
 use App\Enums\JobPostingStatus;
 use App\Enums\UserRole;
+use App\Models\FreelancerRestaurantReview;
 use App\Models\HireRequest;
 use App\Models\JobApplication;
 use App\Models\JobPosting;
@@ -30,6 +31,7 @@ class DemoFreelancerSeeder extends Seeder
         $freelancers = $this->createFreelancers();
         $this->createHireRequestsAndReviews($freelancers);
         $this->createJobPostings($freelancers);
+        $this->createRestaurantReviews($freelancers);
     }
 
     /**
@@ -325,6 +327,49 @@ class DemoFreelancerSeeder extends Seeder
                     $jobApplication->update(['hire_request_id' => $hireRequest->id]);
                 }
             }
+        }
+    }
+
+    /**
+     * Avaliacoes de demonstracao na direcao contraria (freelancer avalia o restaurante) --
+     * reaproveita as contratacoes aceitas ja criadas acima, so' pra nao inventar cenarios
+     * novos. So' visivel pra outros freelancers, ver FreelancerRestaurantReview.
+     *
+     * @param  array<string, User>  $freelancers
+     */
+    private function createRestaurantReviews(array $freelancers): void
+    {
+        $reviews = [
+            ['restaurant' => 'arte-sabor', 'freelancer' => 'Rafael Andrade', 'rating' => 5, 'comment' => 'Equipe organizada e pagamento em dia. Ambiente tranquilo pra trabalhar mesmo em dia de rodízio cheio.'],
+            ['restaurant' => 'choperia-e-churrascaria-devan', 'freelancer' => 'Marcos Vinícius', 'rating' => 3, 'comment' => 'Movimento intenso e pouca pausa durante o turno, mas o combinado foi cumprido.'],
+            ['restaurant' => 'beco-das-flores', 'freelancer' => 'Patrícia Lima', 'rating' => 5, 'comment' => 'Cozinha bem equipada e dona super acessível, recomendo pra outros confeiteiros.'],
+        ];
+
+        foreach ($reviews as $data) {
+            $restaurant = Restaurant::where('slug', $data['restaurant'])->first();
+            $freelancerUser = $freelancers[$data['freelancer']] ?? null;
+
+            if (! $restaurant || ! $freelancerUser) {
+                continue;
+            }
+
+            $hireRequest = HireRequest::where('restaurant_id', $restaurant->id)
+                ->where('freelancer_profile_id', $freelancerUser->freelancerProfile->id)
+                ->first();
+
+            if (! $hireRequest) {
+                continue;
+            }
+
+            FreelancerRestaurantReview::updateOrCreate(
+                ['hire_request_id' => $hireRequest->id],
+                [
+                    'restaurant_id' => $restaurant->id,
+                    'freelancer_profile_id' => $freelancerUser->freelancerProfile->id,
+                    'rating' => $data['rating'],
+                    'comment' => $data['comment'],
+                ]
+            );
         }
     }
 }
