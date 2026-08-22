@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue';
 import { Head, usePage } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
+import { formatBRL } from '@/utils/formatCurrency';
 
 const props = defineProps({
     restaurant: { type: Object, required: true },
@@ -306,14 +307,14 @@ const jsonLd = computed(() => {
                                         <span class="text-no-wrap text-right">
                                             <template v-if="item.compare_at_price && Number(item.compare_at_price) > Number(item.price)">
                                                 <span class="d-block text-caption text-medium-emphasis text-decoration-line-through">
-                                                    De R$ {{ Number(item.compare_at_price).toFixed(2).replace('.', ',') }}
+                                                    De {{ formatBRL(item.compare_at_price) }}
                                                 </span>
                                                 <span class="text-primary font-weight-bold">
-                                                    Por R$ {{ Number(item.price).toFixed(2).replace('.', ',') }}
+                                                    Por {{ formatBRL(item.price) }}
                                                 </span>
                                             </template>
                                             <span v-else class="text-primary font-weight-bold">
-                                                R$ {{ Number(item.price).toFixed(2).replace('.', ',') }}
+                                                {{ formatBRL(item.price) }}
                                             </span>
                                         </span>
                                     </v-card-title>

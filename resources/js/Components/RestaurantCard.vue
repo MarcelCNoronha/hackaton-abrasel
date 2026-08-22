@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { emojiForRestaurant } from '@/utils/categoryIcons';
+import { formatBRL } from '@/utils/formatCurrency';
 
 const props = defineProps({
     restaurant: { type: Object, required: true },
@@ -33,10 +34,6 @@ const distanceLabel = computed(() => {
 // estabelecimento, em vez de repetir a mesma foto/ícone genérico do perfil.
 const featuredItem = computed(() => props.restaurant.featured_item ?? null);
 const thumbPhotoPath = computed(() => featuredItem.value?.main_photo_path ?? props.restaurant.cover_photo_path ?? null);
-
-function formatPrice(value) {
-    return `R$ ${Number(value).toFixed(2).replace('.', ',')}`;
-}
 
 // So' a principal, inline com nota/preco -- a lista de chips no rodape ocupava uma linha
 // inteira so' pra isso, deixando o card mais alto (e a miniatura mais "esticada") do que
@@ -111,7 +108,7 @@ const primaryCuisine = computed(() => props.restaurant.cuisines?.[0] ?? null);
                         <div class="featured-strip__label">Destaque</div>
                         <div class="text-body-2 font-weight-medium text-truncate">{{ featuredItem.name }}</div>
                     </div>
-                    <span class="featured-strip__price flex-shrink-0">{{ formatPrice(featuredItem.price) }}</span>
+                    <span class="featured-strip__price flex-shrink-0">{{ formatBRL(featuredItem.price) }}</span>
                 </div>
             </div>
         </div>

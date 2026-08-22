@@ -2,6 +2,8 @@
 import { computed, reactive, ref } from 'vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import PhotoInputField from '@/Components/PhotoInputField.vue';
+import { formatBRL } from '@/utils/formatCurrency';
 
 const props = defineProps({
     restaurant: { type: Object, required: true },
@@ -288,41 +290,22 @@ function submitReply(reviewId) {
                                             <v-text-field v-model="profileForm.whatsapp" label="WhatsApp" hint="Somente números, com DDD" />
                                         </v-col>
                                         <v-col cols="12" md="6">
-                                            <v-file-input
+                                            <PhotoInputField
                                                 v-model="profileForm.cover_photo"
                                                 label="Foto de capa (aparece na lista de busca)"
-                                                accept="image/*"
-                                                prepend-icon="mdi-image"
-                                                show-size
+                                                icon="mdi-image"
+                                                :existing-path="restaurant.cover_photo_path"
                                                 :error-messages="profileForm.errors.cover_photo"
-                                            />
-                                            <v-img
-                                                v-if="!profileForm.cover_photo && restaurant.cover_photo_path"
-                                                :src="`/storage/${restaurant.cover_photo_path}`"
-                                                height="90"
-                                                width="120"
-                                                cover
-                                                rounded="lg"
-                                                class="mt-1"
                                             />
                                         </v-col>
                                         <v-col cols="12" md="6">
-                                            <v-file-input
+                                            <PhotoInputField
                                                 v-model="profileForm.banner_photo"
                                                 label="Banner de topo da página"
-                                                accept="image/*"
-                                                prepend-icon="mdi-panorama"
-                                                show-size
+                                                icon="mdi-panorama"
+                                                :existing-path="restaurant.banner_photo_path"
                                                 :error-messages="profileForm.errors.banner_photo"
-                                            />
-                                            <v-img
-                                                v-if="!profileForm.banner_photo && restaurant.banner_photo_path"
-                                                :src="`/storage/${restaurant.banner_photo_path}`"
-                                                height="90"
-                                                width="200"
-                                                cover
-                                                rounded="lg"
-                                                class="mt-1"
+                                                :preview-width="200"
                                             />
                                         </v-col>
                                     </v-row>
@@ -381,9 +364,9 @@ function submitReply(reviewId) {
                                                             v-if="item.compare_at_price && Number(item.compare_at_price) > Number(item.price)"
                                                             class="text-medium-emphasis text-decoration-line-through mr-1"
                                                         >
-                                                            R$ {{ Number(item.compare_at_price).toFixed(2).replace('.', ',') }}
+                                                            {{ formatBRL(item.compare_at_price) }}
                                                         </span>
-                                                        <span class="text-primary font-weight-bold">R$ {{ Number(item.price).toFixed(2).replace('.', ',') }}</span>
+                                                        <span class="text-primary font-weight-bold">{{ formatBRL(item.price) }}</span>
                                                     </span>
                                                 </v-card-title>
                                                 <v-card-subtitle v-if="item.description">{{ item.description }}</v-card-subtitle>
@@ -439,22 +422,14 @@ function submitReply(reviewId) {
                                             <v-form @submit.prevent="submitItem">
                                                 <v-text-field v-model="itemForm.name" label="Nome" :error-messages="itemForm.errors.name" />
                                                 <v-textarea v-model="itemForm.description" label="Descrição" rows="2" :error-messages="itemForm.errors.description" />
-                                                <v-file-input
+                                                <PhotoInputField
                                                     v-model="itemForm.photo"
                                                     label="Foto do prato"
-                                                    accept="image/*"
-                                                    prepend-icon="mdi-camera"
-                                                    show-size
+                                                    icon="mdi-camera"
+                                                    :existing-path="editingItem?.main_photo_path"
                                                     :error-messages="itemForm.errors.photo"
-                                                />
-                                                <v-img
-                                                    v-if="!itemForm.photo && editingItem?.main_photo_path"
-                                                    :src="`/storage/${editingItem.main_photo_path}`"
-                                                    height="60"
-                                                    width="60"
-                                                    cover
-                                                    rounded="lg"
-                                                    class="mb-3"
+                                                    :preview-width="60"
+                                                    :preview-height="60"
                                                 />
                                                 <div class="d-flex ga-2">
                                                     <v-text-field
