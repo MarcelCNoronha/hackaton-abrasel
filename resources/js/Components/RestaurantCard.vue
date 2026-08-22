@@ -118,7 +118,7 @@ const primaryCuisine = computed(() => props.restaurant.cuisines?.[0] ?? null);
 <style scoped>
 .restaurant-card {
     background: rgb(var(--v-theme-surface));
-    border: 1px solid rgba(249, 115, 22, 0.28);
+    border: 1px solid rgba(var(--v-theme-primary), 0.28);
     overflow: hidden;
     transition:
         transform 0.15s ease,
@@ -128,8 +128,8 @@ const primaryCuisine = computed(() => props.restaurant.cuisines?.[0] ?? null);
 
 .restaurant-card:hover,
 .restaurant-card--highlighted {
-    border-color: #f97316;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35), 0 0 24px -8px rgba(249, 115, 22, 0.5);
+    border-color: rgb(var(--v-theme-primary));
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35), 0 0 24px -8px rgba(var(--v-theme-primary), 0.5);
     transform: translateY(-1px);
 }
 
@@ -149,8 +149,8 @@ const primaryCuisine = computed(() => props.restaurant.cuisines?.[0] ?? null);
     display: flex;
     align-items: center;
     gap: 2px;
-    background: rgba(28, 18, 12, 0.85);
-    color: #fdf6f0;
+    background: rgba(var(--v-theme-surface), 0.9);
+    color: rgb(var(--v-theme-on-surface));
     font-size: 10px;
     font-weight: 700;
     text-transform: uppercase;

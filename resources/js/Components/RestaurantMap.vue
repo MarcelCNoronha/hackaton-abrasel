@@ -51,10 +51,26 @@ function escapeHtml(text) {
 // Badge redondo + nome sempre visivel do lado, no estilo dos POIs do Google Maps -- ao inves
 // da gota clicavel-so-no-popup de antes. iconAnchor fica no CENTRO do badge (nao na ponta
 // inferior, como seria numa gota), ja que e' um circulo, nao um pino apontando pra baixo.
+// Cores lidas das custom properties que o Vuetify ja expoe no tema ativo (vicosaFoodDark,
+// ver plugins/vuetify.js) em vez de hex fixo -- o marcador/popup e' HTML cru injetado pelo
+// Leaflet, mas ainda vive dentro da mesma arvore de DOM onde essas variaveis estao
+// definidas, entao `rgb(var(--v-theme-x))` resolve normalmente.
+const THEME = {
+    secondary: 'rgb(var(--v-theme-secondary))',
+    onSurfaceMuted: 'rgba(var(--v-theme-on-surface), 0.55)',
+    surface: 'rgba(var(--v-theme-surface), 0.92)',
+    onSurface: 'rgb(var(--v-theme-on-surface))',
+};
+
 function restaurantIcon(restaurant, isHighlighted) {
-    const color = restaurant.is_open_now ? '#22C55E' : '#8A7F7A';
+    const statusVar = restaurant.is_open_now ? '--v-theme-secondary' : '--v-theme-on-surface';
+    // Fechado usa on-surface BEM esmaecido (0.55) -- em opacidade cheia essa variavel e' um
+    // off-white quase branco (cor de texto), ruim como preenchimento solido do badge.
+    const color = restaurant.is_open_now ? `rgb(var(${statusVar}))` : `rgba(var(${statusVar}), 0.55)`;
     const size = isHighlighted ? 34 : 28;
-    const ring = isHighlighted ? `box-shadow:0 0 0 4px ${color}33, 0 2px 8px rgba(0,0,0,.5);` : 'box-shadow:0 2px 6px rgba(0,0,0,.5);';
+    const ring = isHighlighted
+        ? `box-shadow:0 0 0 4px rgba(var(${statusVar}), 0.25), 0 2px 8px rgba(0,0,0,.5);`
+        : 'box-shadow:0 2px 6px rgba(0,0,0,.5);';
     const emoji = emojiForRestaurant(restaurant.categories);
     const name = escapeHtml(restaurant.name);
 
@@ -74,7 +90,7 @@ function restaurantIcon(restaurant, isHighlighted) {
                 </div>
                 <div style="
                     position:absolute;left:${size + 6}px;top:50%;transform:translateY(-50%);
-                    background:rgba(28,18,12,.92);color:#fdf6f0;
+                    background:${THEME.surface};color:${THEME.onSurface};
                     padding:2px 8px;border-radius:6px;font-size:12px;font-weight:600;
                     max-width:140px;overflow:hidden;text-overflow:ellipsis;
                     white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.4);
@@ -100,29 +116,29 @@ function popupHtml(restaurant) {
     // permissao, que pode nao ter sido concedida mesmo com a do app.
     const origin = props.userLocation ? `&origin=${props.userLocation.lat},${props.userLocation.lng}` : '';
     const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${restaurant.latitude},${restaurant.longitude}${origin}`;
-    const statusColor = restaurant.is_open_now ? '#22C55E' : '#A68D7C';
+    const statusColor = restaurant.is_open_now ? THEME.secondary : THEME.onSurfaceMuted;
 
     return `
         <div style="min-width:260px;font-family:inherit;">
-            <div style="font-weight:700;font-size:15px;margin-bottom:4px;color:#FDF6F0;">${name}</div>
-            <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#E3CFC0;margin-bottom:4px;flex-wrap:wrap;">
-                <span><i class="mdi mdi-star" style="color:#FBBF24;"></i> ${Number(restaurant.average_rating).toFixed(1)}</span>
+            <div style="font-weight:700;font-size:15px;margin-bottom:4px;color:${THEME.onSurface};">${name}</div>
+            <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(var(--v-theme-on-surface),0.8);margin-bottom:4px;flex-wrap:wrap;">
+                <span><i class="mdi mdi-star" style="color:rgb(var(--v-theme-accent));"></i> ${Number(restaurant.average_rating).toFixed(1)}</span>
                 ${distance ? `<span><i class="mdi mdi-map-marker-outline"></i> ${distance}</span>` : ''}
-                <span style="font-weight:700;color:#F97316;">${restaurant.price_range ?? ''}</span>
+                <span style="font-weight:700;color:rgb(var(--v-theme-primary));">${restaurant.price_range ?? ''}</span>
             </div>
-            ${cuisines ? `<div style="font-size:12px;color:#A68D7C;margin-bottom:6px;">${cuisines}</div>` : ''}
+            ${cuisines ? `<div style="font-size:12px;color:${THEME.onSurfaceMuted};margin-bottom:6px;">${cuisines}</div>` : ''}
             <div style="font-size:12px;font-weight:600;color:${statusColor};margin-bottom:10px;">
                 <i class="mdi mdi-circle" style="font-size:8px;"></i>
                 ${restaurant.is_open_now ? 'Aberto agora' : 'Fechado agora'}
             </div>
-            <a href="${profileUrl}" style="display:block;text-align:center;background:#F97316;color:#2A0F02;padding:8px 10px;border-radius:6px;font-size:12px;font-weight:700;text-decoration:none;margin-bottom:6px;transition:background .15s;" onmouseover="this.style.background='#FB923C'" onmouseout="this.style.background='#F97316'">
+            <a href="${profileUrl}" style="display:block;text-align:center;background:rgb(var(--v-theme-primary));color:rgb(var(--v-theme-on-primary));padding:8px 10px;border-radius:6px;font-size:12px;font-weight:700;text-decoration:none;margin-bottom:6px;transition:filter .15s;" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter='none'">
                 Ver perfil
             </a>
             <div style="display:flex;gap:6px;">
-                <a href="${profileUrl}#cardapio" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;border:1px solid rgba(249,115,22,0.4);padding:7px 8px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none;color:#FDF6F0;transition:border-color .15s,background-color .15s;" onmouseover="this.style.borderColor='#F97316';this.style.backgroundColor='rgba(249,115,22,.1)'" onmouseout="this.style.borderColor='rgba(249,115,22,.4)';this.style.backgroundColor='transparent'">
+                <a href="${profileUrl}#cardapio" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;border:1px solid rgba(var(--v-theme-primary),0.4);padding:7px 8px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none;color:${THEME.onSurface};transition:border-color .15s,background-color .15s;" onmouseover="this.style.borderColor='rgb(var(--v-theme-primary))';this.style.backgroundColor='rgba(var(--v-theme-primary),.1)'" onmouseout="this.style.borderColor='rgba(var(--v-theme-primary),.4)';this.style.backgroundColor='transparent'">
                     <i class="mdi mdi-book-open-variant" style="font-size:14px;"></i> Cardápio
                 </a>
-                <a href="${directionsUrl}" target="_blank" rel="noopener" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;border:1px solid rgba(249,115,22,0.4);padding:7px 8px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none;color:#FDF6F0;transition:border-color .15s,background-color .15s;" onmouseover="this.style.borderColor='#F97316';this.style.backgroundColor='rgba(249,115,22,.1)'" onmouseout="this.style.borderColor='rgba(249,115,22,.4)';this.style.backgroundColor='transparent'">
+                <a href="${directionsUrl}" target="_blank" rel="noopener" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;border:1px solid rgba(var(--v-theme-primary),0.4);padding:7px 8px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none;color:${THEME.onSurface};transition:border-color .15s,background-color .15s;" onmouseover="this.style.borderColor='rgb(var(--v-theme-primary))';this.style.backgroundColor='rgba(var(--v-theme-primary),.1)'" onmouseout="this.style.borderColor='rgba(var(--v-theme-primary),.4)';this.style.backgroundColor='transparent'">
                     <i class="mdi mdi-directions" style="font-size:14px;"></i> Como chegar
                 </a>
             </div>
@@ -181,10 +197,11 @@ function renderUserMarker() {
 
     if (!props.userLocation) return;
 
+    const infoColor = getComputedStyle(mapEl.value).getPropertyValue('--v-theme-info').trim();
     userMarker = L.circleMarker([props.userLocation.lat, props.userLocation.lng], {
         radius: 7,
-        color: '#60A5FA',
-        fillColor: '#60A5FA',
+        color: `rgb(${infoColor})`,
+        fillColor: `rgb(${infoColor})`,
         fillOpacity: 0.9,
         weight: 2,
     }).addTo(map);
@@ -265,24 +282,24 @@ watch(
 
 .restaurant-map :deep(.leaflet-popup-content-wrapper) {
     border-radius: 10px;
-    background: #1c120c;
-    border: 1px solid rgba(249, 115, 22, 0.28);
+    background: rgb(var(--v-theme-surface));
+    border: 1px solid rgba(var(--v-theme-primary), 0.28);
 }
 
 .restaurant-map :deep(.leaflet-popup-tip) {
-    background: #1c120c;
+    background: rgb(var(--v-theme-surface));
 }
 
 .restaurant-map :deep(.leaflet-control-zoom a) {
-    background: #1c120c;
-    color: #fdf6f0;
-    border-color: rgba(249, 115, 22, 0.28) !important;
+    background: rgb(var(--v-theme-surface));
+    color: rgb(var(--v-theme-on-surface));
+    border-color: rgba(var(--v-theme-primary), 0.28) !important;
 }
 
 .restaurant-map :deep(.leaflet-control-layers) {
-    background: #1c120c;
-    color: #fdf6f0;
-    border: 1px solid rgba(249, 115, 22, 0.28);
+    background: rgb(var(--v-theme-surface));
+    color: rgb(var(--v-theme-on-surface));
+    border: 1px solid rgba(var(--v-theme-primary), 0.28);
 }
 
 .restaurant-map :deep(.leaflet-control-layers-toggle) {
