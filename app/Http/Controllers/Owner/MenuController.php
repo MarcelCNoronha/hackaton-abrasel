@@ -9,6 +9,7 @@ use App\Models\MenuCategory;
 use App\Models\MenuItem;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class MenuController extends Controller
@@ -59,6 +60,11 @@ class MenuController extends Controller
         $foodTagNames = $data['food_tags'] ?? [];
         unset($data['food_tags']);
 
+        if ($request->hasFile('photo')) {
+            $data['main_photo_path'] = $request->file('photo')->store('menu-items', 'public');
+        }
+        unset($data['photo']);
+
         $item = $menuCategory->items()->create($data + [
             'position' => $menuCategory->items()->count(),
         ]);
@@ -75,6 +81,14 @@ class MenuController extends Controller
         $data = $this->validateItem($request);
         $foodTagNames = $data['food_tags'] ?? [];
         unset($data['food_tags']);
+
+        if ($request->hasFile('photo')) {
+            if ($menuItem->main_photo_path) {
+                Storage::disk('public')->delete($menuItem->main_photo_path);
+            }
+            $data['main_photo_path'] = $request->file('photo')->store('menu-items', 'public');
+        }
+        unset($data['photo']);
 
         $menuItem->update($data);
         $menuItem->foodTags()->sync($this->resolveFoodTagIds($foodTagNames));
@@ -128,6 +142,7 @@ class MenuController extends Controller
             'is_available' => ['required', 'boolean'],
             'food_tags' => ['nullable', 'array'],
             'food_tags.*' => ['string', 'max:50'],
+            'photo' => ['nullable', 'image', 'max:4096'],
         ]);
     }
 

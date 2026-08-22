@@ -8,6 +8,8 @@ use App\Models\FoodTag;
 use App\Models\Restaurant;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Enum;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -54,11 +56,30 @@ class RestaurantController extends Controller
             'phone' => ['nullable', 'string', 'max:20'],
             'whatsapp' => ['nullable', 'string', 'max:20'],
             'price_range' => ['nullable', new Enum(PriceRange::class)],
+            'cover_photo' => ['nullable', 'image', 'max:4096'],
+            'banner_photo' => ['nullable', 'image', 'max:4096'],
         ]);
+
+        if ($request->hasFile('cover_photo')) {
+            $data['cover_photo_path'] = $this->replacePhoto($request->file('cover_photo'), $restaurant->cover_photo_path, 'restaurants');
+        }
+
+        if ($request->hasFile('banner_photo')) {
+            $data['banner_photo_path'] = $this->replacePhoto($request->file('banner_photo'), $restaurant->banner_photo_path, 'restaurants');
+        }
 
         $restaurant->update($data);
 
         return back()->with('status', 'Perfil atualizado.');
+    }
+
+    private function replacePhoto(UploadedFile $file, ?string $previousPath, string $directory): string
+    {
+        if ($previousPath) {
+            Storage::disk('public')->delete($previousPath);
+        }
+
+        return $file->store($directory, 'public');
     }
 
     public function updateHours(Request $request, Restaurant $restaurant): RedirectResponse

@@ -61,9 +61,17 @@ const gradients = [
     ['#7A4CC0', '#B084F0'],
 ];
 
-const heroGradient = computed(() => {
+const heroStyle = computed(() => {
+    if (props.restaurant.banner_photo_path) {
+        return {
+            backgroundImage: `linear-gradient(rgba(18,11,8,.35), rgba(18,11,8,.75)), url(/storage/${props.restaurant.banner_photo_path})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+        };
+    }
+
     const pair = gradients[props.restaurant.id % gradients.length];
-    return `linear-gradient(135deg, ${pair[0]}, ${pair[1]})`;
+    return { background: `linear-gradient(135deg, ${pair[0]}, ${pair[1]})` };
 });
 </script>
 
@@ -71,18 +79,18 @@ const heroGradient = computed(() => {
     <Head :title="restaurant.name" />
 
     <PublicLayout>
-        <div class="hero" :style="{ background: heroGradient }">
+        <div class="hero" :style="heroStyle">
             <v-container style="max-width: 1040px">
                 <div class="d-flex flex-wrap align-center justify-space-between ga-3">
                     <div>
                         <div class="d-flex flex-wrap align-center ga-2 mb-2">
                             <v-chip
-                                :color="restaurant.is_open_now ? 'white' : undefined"
+                                :color="restaurant.is_open_now ? 'secondary' : undefined"
                                 :variant="restaurant.is_open_now ? 'flat' : 'outlined'"
                                 size="small"
                                 class="hero-chip"
                             >
-                                <v-icon icon="mdi-circle" size="8" start :color="restaurant.is_open_now ? 'secondary' : 'white'" />
+                                <v-icon icon="mdi-circle" size="8" start color="white" />
                                 {{ restaurant.is_open_now ? 'Aberto agora' : 'Fechado agora' }}
                             </v-chip>
                         </div>
@@ -153,6 +161,9 @@ const heroGradient = computed(() => {
 
                             <v-card v-for="item in category.items" :key="item.id" variant="outlined" class="mb-2 menu-item-card">
                                 <v-card-item>
+                                    <template v-if="item.main_photo_path" #prepend>
+                                        <v-img :src="`/storage/${item.main_photo_path}`" width="56" height="56" cover rounded="lg" />
+                                    </template>
                                     <v-card-title class="d-flex justify-space-between align-start ga-2">
                                         <span>{{ item.name }}</span>
                                         <span class="text-no-wrap text-right">

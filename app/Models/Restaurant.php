@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
     'name', 'slug', 'description',
     'address_street', 'address_number', 'address_neighborhood', 'address_city', 'address_state', 'address_zip_code',
     'latitude', 'longitude', 'phone', 'whatsapp', 'social_links',
-    'price_range', 'cover_photo_path', 'is_active',
+    'price_range', 'cover_photo_path', 'banner_photo_path', 'is_active',
 ])]
 class Restaurant extends Model
 {

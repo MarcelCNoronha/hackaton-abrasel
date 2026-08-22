@@ -24,10 +24,20 @@ const profileForm = useForm({
     phone: props.restaurant.phone ?? '',
     whatsapp: props.restaurant.whatsapp ?? '',
     price_range: props.restaurant.price_range ?? null,
+    cover_photo: null,
+    banner_photo: null,
 });
 
 function submitProfile() {
-    profileForm.patch(route('owner.restaurants.update', props.restaurant.slug), { preserveScroll: true });
+    // useForm() detecta os File nesses dois campos e troca pra POST com _method=PATCH
+    // sozinho -- upload multipart nao viaja num PATCH de verdade.
+    profileForm.patch(route('owner.restaurants.update', props.restaurant.slug), {
+        preserveScroll: true,
+        onSuccess: () => {
+            profileForm.cover_photo = null;
+            profileForm.banner_photo = null;
+        },
+    });
 }
 
 // --- Horários ---
@@ -80,6 +90,7 @@ const itemForm = useForm({
     compare_at_price: '',
     is_available: true,
     food_tags: [],
+    photo: null,
 });
 
 function openNewItemDialog(categoryId) {
@@ -87,6 +98,7 @@ function openNewItemDialog(categoryId) {
     itemForm.reset();
     itemForm.is_available = true;
     itemForm.food_tags = [];
+    itemForm.photo = null;
     itemDialogCategoryId.value = categoryId;
 }
 
@@ -98,6 +110,7 @@ function openEditItemDialog(item) {
     itemForm.compare_at_price = item.compare_at_price ?? '';
     itemForm.is_available = item.is_available;
     itemForm.food_tags = (item.food_tags ?? []).map((tag) => tag.name);
+    itemForm.photo = null;
     itemDialogCategoryId.value = 'edit';
 }
 
@@ -251,6 +264,44 @@ function submitReply(reviewId) {
                                         <v-col cols="12" md="6">
                                             <v-text-field v-model="profileForm.whatsapp" label="WhatsApp" hint="Somente números, com DDD" />
                                         </v-col>
+                                        <v-col cols="12" md="6">
+                                            <v-file-input
+                                                v-model="profileForm.cover_photo"
+                                                label="Foto de capa (aparece na lista de busca)"
+                                                accept="image/*"
+                                                prepend-icon="mdi-image"
+                                                show-size
+                                                :error-messages="profileForm.errors.cover_photo"
+                                            />
+                                            <v-img
+                                                v-if="!profileForm.cover_photo && restaurant.cover_photo_path"
+                                                :src="`/storage/${restaurant.cover_photo_path}`"
+                                                height="90"
+                                                width="120"
+                                                cover
+                                                rounded="lg"
+                                                class="mt-1"
+                                            />
+                                        </v-col>
+                                        <v-col cols="12" md="6">
+                                            <v-file-input
+                                                v-model="profileForm.banner_photo"
+                                                label="Banner de topo da página"
+                                                accept="image/*"
+                                                prepend-icon="mdi-panorama"
+                                                show-size
+                                                :error-messages="profileForm.errors.banner_photo"
+                                            />
+                                            <v-img
+                                                v-if="!profileForm.banner_photo && restaurant.banner_photo_path"
+                                                :src="`/storage/${restaurant.banner_photo_path}`"
+                                                height="90"
+                                                width="200"
+                                                cover
+                                                rounded="lg"
+                                                class="mt-1"
+                                            />
+                                        </v-col>
                                     </v-row>
                                     <v-btn type="submit" color="primary" variant="flat" :loading="profileForm.processing">
                                         Salvar perfil
@@ -291,6 +342,9 @@ function submitReply(reviewId) {
 
                                         <v-card v-for="item in category.items" :key="item.id" variant="outlined" class="mb-2">
                                             <v-card-item>
+                                                <template v-if="item.main_photo_path" #prepend>
+                                                    <v-img :src="`/storage/${item.main_photo_path}`" width="48" height="48" cover rounded="lg" />
+                                                </template>
                                                 <v-card-title class="d-flex justify-space-between align-start ga-2">
                                                     <span>{{ item.name }}</span>
                                                     <span class="text-no-wrap">
@@ -336,6 +390,23 @@ function submitReply(reviewId) {
                                             <v-form @submit.prevent="submitItem">
                                                 <v-text-field v-model="itemForm.name" label="Nome" :error-messages="itemForm.errors.name" />
                                                 <v-textarea v-model="itemForm.description" label="Descrição" rows="2" :error-messages="itemForm.errors.description" />
+                                                <v-file-input
+                                                    v-model="itemForm.photo"
+                                                    label="Foto do prato"
+                                                    accept="image/*"
+                                                    prepend-icon="mdi-camera"
+                                                    show-size
+                                                    :error-messages="itemForm.errors.photo"
+                                                />
+                                                <v-img
+                                                    v-if="!itemForm.photo && editingItem?.main_photo_path"
+                                                    :src="`/storage/${editingItem.main_photo_path}`"
+                                                    height="60"
+                                                    width="60"
+                                                    cover
+                                                    rounded="lg"
+                                                    class="mb-3"
+                                                />
                                                 <div class="d-flex ga-2">
                                                     <v-text-field
                                                         v-model="itemForm.compare_at_price"
