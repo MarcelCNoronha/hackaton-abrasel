@@ -53,6 +53,11 @@
 
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
+  /* header.nav e' sticky -- sem isso, clicar num link do menu (#como-funciona etc.) rolava a
+     secao pra flush no topo da pagina, ficando escondida atras do proprio header por cima
+     dela. 112px cobre o header nas duas fileiras (marca+botoes, depois os links) com uma
+     folga pequena. */
+  html { scroll-behavior: smooth; scroll-padding-top: 112px; }
 
   body {
     background: var(--page-plane);
