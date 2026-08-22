@@ -20,6 +20,25 @@ const directionsUrl = computed(
         `https://www.google.com/maps/dir/?api=1&destination=${props.restaurant.latitude},${props.restaurant.longitude}`,
 );
 
+// Tenta pegar a localizacao atual antes de abrir o Maps e passa como origin explicito --
+// sem isso o Maps pede a localizacao de novo com sua propria permissao, que pode nao ter
+// sido concedida mesmo com a do app. Sem geolocalizacao disponivel, cai no href normal
+// (sem origin), que o Maps ja resolve como "sua localizacao" por conta propria.
+function openDirections(event) {
+    if (!navigator.geolocation) return;
+
+    event.preventDefault();
+
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            const { latitude, longitude } = position.coords;
+            window.open(`${directionsUrl.value}&origin=${latitude},${longitude}`, '_blank', 'noopener');
+        },
+        () => window.open(directionsUrl.value, '_blank', 'noopener'),
+        { timeout: 4000 },
+    );
+}
+
 const whatsappUrl = computed(() => {
     if (!props.restaurant.whatsapp) return null;
     const digits = props.restaurant.whatsapp.replace(/\D/g, '');
@@ -87,7 +106,7 @@ const heroGradient = computed(() => {
                     </div>
 
                     <div class="d-flex flex-wrap ga-2">
-                        <v-btn color="primary" variant="flat" prepend-icon="mdi-directions" :href="directionsUrl" target="_blank" rel="noopener">
+                        <v-btn color="primary" variant="flat" prepend-icon="mdi-directions" :href="directionsUrl" target="_blank" rel="noopener" @click="openDirections">
                             Como chegar
                         </v-btn>
                         <v-btn v-if="restaurant.phone" variant="outlined" color="white" prepend-icon="mdi-phone" :href="`tel:${restaurant.phone}`">

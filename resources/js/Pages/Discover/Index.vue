@@ -4,6 +4,11 @@ import { Head, router } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import RestaurantMap from '@/Components/RestaurantMap.vue';
 import RestaurantCard from '@/Components/RestaurantCard.vue';
+import { emojiForCategorySlug } from '@/utils/categoryIcons';
+
+function toggleCategory(slug) {
+    filters.category = filters.category === slug ? null : slug;
+}
 
 const props = defineProps({
     restaurants: { type: Array, default: () => [] },
@@ -214,17 +219,22 @@ function clearFilters() {
                         </v-btn>
                     </div>
 
+                    <div class="category-quickbar">
+                        <button
+                            v-for="category in categories"
+                            :key="category.id"
+                            type="button"
+                            class="category-quickbar__item"
+                            :class="{ 'category-quickbar__item--active': filters.category === category.slug }"
+                            @click="toggleCategory(category.slug)"
+                        >
+                            <span class="category-quickbar__emoji">{{ emojiForCategorySlug(category.slug) }}</span>
+                            <span class="category-quickbar__label">{{ category.name }}</span>
+                        </button>
+                    </div>
+
                     <v-expand-transition>
                         <div v-if="showFilters" class="filters-panel">
-                            <div class="filter-group">
-                                <span class="filter-label">Tipo de estabelecimento</span>
-                                <v-chip-group v-model="filters.category" selected-class="chip-selected" column>
-                                    <v-chip v-for="category in categories" :key="category.id" :value="category.slug" filter variant="outlined">
-                                        {{ category.name }}
-                                    </v-chip>
-                                </v-chip-group>
-                            </div>
-
                             <div class="filter-group">
                                 <span class="filter-label">Tipo de comida</span>
                                 <v-chip-group v-model="filters.cuisines" selected-class="chip-selected" column multiple>
@@ -356,6 +366,51 @@ function clearFilters() {
 .search-field {
     flex: 1 1 320px;
     min-width: 240px;
+}
+
+.category-quickbar {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-top: 14px;
+    padding-bottom: 2px;
+    scrollbar-width: thin;
+}
+
+.category-quickbar__item {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(249, 115, 22, 0.28);
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.category-quickbar__item:hover {
+    border-color: #f97316;
+}
+
+.category-quickbar__item--active {
+    background: #f97316;
+    border-color: #f97316;
+    color: #2a0f02;
+}
+
+.category-quickbar__emoji {
+    font-size: 22px;
+    line-height: 1;
+}
+
+.category-quickbar__label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    white-space: nowrap;
 }
 
 .filters-panel {

@@ -2,6 +2,7 @@
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { emojiForRestaurant } from '@/utils/categoryIcons';
 
 const props = defineProps({
     restaurants: {
@@ -40,10 +41,11 @@ function formatDistance(distanceKm) {
     return km < 1 ? `${Math.round(km * 1000)} metros` : `${km.toFixed(1)} km`;
 }
 
-function restaurantIcon(isOpenNow, isHighlighted) {
-    const color = isOpenNow ? '#22C55E' : '#8A7F7A';
+function restaurantIcon(restaurant, isHighlighted) {
+    const color = restaurant.is_open_now ? '#22C55E' : '#8A7F7A';
     const size = isHighlighted ? 34 : 26;
     const ring = isHighlighted ? `box-shadow:0 0 0 4px ${color}33, 0 2px 8px rgba(0,0,0,.5);` : 'box-shadow:0 2px 6px rgba(0,0,0,.5);';
+    const emoji = emojiForRestaurant(restaurant.categories);
 
     return L.divIcon({
         className: '',
@@ -58,7 +60,7 @@ function restaurantIcon(isOpenNow, isHighlighted) {
                 display:flex;align-items:center;justify-content:center;
                 transition:width .15s,height .15s;
             ">
-                <span class="mdi mdi-silverware-fork-knife" style="color:white;font-size:${size * 0.45}px;transform:rotate(45deg);"></span>
+                <span style="font-size:${size * 0.5}px;line-height:1;transform:rotate(45deg);">${emoji}</span>
             </div>
         `,
         iconSize: [size, size],
@@ -71,7 +73,11 @@ function popupHtml(restaurant) {
     const distance = formatDistance(restaurant.distance_km);
     const cuisines = (restaurant.cuisines ?? []).map((c) => c.name).join(' · ');
     const profileUrl = route('restaurants.show', restaurant.slug);
-    const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${restaurant.latitude},${restaurant.longitude}`;
+    // Com a localizacao do usuario ja em maos (props.userLocation), passa como origin
+    // explicito -- sem isso o Google Maps pede a localizacao de novo, com sua propria
+    // permissao, que pode nao ter sido concedida mesmo com a do app.
+    const origin = props.userLocation ? `&origin=${props.userLocation.lat},${props.userLocation.lng}` : '';
+    const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${restaurant.latitude},${restaurant.longitude}${origin}`;
     const statusColor = restaurant.is_open_now ? '#22C55E' : '#A68D7C';
 
     return `
@@ -106,11 +112,14 @@ function renderMarkers() {
         if (restaurant.latitude == null || restaurant.longitude == null) return;
 
         const marker = L.marker([restaurant.latitude, restaurant.longitude], {
-            icon: restaurantIcon(restaurant.is_open_now, restaurant.id === props.highlightedId),
+            icon: restaurantIcon(restaurant, restaurant.id === props.highlightedId),
         });
 
         marker.bindPopup(popupHtml(restaurant));
-        marker.on('click', () => emit('select', restaurant));
+        marker.on('click', () => {
+            map.flyTo([restaurant.latitude, restaurant.longitude], Math.max(map.getZoom(), 17), { duration: 0.5 });
+            emit('select', restaurant);
+        });
         marker.addTo(markersLayer);
         markersById.set(restaurant.id, { marker, restaurant });
     });
@@ -118,7 +127,7 @@ function renderMarkers() {
 
 function updateHighlight() {
     markersById.forEach(({ marker, restaurant }, id) => {
-        marker.setIcon(restaurantIcon(restaurant.is_open_now, id === props.highlightedId));
+        marker.setIcon(restaurantIcon(restaurant, id === props.highlightedId));
         if (id === props.highlightedId) {
             marker.setZIndexOffset(1000);
         } else {
