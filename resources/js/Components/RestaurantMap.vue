@@ -96,7 +96,7 @@ function popupHtml(restaurant) {
     const statusColor = restaurant.is_open_now ? '#22C55E' : '#A68D7C';
 
     return `
-        <div style="min-width:240px;font-family:inherit;">
+        <div style="min-width:260px;font-family:inherit;">
             <div style="font-weight:700;font-size:15px;margin-bottom:4px;color:#FDF6F0;">${restaurant.name}</div>
             <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#E3CFC0;margin-bottom:4px;flex-wrap:wrap;">
                 <span><i class="mdi mdi-star" style="color:#FBBF24;"></i> ${Number(restaurant.average_rating).toFixed(1)}</span>
@@ -108,10 +108,16 @@ function popupHtml(restaurant) {
                 <i class="mdi mdi-circle" style="font-size:8px;"></i>
                 ${restaurant.is_open_now ? 'Aberto agora' : 'Fechado agora'}
             </div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                <a href="${profileUrl}" style="background:#F97316;color:#2A0F02;padding:6px 10px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none;">Ver perfil</a>
-                <a href="${profileUrl}#cardapio" style="border:1px solid rgba(249,115,22,0.35);padding:6px 10px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none;color:#FDF6F0;">Cardápio</a>
-                <a href="${directionsUrl}" target="_blank" rel="noopener" style="padding:6px 10px;font-size:12px;font-weight:600;text-decoration:none;color:#FDF6F0;">Como chegar</a>
+            <a href="${profileUrl}" style="display:block;text-align:center;background:#F97316;color:#2A0F02;padding:8px 10px;border-radius:6px;font-size:12px;font-weight:700;text-decoration:none;margin-bottom:6px;transition:background .15s;" onmouseover="this.style.background='#FB923C'" onmouseout="this.style.background='#F97316'">
+                Ver perfil
+            </a>
+            <div style="display:flex;gap:6px;">
+                <a href="${profileUrl}#cardapio" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;border:1px solid rgba(249,115,22,0.4);padding:7px 8px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none;color:#FDF6F0;transition:border-color .15s,background-color .15s;" onmouseover="this.style.borderColor='#F97316';this.style.backgroundColor='rgba(249,115,22,.1)'" onmouseout="this.style.borderColor='rgba(249,115,22,.4)';this.style.backgroundColor='transparent'">
+                    <i class="mdi mdi-book-open-variant" style="font-size:14px;"></i> Cardápio
+                </a>
+                <a href="${directionsUrl}" target="_blank" rel="noopener" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;border:1px solid rgba(249,115,22,0.4);padding:7px 8px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none;color:#FDF6F0;transition:border-color .15s,background-color .15s;" onmouseover="this.style.borderColor='#F97316';this.style.backgroundColor='rgba(249,115,22,.1)'" onmouseout="this.style.borderColor='rgba(249,115,22,.4)';this.style.backgroundColor='transparent'">
+                    <i class="mdi mdi-directions" style="font-size:14px;"></i> Como chegar
+                </a>
             </div>
         </div>
     `;
