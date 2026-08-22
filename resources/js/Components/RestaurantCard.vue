@@ -92,10 +92,20 @@ function formatPrice(value) {
                     <span class="font-weight-bold text-primary">{{ restaurant.price_range }}</span>
                 </div>
 
-                <div v-if="featuredItem" class="mt-2 d-flex align-center ga-1 text-body-2 featured-line">
-                    <v-icon icon="mdi-fire" size="16" color="accent" />
-                    <span class="text-truncate" style="min-width: 0">{{ featuredItem.name }}</span>
-                    <span class="font-weight-bold flex-shrink-0">{{ formatPrice(featuredItem.price) }}</span>
+                <div v-if="featuredItem" class="mt-2 featured-strip">
+                    <div class="featured-strip__thumb">
+                        <img
+                            v-if="featuredItem.main_photo_path"
+                            :src="`/storage/${featuredItem.main_photo_path}`"
+                            :alt="featuredItem.name"
+                        />
+                        <v-icon v-else icon="mdi-fire" size="18" color="accent" />
+                    </div>
+                    <div class="flex-grow-1" style="min-width: 0">
+                        <div class="featured-strip__label">Destaque</div>
+                        <div class="text-body-2 font-weight-medium text-truncate">{{ featuredItem.name }}</div>
+                    </div>
+                    <span class="featured-strip__price flex-shrink-0">{{ formatPrice(featuredItem.price) }}</span>
                 </div>
 
                 <div class="mt-2 d-flex flex-wrap ga-1">
@@ -157,9 +167,46 @@ function formatPrice(value) {
     border-top-right-radius: 6px;
 }
 
-.featured-line {
+.featured-strip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 8px;
+    background: rgba(var(--v-theme-accent), 0.1);
+    border: 1px solid rgba(var(--v-theme-accent), 0.25);
+}
+
+.featured-strip__thumb {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(var(--v-theme-accent), 0.16);
+}
+
+.featured-strip__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.featured-strip__label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
     color: rgb(var(--v-theme-accent));
-    font-weight: 600;
+    line-height: 1.4;
+}
+
+.featured-strip__price {
+    font-weight: 700;
+    color: rgb(var(--v-theme-accent));
 }
 
 .restaurant-thumb__photo {
