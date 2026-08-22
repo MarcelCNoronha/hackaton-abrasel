@@ -7,10 +7,12 @@ use App\Models\FoodTag;
 use App\Models\Menu;
 use App\Models\MenuCategory;
 use App\Models\MenuItem;
+use App\Models\Restaurant;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class MenuController extends Controller
 {
@@ -60,6 +62,7 @@ class MenuController extends Controller
         $foodTagNames = $data['food_tags'] ?? [];
         $dietaryTagIds = $data['dietary_tags'] ?? [];
         unset($data['food_tags'], $data['dietary_tags']);
+        $this->assertFoodTagsDontDuplicateCuisine($foodTagNames, $menuCategory->menu->restaurant);
 
         if ($request->hasFile('photo')) {
             $data['main_photo_path'] = $request->file('photo')->store('menu-items', 'public');
@@ -84,6 +87,7 @@ class MenuController extends Controller
         $foodTagNames = $data['food_tags'] ?? [];
         $dietaryTagIds = $data['dietary_tags'] ?? [];
         unset($data['food_tags'], $data['dietary_tags']);
+        $this->assertFoodTagsDontDuplicateCuisine($foodTagNames, $menuItem->category->menu->restaurant);
 
         if ($request->hasFile('photo')) {
             if ($menuItem->main_photo_path) {
@@ -127,6 +131,31 @@ class MenuController extends Controller
         }, array_filter($names, fn ($name) => trim((string) $name) !== ''));
     }
 
+    /**
+     * Uma food tag igual a uma cozinha que o proprio restaurante ja tem (ex.: marcar "Pizza"
+     * num prato de uma pizzaria) nao ajuda a filtrar nada -- o restaurante ja aparece nesse
+     * filtro via Cuisine, no mesmo nivel de granularidade. Isso ja aconteceu nos dados de
+     * demonstracao (Pizza/Churrasco duplicados) e confundia quem via "Tipo de comida" e
+     * "Prato ou ingrediente" oferecendo a mesma palavra. A tag continua valida pra QUALQUER
+     * outro restaurante sem essa cozinha -- so' e' redundante pra este.
+     *
+     * @param  array<int, string>  $names
+     */
+    private function assertFoodTagsDontDuplicateCuisine(array $names, Restaurant $restaurant): void
+    {
+        $cuisineSlugs = $restaurant->cuisines()->pluck('slug')->all();
+
+        foreach ($names as $name) {
+            $slug = Str::slug(trim((string) $name));
+
+            if (in_array($slug, $cuisineSlugs, true)) {
+                throw ValidationException::withMessages([
+                    'food_tags' => "\"{$name}\" já é o tipo de cozinha deste restaurante -- use uma tag mais específica de prato ou ingrediente.",
+                ]);
+            }
+        }
+    }
+
     public function destroyItem(Request $request, MenuItem $menuItem): RedirectResponse
     {
         $this->authorizeItem($request, $menuItem);
@@ -134,6 +163,26 @@ class MenuController extends Controller
         $menuItem->delete();
 
         return back()->with('status', 'Item removido.');
+    }
+
+    // So' 1 item em destaque por restaurante -- selecionar um novo troca o anterior; clicar
+    // no que ja esta em destaque desmarca. E' isso que aparece no lugar do icone generico no
+    // card de busca (ver Discover\RestaurantCard.vue), pra diferenciar cada estabelecimento.
+    public function toggleFeatured(Request $request, MenuItem $menuItem): RedirectResponse
+    {
+        $this->authorizeItem($request, $menuItem);
+
+        $restaurant = $menuItem->category->menu->restaurant;
+        $isCurrentlyFeatured = $restaurant->featured_menu_item_id === $menuItem->id;
+
+        $restaurant->forceFill([
+            'featured_menu_item_id' => $isCurrentlyFeatured ? null : $menuItem->id,
+        ])->save();
+
+        return back()->with(
+            'status',
+            $isCurrentlyFeatured ? 'Destaque removido.' : "\"{$menuItem->name}\" agora é o destaque do estabelecimento.",
+        );
     }
 
     private function validateItem(Request $request): array

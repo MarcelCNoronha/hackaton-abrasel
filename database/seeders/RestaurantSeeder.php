@@ -59,7 +59,7 @@ class RestaurantSeeder extends Seeder
                 'rating' => 4.6, 'reviews' => 340,
                 'menu' => [
                     'Rodízio' => [
-                        ['name' => 'Rodízio tradicional', 'desc' => 'Pizzas, petiscos, refrigerante e massa liberados.', 'price' => 59.00, 'tags' => [], 'food_tags' => ['Rodízio', 'Pizza']],
+                        ['name' => 'Rodízio tradicional', 'desc' => 'Pizzas, petiscos, refrigerante e massa liberados.', 'price' => 59.00, 'tags' => [], 'food_tags' => ['Rodízio']],
                         ['name' => 'Rodízio premium', 'desc' => 'Inclui camarões empanados, presunto parma com alho-poró e costela ao molho barbecue.', 'price' => 59.00, 'compare_at_price' => 69.00, 'tags' => [], 'food_tags' => ['Rodízio', 'Frutos do Mar']],
                     ],
                 ],
@@ -75,8 +75,8 @@ class RestaurantSeeder extends Seeder
                 'rating' => 4.0, 'reviews' => 210,
                 'menu' => [
                     'Pizzas' => [
-                        ['name' => 'Pizza calabresa', 'desc' => 'Calabresa, cebola e mussarela.', 'price' => 32.90, 'compare_at_price' => 39.90, 'tags' => [], 'food_tags' => ['Pizza']],
-                        ['name' => 'Pizza vegetariana', 'desc' => 'Legumes grelhados e mussarela.', 'price' => 42.90, 'tags' => ['Vegetariano'], 'food_tags' => ['Pizza']],
+                        ['name' => 'Pizza calabresa', 'desc' => 'Calabresa, cebola e mussarela.', 'price' => 32.90, 'compare_at_price' => 39.90, 'tags' => [], 'food_tags' => []],
+                        ['name' => 'Pizza vegetariana', 'desc' => 'Legumes grelhados e mussarela.', 'price' => 42.90, 'tags' => ['Vegetariano'], 'food_tags' => []],
                     ],
                     'Bebidas' => [
                         ['name' => 'Chope artesanal', 'desc' => null, 'price' => 12.00, 'tags' => []],
@@ -142,7 +142,7 @@ class RestaurantSeeder extends Seeder
                 'rating' => 4.1, 'reviews' => 220,
                 'menu' => [
                     'Petiscos' => [
-                        ['name' => 'Picanha na tábua', 'desc' => 'Acompanha farofa e vinagrete.', 'price' => 64.90, 'tags' => [], 'food_tags' => ['Picanha', 'Churrasco', 'Petiscos']],
+                        ['name' => 'Picanha na tábua', 'desc' => 'Acompanha farofa e vinagrete.', 'price' => 64.90, 'tags' => [], 'food_tags' => ['Picanha', 'Petiscos']],
                         ['name' => 'Torresmo de barriga', 'desc' => null, 'price' => 32.90, 'tags' => [], 'food_tags' => ['Petiscos']],
                     ],
                 ],
@@ -158,7 +158,7 @@ class RestaurantSeeder extends Seeder
                 'rating' => 4.4, 'reviews' => 130,
                 'menu' => [
                     'Pizzas' => [
-                        ['name' => 'Pizza mineira', 'desc' => 'Linguiça, pimenta biquinho e queijo canastra.', 'price' => 44.90, 'tags' => [], 'food_tags' => ['Pizza']],
+                        ['name' => 'Pizza mineira', 'desc' => 'Linguiça, pimenta biquinho e queijo canastra.', 'price' => 44.90, 'tags' => [], 'food_tags' => []],
                     ],
                     'Petiscos' => [
                         ['name' => 'Frango com quiabo sem lactose', 'desc' => null, 'price' => 28.90, 'tags' => ['Sem lactose'], 'food_tags' => ['Frango', 'Arroz e Feijão']],
@@ -177,7 +177,7 @@ class RestaurantSeeder extends Seeder
                 'rating' => 4.2, 'reviews' => 175,
                 'menu' => [
                     'Rodízio' => [
-                        ['name' => 'Rodízio de carnes', 'desc' => 'Cortes nobres + buffet de saladas.', 'price' => 89.90, 'tags' => [], 'food_tags' => ['Rodízio', 'Churrasco', 'Picanha']],
+                        ['name' => 'Rodízio de carnes', 'desc' => 'Cortes nobres + buffet de saladas.', 'price' => 89.90, 'tags' => [], 'food_tags' => ['Rodízio', 'Picanha']],
                         ['name' => 'Buffet vegetariano avulso', 'desc' => null, 'price' => 49.90, 'tags' => ['Vegetariano', 'Sem glúten'], 'food_tags' => ['Arroz e Feijão']],
                     ],
                 ],
@@ -209,8 +209,8 @@ class RestaurantSeeder extends Seeder
                 'rating' => 4.3, 'reviews' => 140,
                 'menu' => [
                     'Pizzas' => [
-                        ['name' => 'Pizza margherita', 'desc' => null, 'price' => 36.90, 'tags' => ['Vegetariano'], 'food_tags' => ['Pizza']],
-                        ['name' => 'Pizza portuguesa', 'desc' => null, 'price' => 41.90, 'tags' => [], 'food_tags' => ['Pizza']],
+                        ['name' => 'Pizza margherita', 'desc' => null, 'price' => 36.90, 'tags' => ['Vegetariano'], 'food_tags' => []],
+                        ['name' => 'Pizza portuguesa', 'desc' => null, 'price' => 41.90, 'tags' => [], 'food_tags' => []],
                     ],
                 ],
                 'hours' => ['tue-sun' => ['18:00', '23:30']],
