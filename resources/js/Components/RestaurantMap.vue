@@ -41,31 +41,46 @@ function formatDistance(distanceKm) {
     return km < 1 ? `${Math.round(km * 1000)} metros` : `${km.toFixed(1)} km`;
 }
 
+function escapeHtml(text) {
+    return String(text).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+}
+
+// Badge redondo + nome sempre visivel do lado, no estilo dos POIs do Google Maps -- ao inves
+// da gota clicavel-so-no-popup de antes. iconAnchor fica no CENTRO do badge (nao na ponta
+// inferior, como seria numa gota), ja que e' um circulo, nao um pino apontando pra baixo.
 function restaurantIcon(restaurant, isHighlighted) {
     const color = restaurant.is_open_now ? '#22C55E' : '#8A7F7A';
-    const size = isHighlighted ? 34 : 26;
+    const size = isHighlighted ? 34 : 28;
     const ring = isHighlighted ? `box-shadow:0 0 0 4px ${color}33, 0 2px 8px rgba(0,0,0,.5);` : 'box-shadow:0 2px 6px rgba(0,0,0,.5);';
     const emoji = emojiForRestaurant(restaurant.categories);
+    const name = escapeHtml(restaurant.name);
 
     return L.divIcon({
         className: '',
         html: `
-            <div style="
-                background:${color};
-                width:${size}px;height:${size}px;
-                border-radius:50% 50% 50% 0;
-                transform:rotate(-45deg);
-                border:2px solid white;
-                ${ring}
-                display:flex;align-items:center;justify-content:center;
-                transition:width .15s,height .15s;
-            ">
-                <span style="font-size:${size * 0.5}px;line-height:1;transform:rotate(45deg);">${emoji}</span>
+            <div style="position:relative;width:${size}px;height:${size}px;">
+                <div style="
+                    background:${color};
+                    width:${size}px;height:${size}px;
+                    border-radius:50%;
+                    border:2px solid white;
+                    ${ring}
+                    display:flex;align-items:center;justify-content:center;
+                ">
+                    <span style="font-size:${size * 0.55}px;line-height:1;">${emoji}</span>
+                </div>
+                <div style="
+                    position:absolute;left:${size + 6}px;top:50%;transform:translateY(-50%);
+                    background:rgba(28,18,12,.92);color:#fdf6f0;
+                    padding:2px 8px;border-radius:6px;font-size:12px;font-weight:600;
+                    white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.4);
+                    cursor:pointer;
+                ">${name}</div>
             </div>
         `,
         iconSize: [size, size],
-        iconAnchor: [size / 2, size],
-        popupAnchor: [0, -size],
+        iconAnchor: [size / 2, size / 2],
+        popupAnchor: [0, -size / 2],
     });
 }
 
