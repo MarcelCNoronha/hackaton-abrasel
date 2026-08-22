@@ -86,6 +86,7 @@ class MenuController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:1000'],
             'price' => ['required', 'numeric', 'min:0'],
+            'compare_at_price' => ['nullable', 'numeric', 'gt:price'],
             'is_available' => ['required', 'boolean'],
         ]);
     }

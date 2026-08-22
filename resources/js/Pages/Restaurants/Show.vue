@@ -136,15 +136,31 @@ const heroGradient = computed(() => {
                                 <v-card-item>
                                     <v-card-title class="d-flex justify-space-between align-start ga-2">
                                         <span>{{ item.name }}</span>
-                                        <span class="text-primary font-weight-bold text-no-wrap">
-                                            R$ {{ Number(item.price).toFixed(2).replace('.', ',') }}
+                                        <span class="text-no-wrap text-right">
+                                            <template v-if="item.compare_at_price && Number(item.compare_at_price) > Number(item.price)">
+                                                <span class="d-block text-caption text-medium-emphasis text-decoration-line-through">
+                                                    De R$ {{ Number(item.compare_at_price).toFixed(2).replace('.', ',') }}
+                                                </span>
+                                                <span class="text-primary font-weight-bold">
+                                                    Por R$ {{ Number(item.price).toFixed(2).replace('.', ',') }}
+                                                </span>
+                                            </template>
+                                            <span v-else class="text-primary font-weight-bold">
+                                                R$ {{ Number(item.price).toFixed(2).replace('.', ',') }}
+                                            </span>
                                         </span>
                                     </v-card-title>
                                     <v-card-subtitle v-if="item.description" style="white-space: normal">
                                         {{ item.description }}
                                     </v-card-subtitle>
                                 </v-card-item>
-                                <v-card-text v-if="item.dietary_tags?.length || !item.is_available" class="pt-0">
+                                <v-card-text v-if="item.dietary_tags?.length || !item.is_available || (item.compare_at_price && Number(item.compare_at_price) > Number(item.price))" class="pt-0">
+                                    <v-chip
+                                        v-if="item.compare_at_price && Number(item.compare_at_price) > Number(item.price)"
+                                        size="small" color="error" variant="flat" class="mr-1"
+                                    >
+                                        -{{ Math.round((1 - Number(item.price) / Number(item.compare_at_price)) * 100) }}%
+                                    </v-chip>
                                     <v-chip v-if="!item.is_available" size="small" variant="outlined" class="mr-1">
                                         Indisponível
                                     </v-chip>

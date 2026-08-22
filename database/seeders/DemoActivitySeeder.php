@@ -15,6 +15,7 @@ use App\Models\ReviewReply;
 use App\Models\User;
 use App\Models\Visit;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 /**
@@ -116,9 +117,9 @@ class DemoActivitySeeder extends Seeder
     }
 
     /**
-     * @return \Illuminate\Support\Collection<int, Review>
+     * @return Collection<int, Review>
      */
-    private function createVisitsAndReviews(Restaurant $restaurant, array $consumers, User $owner): \Illuminate\Support\Collection
+    private function createVisitsAndReviews(Restaurant $restaurant, array $consumers, User $owner): Collection
     {
         $slug = $restaurant->slug;
         $reviewerCount = min(count($consumers), 4);
@@ -211,7 +212,7 @@ class DemoActivitySeeder extends Seeder
         );
     }
 
-    private function createCoupons(Restaurant $restaurant, CouponCampaign $campaign, \Illuminate\Support\Collection $reviews): void
+    private function createCoupons(Restaurant $restaurant, CouponCampaign $campaign, Collection $reviews): void
     {
         foreach ($reviews as $index => $review) {
             if ($index % 2 !== 0) {

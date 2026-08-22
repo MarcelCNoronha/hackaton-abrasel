@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
-    'menu_category_id', 'name', 'description', 'price', 'main_photo_path',
+    'menu_category_id', 'name', 'description', 'price', 'compare_at_price', 'main_photo_path',
     'is_available', 'is_spicy', 'size', 'serves_count', 'position',
 ])]
 class MenuItem extends Model
@@ -23,9 +23,15 @@ class MenuItem extends Model
     {
         return [
             'price' => 'decimal:2',
+            'compare_at_price' => 'decimal:2',
             'is_available' => 'boolean',
             'is_spicy' => 'boolean',
         ];
+    }
+
+    public function isOnSale(): bool
+    {
+        return $this->compare_at_price !== null && $this->compare_at_price > $this->price;
     }
 
     public function category(): BelongsTo

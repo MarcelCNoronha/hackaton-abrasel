@@ -34,7 +34,7 @@ class RestaurantSeeder extends Seeder
                 'menu' => [
                     'Rodízio' => [
                         ['name' => 'Rodízio tradicional', 'desc' => 'Pizzas, petiscos, refrigerante e massa liberados.', 'price' => 59.00, 'tags' => []],
-                        ['name' => 'Rodízio premium', 'desc' => 'Inclui camarões empanados, presunto parma com alho-poró e costela ao molho barbecue.', 'price' => 69.00, 'tags' => []],
+                        ['name' => 'Rodízio premium', 'desc' => 'Inclui camarões empanados, presunto parma com alho-poró e costela ao molho barbecue.', 'price' => 59.00, 'compare_at_price' => 69.00, 'tags' => []],
                     ],
                 ],
                 'hours' => ['mon-sun' => ['11:00', '23:30']],
@@ -49,7 +49,7 @@ class RestaurantSeeder extends Seeder
                 'rating' => 4.0, 'reviews' => 210,
                 'menu' => [
                     'Pizzas' => [
-                        ['name' => 'Pizza calabresa', 'desc' => 'Calabresa, cebola e mussarela.', 'price' => 39.90, 'tags' => []],
+                        ['name' => 'Pizza calabresa', 'desc' => 'Calabresa, cebola e mussarela.', 'price' => 32.90, 'compare_at_price' => 39.90, 'tags' => []],
                         ['name' => 'Pizza vegetariana', 'desc' => 'Legumes grelhados e mussarela.', 'price' => 42.90, 'tags' => ['Vegetariano']],
                     ],
                     'Bebidas' => [
@@ -68,7 +68,7 @@ class RestaurantSeeder extends Seeder
                 'rating' => 4.5, 'reviews' => 150,
                 'menu' => [
                     'Combinados' => [
-                        ['name' => 'Combinado 20 peças', 'desc' => 'Sushi e sashimi variados.', 'price' => 64.90, 'tags' => []],
+                        ['name' => 'Combinado 20 peças', 'desc' => 'Sushi e sashimi variados.', 'price' => 54.90, 'compare_at_price' => 64.90, 'tags' => []],
                         ['name' => 'Temaki salmão', 'desc' => null, 'price' => 22.90, 'tags' => []],
                     ],
                 ],
@@ -283,6 +283,7 @@ class RestaurantSeeder extends Seeder
                     'name' => $item['name'],
                     'description' => $item['desc'],
                     'price' => $item['price'],
+                    'compare_at_price' => $item['compare_at_price'] ?? null,
                     'is_available' => true,
                     'position' => $itemPosition++,
                 ]);

@@ -76,6 +76,7 @@ const itemForm = useForm({
     name: '',
     description: '',
     price: '',
+    compare_at_price: '',
     is_available: true,
 });
 
@@ -91,6 +92,7 @@ function openEditItemDialog(item) {
     itemForm.name = item.name;
     itemForm.description = item.description ?? '';
     itemForm.price = item.price;
+    itemForm.compare_at_price = item.compare_at_price ?? '';
     itemForm.is_available = item.is_available;
     itemDialogCategoryId.value = 'edit';
 }
@@ -287,7 +289,15 @@ function submitReply(reviewId) {
                                             <v-card-item>
                                                 <v-card-title class="d-flex justify-space-between align-start ga-2">
                                                     <span>{{ item.name }}</span>
-                                                    <span class="text-primary font-weight-bold">R$ {{ Number(item.price).toFixed(2).replace('.', ',') }}</span>
+                                                    <span class="text-no-wrap">
+                                                        <span
+                                                            v-if="item.compare_at_price && Number(item.compare_at_price) > Number(item.price)"
+                                                            class="text-medium-emphasis text-decoration-line-through mr-1"
+                                                        >
+                                                            R$ {{ Number(item.compare_at_price).toFixed(2).replace('.', ',') }}
+                                                        </span>
+                                                        <span class="text-primary font-weight-bold">R$ {{ Number(item.price).toFixed(2).replace('.', ',') }}</span>
+                                                    </span>
                                                 </v-card-title>
                                                 <v-card-subtitle v-if="item.description">{{ item.description }}</v-card-subtitle>
                                             </v-card-item>
@@ -317,7 +327,22 @@ function submitReply(reviewId) {
                                             <v-form @submit.prevent="submitItem">
                                                 <v-text-field v-model="itemForm.name" label="Nome" :error-messages="itemForm.errors.name" />
                                                 <v-textarea v-model="itemForm.description" label="Descrição" rows="2" :error-messages="itemForm.errors.description" />
-                                                <v-text-field v-model="itemForm.price" type="number" step="0.01" min="0" label="Preço (R$)" :error-messages="itemForm.errors.price" />
+                                                <div class="d-flex ga-2">
+                                                    <v-text-field
+                                                        v-model="itemForm.compare_at_price"
+                                                        type="number" step="0.01" min="0"
+                                                        label="De (R$) -- opcional"
+                                                        hint="Preço original, exibido riscado"
+                                                        persistent-hint
+                                                        :error-messages="itemForm.errors.compare_at_price"
+                                                    />
+                                                    <v-text-field
+                                                        v-model="itemForm.price"
+                                                        type="number" step="0.01" min="0"
+                                                        label="Por (R$)"
+                                                        :error-messages="itemForm.errors.price"
+                                                    />
+                                                </div>
                                                 <v-switch v-model="itemForm.is_available" color="primary" label="Disponível" />
                                                 <v-btn type="submit" color="primary" variant="flat" :loading="itemForm.processing">
                                                     Salvar

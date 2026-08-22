@@ -32,32 +32,33 @@ class DiscoveryTest extends TestCase
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('Discover/Index')
-                ->has('restaurants', 6)
+                ->has('restaurants', 10)
             );
     }
 
     public function test_within_distance_filter_excludes_far_restaurants(): void
     {
-        // centro de Vicosa/MG; Burger Local (~170m) e Veggie Green Bowl (~335m) ficam
-        // dentro de 500m, os demais estao a 700m+ -- margem confortavel para o teste.
-        $response = $this->get('/restaurantes?lat=-20.7546&lng=-42.8825&radius_km=0.5');
+        // centro de Vicosa/MG; so O Barbante fica a ~155m, o proximo mais perto
+        // (Sabor e Cia, ~265m) ja fica fora do raio de 200m -- margem confortavel.
+        $response = $this->get('/restaurantes?lat=-20.7546&lng=-42.8825&radius_km=0.2');
 
         $response->assertInertia(fn (Assert $page) => $page
             ->component('Discover/Index')
-            ->has('restaurants', 2)
+            ->has('restaurants', 1)
+            ->where('restaurants.0.slug', 'o-barbante')
         );
     }
 
     public function test_dietary_tags_filter_requires_a_single_dish_matching_all_tags(): void
     {
         $response = $this->get('/restaurantes?'.http_build_query([
-            'dietary_tags' => ['vegano', 'sem-gluten'],
+            'dietary_tags' => ['vegetariano', 'sem-gluten'],
         ]));
 
         $response->assertInertia(fn (Assert $page) => $page
             ->component('Discover/Index')
             ->has('restaurants', 1)
-            ->where('restaurants.0.slug', 'veggie-green-bowl')
+            ->where('restaurants.0.slug', 'choperia-e-churrascaria-devan')
         );
     }
 
@@ -67,17 +68,17 @@ class DiscoveryTest extends TestCase
 
         $response->assertInertia(fn (Assert $page) => $page
             ->has('restaurants', 1)
-            ->where('restaurants.0.slug', 'veggie-green-bowl')
+            ->where('restaurants.0.slug', 'beco-das-flores')
         );
     }
 
     public function test_restaurant_profile_page_renders_menu_and_business_hours(): void
     {
-        $response = $this->get('/restaurantes/burger-local');
+        $response = $this->get('/restaurantes/arte-sabor');
 
         $response->assertOk()->assertInertia(fn (Assert $page) => $page
             ->component('Restaurants/Show')
-            ->where('restaurant.name', 'Burger Local')
+            ->where('restaurant.name', 'Arte & Sabor')
             ->has('restaurant.menus.0.categories.0.items')
             ->has('restaurant.business_hours', 7)
         );
