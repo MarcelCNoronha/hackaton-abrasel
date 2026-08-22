@@ -38,7 +38,7 @@ class DiscoveryTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page
                 ->component('Discover/Index')
                 ->has('restaurants', 0)
-                ->has('mapRestaurants', 10)
+                ->has('mapRestaurants', 16)
             );
     }
 
@@ -68,23 +68,25 @@ class DiscoveryTest extends TestCase
 
     public function test_dietary_tags_filter_requires_a_single_dish_matching_all_tags(): void
     {
+        // Choperia e Churrascaria Devan (buffet vegetariano avulso) e Padaria Vesúvio (combo
+        // de pão de queijo, naturalmente sem glúten) sao os unicos com 1 prato so' que atenda
+        // as DUAS restricoes ao mesmo tempo.
         $response = $this->get('/restaurantes?'.http_build_query([
             'dietary_tags' => ['vegetariano', 'sem-gluten'],
         ]));
 
         $response->assertInertia(fn (Assert $page) => $page
             ->component('Discover/Index')
-            ->has('restaurants', 1)
-            ->where('restaurants.0.slug', 'choperia-e-churrascaria-devan')
+            ->has('restaurants', 2)
         );
     }
 
     public function test_cuisine_and_food_tag_are_combined_with_or_not_and(): void
     {
-        // "Japonês" (cozinha) bate com Sushi Mirim + Japa Nobre; "Bowls" (food tag) bate so'
-        // com Beco das Flores -- nenhum restaurante e' as duas coisas ao mesmo tempo. Isso so'
-        // devolve os 3 se a combinacao for OR; a semantica antiga (AND entre as duas
-        // categorias) devolveria 0.
+        // "Japonês" (cozinha) bate com Sushi Mirim + Japa Nobre; "Bowls" (food tag) bate com
+        // Beco das Flores e Açaí Mix Viçosa -- nenhum restaurante e' as duas coisas ao mesmo
+        // tempo. Isso so' devolve os 4 se a combinacao for OR; a semantica antiga (AND entre
+        // as duas categorias) devolveria 0.
         $response = $this->get('/restaurantes?'.http_build_query([
             'cuisines' => ['japones'],
             'food_tags' => ['bowls'],
@@ -92,16 +94,18 @@ class DiscoveryTest extends TestCase
 
         $response->assertInertia(fn (Assert $page) => $page
             ->component('Discover/Index')
-            ->has('restaurants', 3)
+            ->has('restaurants', 4)
         );
     }
 
     public function test_text_search_matches_menu_item_names(): void
     {
+        // Beco das Flores (Bowl vegano do dia) e Açaí Mix Viçosa (Bowl de açaí) -- Beco fica
+        // primeiro por ter mais avaliacoes no empate de nota (ambos 4.5).
         $response = $this->get('/restaurantes?q=bowl');
 
         $response->assertInertia(fn (Assert $page) => $page
-            ->has('restaurants', 1)
+            ->has('restaurants', 2)
             ->where('restaurants.0.slug', 'beco-das-flores')
         );
     }

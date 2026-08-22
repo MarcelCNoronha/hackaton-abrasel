@@ -215,6 +215,106 @@ class RestaurantSeeder extends Seeder
                 ],
                 'hours' => ['tue-sun' => ['18:00', '23:30']],
             ],
+            // A partir daqui: 1 estabelecimento por tipo que ainda nao tinha nenhum
+            // representante na lista acima (Hamburgueria, Cafeteria, Padaria, Lanchonete,
+            // Sorveteria, Acai) -- sem isso a quickbar de categorias do Discover tinha icone
+            // pra tipos que a busca nunca retornava nada.
+            [
+                'name' => 'Fábrica Hamburgueria Artesanal',
+                'neighborhood' => 'Santo Antônio',
+                'category' => 'Hamburgueria',
+                'cuisines' => ['Hambúrguer'],
+                'price_range' => PriceRange::Medium,
+                'lat' => -20.7506241, 'lng' => -42.8638934,
+                'rating' => 4.4, 'reviews' => 95,
+                'menu' => [
+                    'Burgers' => [
+                        ['name' => 'X-Fábrica', 'desc' => 'Blend 180g, cheddar, bacon e cebola caramelizada no pão brioche.', 'price' => 28.90, 'tags' => [], 'food_tags' => []],
+                        ['name' => 'Batata frita rústica', 'desc' => 'Com casca, alecrim e páprica.', 'price' => 14.90, 'tags' => ['Vegetariano'], 'food_tags' => ['Petiscos']],
+                    ],
+                ],
+                'hours' => ['tue-sun' => ['18:00', '23:30']],
+            ],
+            [
+                'name' => 'Cafeteria Viena Café',
+                'neighborhood' => 'Centro',
+                'category' => 'Cafeteria',
+                'cuisines' => ['Café'],
+                'price_range' => PriceRange::Low,
+                'lat' => -20.7544069, 'lng' => -42.8804566,
+                'rating' => 4.7, 'reviews' => 210,
+                'menu' => [
+                    'Cardápio' => [
+                        ['name' => 'Croissant com queijo e presunto', 'desc' => null, 'price' => 14.90, 'tags' => [], 'food_tags' => ['Café da Manhã']],
+                        ['name' => 'Bolo de fubá com café coado', 'desc' => null, 'price' => 12.90, 'tags' => ['Vegetariano'], 'food_tags' => ['Café da Manhã']],
+                    ],
+                ],
+                'hours' => ['mon-sat' => ['07:00', '19:00']],
+            ],
+            [
+                'name' => 'Padaria Vesúvio',
+                'neighborhood' => 'Bela Vista',
+                'category' => 'Padaria',
+                'cuisines' => ['Café'],
+                'price_range' => PriceRange::Low,
+                'lat' => -20.7583470, 'lng' => -42.8789830,
+                'rating' => 4.2, 'reviews' => 88,
+                'menu' => [
+                    'Cardápio' => [
+                        ['name' => 'Pão na chapa com café com leite', 'desc' => null, 'price' => 8.90, 'tags' => [], 'food_tags' => ['Café da Manhã']],
+                        ['name' => 'Combo pão de queijo (6 un.)', 'desc' => null, 'price' => 12.90, 'tags' => ['Vegetariano', 'Sem glúten'], 'food_tags' => []],
+                    ],
+                ],
+                'hours' => ['mon-sun' => ['06:00', '20:00']],
+            ],
+            [
+                'name' => 'Lanchonete do Denis',
+                'neighborhood' => 'Centro',
+                'category' => 'Lanchonete',
+                'cuisines' => ['Hambúrguer'],
+                'price_range' => PriceRange::Low,
+                'lat' => -20.7580500, 'lng' => -42.8792500,
+                'rating' => 4.0, 'reviews' => 60,
+                'menu' => [
+                    'Lanches' => [
+                        ['name' => 'X-salada', 'desc' => 'Hambúrguer, alface, tomate e maionese da casa.', 'price' => 16.90, 'tags' => [], 'food_tags' => []],
+                        ['name' => 'Misto quente', 'desc' => null, 'price' => 9.90, 'tags' => ['Vegetariano'], 'food_tags' => []],
+                    ],
+                ],
+                'hours' => ['mon-sat' => ['07:00', '21:00']],
+            ],
+            [
+                'name' => 'Sorveteria Zero Grau',
+                'neighborhood' => 'Centro',
+                'category' => 'Sorveteria',
+                'cuisines' => ['Doces'],
+                'price_range' => PriceRange::Low,
+                'lat' => -20.7555262, 'lng' => -42.8781960,
+                'rating' => 4.6, 'reviews' => 175,
+                'menu' => [
+                    'Sorvetes' => [
+                        ['name' => 'Casquinha de creme com calda de chocolate', 'desc' => null, 'price' => 9.90, 'tags' => ['Vegetariano'], 'food_tags' => []],
+                        ['name' => 'Milk-shake de morango', 'desc' => null, 'price' => 15.90, 'tags' => ['Vegetariano'], 'food_tags' => []],
+                    ],
+                ],
+                'hours' => ['mon-sun' => ['12:00', '22:00']],
+            ],
+            [
+                'name' => 'Açaí Mix Viçosa',
+                'neighborhood' => 'Centro',
+                'category' => 'Açaí',
+                'cuisines' => ['Doces'],
+                'price_range' => PriceRange::Low,
+                'lat' => -20.7562976, 'lng' => -42.8798046,
+                'rating' => 4.5, 'reviews' => 130,
+                'menu' => [
+                    'Açaí' => [
+                        ['name' => 'Açaí 500ml completo', 'desc' => 'Granola, banana, leite em pó e leite condensado.', 'price' => 18.90, 'tags' => ['Vegetariano'], 'food_tags' => ['Açaí']],
+                        ['name' => 'Bowl de açaí com granola e morango', 'desc' => null, 'price' => 22.90, 'tags' => ['Vegano', 'Vegetariano'], 'food_tags' => ['Açaí', 'Bowls']],
+                    ],
+                ],
+                'hours' => ['mon-sun' => ['11:00', '22:00']],
+            ],
         ];
     }
 
