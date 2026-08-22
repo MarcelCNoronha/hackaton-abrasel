@@ -75,10 +75,99 @@ const heroStyle = computed(() => {
 });
 
 const reviewsDialog = ref(false);
+
+const canonicalUrl = computed(() => route('restaurants.show', props.restaurant.slug));
+
+const metaDescription = computed(() => {
+    const r = props.restaurant;
+    const cuisines = (r.cuisines ?? []).map((c) => c.name).join(', ');
+    const ratingPart = Number(r.average_rating) > 0 ? `nota ${Number(r.average_rating).toFixed(1)}` : 'novo no VicosaFood';
+    const cuisinePart = cuisines ? `${cuisines} em` : 'Restaurante em';
+    return `${r.name} -- ${cuisinePart} ${r.address_neighborhood ?? 'Viçosa'}, MG. ${ratingPart}, cardápio, horário de funcionamento e como chegar.`;
+});
+
+const ogImage = computed(() => {
+    const path = props.restaurant.banner_photo_path ?? props.restaurant.cover_photo_path;
+    return path ? `${window.location.origin}/storage/${path}` : null;
+});
+
+// schema.org/Restaurant -- rich snippets (nota, endereco, geo, horario) pra busca local
+// ("GEO"), alem do que os campos OG/description acima cobrem pra preview em redes sociais.
+const jsonLd = computed(() => {
+    const r = props.restaurant;
+    const data = {
+        '@context': 'https://schema.org',
+        '@type': 'Restaurant',
+        name: r.name,
+        url: canonicalUrl.value,
+        servesCuisine: (r.cuisines ?? []).map((c) => c.name),
+        priceRange: r.price_range ?? undefined,
+        telephone: r.phone ?? undefined,
+        address: {
+            '@type': 'PostalAddress',
+            streetAddress: [r.address_street, r.address_number].filter(Boolean).join(', ') || undefined,
+            addressLocality: r.address_city ?? 'Viçosa',
+            addressRegion: r.address_state ?? 'MG',
+            addressCountry: 'BR',
+        },
+        geo: {
+            '@type': 'GeoCoordinates',
+            latitude: r.latitude,
+            longitude: r.longitude,
+        },
+    };
+
+    if (ogImage.value) data.image = ogImage.value;
+
+    if (Number(r.reviews_count) > 0) {
+        data.aggregateRating = {
+            '@type': 'AggregateRating',
+            ratingValue: Number(r.average_rating).toFixed(1),
+            reviewCount: r.reviews_count,
+        };
+    }
+
+    if (sortedHours.value.length) {
+        data.openingHoursSpecification = sortedHours.value
+            .filter((h) => !h.is_closed)
+            .map((h) => ({
+                '@type': 'OpeningHoursSpecification',
+                dayOfWeek: [
+                    'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday',
+                ][h.weekday],
+                opens: h.opens_at?.slice(0, 5),
+                closes: h.closes_at?.slice(0, 5),
+            }));
+    }
+
+    return JSON.stringify(data);
+});
 </script>
 
 <template>
-    <Head :title="restaurant.name" />
+    <Head>
+        <title>{{ restaurant.name }} em Viçosa, MG | VicosaFood</title>
+        <meta name="description" :content="metaDescription" />
+        <link rel="canonical" :href="canonicalUrl" />
+
+        <meta property="og:type" content="restaurant.restaurant" />
+        <meta property="og:title" :content="`${restaurant.name} em Viçosa, MG`" />
+        <meta property="og:description" :content="metaDescription" />
+        <meta property="og:url" :content="canonicalUrl" />
+        <meta v-if="ogImage" property="og:image" :content="ogImage" />
+        <meta property="og:locale" content="pt_BR" />
+
+        <meta name="twitter:card" :content="ogImage ? 'summary_large_image' : 'summary'" />
+        <meta name="twitter:title" :content="`${restaurant.name} em Viçosa, MG`" />
+        <meta name="twitter:description" :content="metaDescription" />
+        <meta v-if="ogImage" name="twitter:image" :content="ogImage" />
+
+        <meta v-if="restaurant.address_neighborhood" name="geo.placename" :content="`${restaurant.address_neighborhood}, Viçosa, MG`" />
+        <meta name="geo.position" :content="`${restaurant.latitude};${restaurant.longitude}`" />
+        <meta name="ICBM" :content="`${restaurant.latitude}, ${restaurant.longitude}`" />
+
+        <script type="application/ld+json" v-html="jsonLd"></script>
+    </Head>
 
     <PublicLayout>
         <div class="hero" :style="heroStyle">

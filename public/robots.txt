@@ -1,2 +1,7 @@
 User-agent: *
-Disallow:
+Disallow: /gestor
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /profile
+
+Sitemap: https://food.vicosa.tech/sitemap.xml

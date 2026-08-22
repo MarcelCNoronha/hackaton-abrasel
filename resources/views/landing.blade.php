@@ -5,7 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>VicosaFood | A vitrine digital dos restaurantes de Viçosa</title>
 <meta name="description" content="Descubra os melhores restaurantes de Viçosa com cupons exclusivos e avaliações verificadas, ou cadastre seu restaurante e alcance mais clientes sem pagar comissão por pedido." />
+<link rel="canonical" href="{{ route('landing') }}" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="VicosaFood | A vitrine digital dos restaurantes de Viçosa" />
+<meta property="og:description" content="Descubra os melhores restaurantes de Viçosa com cupons exclusivos e avaliações verificadas." />
+<meta property="og:url" content="{{ route('landing') }}" />
+<meta property="og:locale" content="pt_BR" />
+<meta name="twitter:card" content="summary" />
+<meta name="geo.placename" content="Viçosa, MG" />
+<meta name="geo.region" content="BR-MG" />
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<script type="application/ld+json">
+{!! json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'WebSite',
+    'name' => 'VicosaFood',
+    'url' => route('landing'),
+    'potentialAction' => [
+        '@type' => 'SearchAction',
+        'target' => route('discover').'?q={search_term_string}',
+        'query-input' => 'required name=search_term_string',
+    ],
+]) !!}
+</script>
 <style>
   :root {
     color-scheme: dark;

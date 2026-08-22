@@ -172,7 +172,22 @@ function clearFilters() {
 </script>
 
 <template>
-    <Head title="Onde vou comer hoje?" />
+    <Head>
+        <title>Restaurantes em Viçosa, MG | VicosaFood</title>
+        <meta
+            name="description"
+            content="Descubra restaurantes, bares e lanchonetes em Viçosa/MG. Filtre por tipo de comida, prato ou restrição alimentar, veja avaliações reais e cupons exclusivos."
+        />
+        <link rel="canonical" :href="route('discover')" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Restaurantes em Viçosa, MG | VicosaFood" />
+        <meta
+            property="og:description"
+            content="Descubra restaurantes, bares e lanchonetes em Viçosa/MG, com avaliações reais e cupons exclusivos."
+        />
+        <meta property="og:url" :content="route('discover')" />
+        <meta property="og:locale" content="pt_BR" />
+    </Head>
 
     <PublicLayout>
         <div class="discover-shell">

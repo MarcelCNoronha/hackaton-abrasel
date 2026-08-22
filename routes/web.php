@@ -17,12 +17,14 @@ use App\Http\Controllers\Owner\ReviewReplyController as OwnerReviewReplyControll
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Public\DiscoveryController;
 use App\Http\Controllers\Public\RestaurantController;
+use App\Http\Controllers\Public\SitemapController;
 use App\Http\Controllers\ReviewController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'landing')->name('landing');
 Route::get('/restaurantes', [DiscoveryController::class, 'index'])->name('discover');
 Route::get('/restaurantes/{restaurant:slug}', [RestaurantController::class, 'show'])->name('restaurants.show');
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
