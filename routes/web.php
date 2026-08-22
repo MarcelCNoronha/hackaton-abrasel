@@ -61,6 +61,7 @@ Route::middleware(['auth', 'role:owner'])->prefix('gestor')->name('owner.')->gro
     Route::post('/restaurantes/{restaurant}/campanhas', [OwnerCouponCampaignController::class, 'store'])->name('coupon-campaigns.store');
     Route::patch('/campanhas/{couponCampaign}/aceitar', [OwnerCouponCampaignController::class, 'accept'])->name('coupon-campaigns.accept');
     Route::delete('/campanhas/{couponCampaign}/rejeitar', [OwnerCouponCampaignController::class, 'reject'])->name('coupon-campaigns.reject');
+    Route::post('/restaurantes/{restaurant}/cupons/resgatar', [OwnerCouponCampaignController::class, 'redeem'])->name('coupons.redeem');
 
     Route::post('/avaliacoes/{review}/resposta', [OwnerReviewReplyController::class, 'store'])->name('reviews.reply');
 });

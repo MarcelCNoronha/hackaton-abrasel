@@ -194,6 +194,17 @@ function rejectCampaign(campaignId) {
     router.delete(route('owner.coupon-campaigns.reject', campaignId), { preserveScroll: true });
 }
 
+const redeemForm = useForm({ code: '' });
+
+function redeemCoupon() {
+    redeemForm.post(route('owner.coupons.redeem', props.restaurant.slug), {
+        preserveScroll: true,
+        onSuccess: () => {
+            redeemForm.reset();
+        },
+    });
+}
+
 // --- Avaliações ---
 const replyForms = reactive({});
 
@@ -491,6 +502,21 @@ function submitReply(reviewId) {
 
                             <!-- Cupons -->
                             <v-window-item value="cupons">
+                                <h3 class="text-subtitle-1 font-weight-bold mb-2">Resgatar cupom no balcão</h3>
+                                <v-form @submit.prevent="redeemCoupon" class="d-flex ga-2 align-start mb-6">
+                                    <v-text-field
+                                        v-model="redeemForm.code"
+                                        label="Código do cupom"
+                                        density="compact"
+                                        hide-details="auto"
+                                        :error-messages="redeemForm.errors.code"
+                                        style="max-width: 260px"
+                                    />
+                                    <v-btn type="submit" color="primary" variant="flat" :loading="redeemForm.processing">
+                                        Resgatar
+                                    </v-btn>
+                                </v-form>
+
                                 <template v-if="pendingCampaigns.length">
                                     <h3 class="text-subtitle-1 font-weight-bold mb-2">Sugestões da administração</h3>
                                     <v-card v-for="campaign in pendingCampaigns" :key="campaign.id" variant="outlined" class="mb-2" style="border-color: rgb(var(--v-theme-warning))">
