@@ -37,12 +37,16 @@ const filters = reactive({
     sort: props.filters.sort ?? 'rating',
 });
 
+// cuisines e food_tags viram UM filtro so' na UI ("Tipo de comida ou prato") -- um mesmo
+// slug pode acabar presente nos dois arrays (ver dishTypes computed abaixo), entao conta a
+// UNIAO, senao uma unica selecao compartilhada por ambos catalogos contaria em dobro.
+const dishTypeCount = computed(() => new Set([...filters.cuisines, ...filters.food_tags]).size);
+
 const activeFilterCount = computed(
     () =>
         (filters.category ? 1 : 0) +
-        filters.cuisines.length +
+        dishTypeCount.value +
         filters.dietary_tags.length +
-        filters.food_tags.length +
         (filters.radius_km ? 1 : 0) +
         (filters.price_range ? 1 : 0) +
         (filters.min_rating ? 1 : 0) +
@@ -80,6 +84,29 @@ const sortOptions = [
     { title: 'Mais próximos', value: 'distance' },
     { title: 'Mais avaliados', value: 'reviews' },
 ];
+
+// "Tipo de comida" (Cuisine) e "Prato ou ingrediente" (FoodTag) eram dois campos separados
+// que pareciam a mesma coisa pro usuario -- fundidos aqui num so'. Um slug pode existir nos
+// dois catalogos ao mesmo tempo (ex.: "pizza" -- uma pizzaria E' tambem um prato que
+// qualquer outro restaurante pode servir); nesse caso a selecao entra nos dois arrays que o
+// backend espera, que combina os dois com OR (ver DiscoveryController).
+const cuisineSlugs = computed(() => new Set(props.cuisines.map((c) => c.slug)));
+const foodTagSlugs = computed(() => new Set(props.foodTags.map((t) => t.slug)));
+
+const dishTypeOptions = computed(() => {
+    const names = new Map();
+    for (const cuisine of props.cuisines) names.set(cuisine.slug, cuisine.name);
+    for (const tag of props.foodTags) if (!names.has(tag.slug)) names.set(tag.slug, tag.name);
+    return Array.from(names, ([value, title]) => ({ title, value }));
+});
+
+const dishTypesModel = computed({
+    get: () => Array.from(new Set([...filters.cuisines, ...filters.food_tags])),
+    set: (slugs) => {
+        filters.cuisines = slugs.filter((slug) => cuisineSlugs.value.has(slug));
+        filters.food_tags = slugs.filter((slug) => foodTagSlugs.value.has(slug));
+    },
+});
 
 function requestLocation() {
     if (!navigator.geolocation) {
@@ -262,26 +289,10 @@ function clearFilters() {
                     <v-expand-transition>
                         <div v-if="showFilters" class="filters-panel">
                             <div class="filter-group">
-                                <span class="filter-label">Tipo de comida</span>
+                                <span class="filter-label">Tipo de comida ou prato</span>
                                 <v-autocomplete
-                                    v-model="filters.cuisines"
-                                    :items="cuisines.map((c) => ({ title: c.name, value: c.slug }))"
-                                    placeholder="Digite pra buscar..."
-                                    multiple
-                                    chips
-                                    closable-chips
-                                    clearable
-                                    hide-details
-                                    density="compact"
-                                    bg-color="surface"
-                                />
-                            </div>
-
-                            <div class="filter-group">
-                                <span class="filter-label">Prato ou ingrediente</span>
-                                <v-autocomplete
-                                    v-model="filters.food_tags"
-                                    :items="foodTags.map((t) => ({ title: t.name, value: t.slug }))"
+                                    v-model="dishTypesModel"
+                                    :items="dishTypeOptions"
                                     placeholder="Digite pra buscar..."
                                     multiple
                                     chips

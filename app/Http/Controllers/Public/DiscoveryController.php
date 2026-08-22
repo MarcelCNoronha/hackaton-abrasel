@@ -51,8 +51,27 @@ class DiscoveryController extends Controller
             $query->whereHas('categories', fn ($c) => $c->where('slug', $category));
         }
 
-        if ($cuisines = array_filter((array) $request->input('cuisines', []))) {
-            $query->whereHas('cuisines', fn ($c) => $c->whereIn('slug', $cuisines));
+        // cuisines (estilo do restaurante) e food_tags (prato/ingrediente especifico) sao
+        // apresentados como UM filtro so' no front ("Tipo de comida ou prato") -- pro usuario
+        // nao ha diferenca real entre os dois conceitos, e ter as duas categorias exigidas ao
+        // mesmo tempo (AND) surpreendia: selecionar "Pizza" (cozinha) + "Sushi" (prato) nao
+        // devia exigir um restaurante que fosse as duas coisas, e sim OR entre tudo.
+        $cuisines = array_filter((array) $request->input('cuisines', []));
+        $foodTags = array_filter((array) $request->input('food_tags', []));
+
+        if ($cuisines || $foodTags) {
+            $query->where(function ($sub) use ($cuisines, $foodTags) {
+                if ($cuisines) {
+                    $sub->orWhereHas('cuisines', fn ($c) => $c->whereIn('slug', $cuisines));
+                }
+
+                if ($foodTags) {
+                    $sub->orWhereHas('menus.categories.items', function ($items) use ($foodTags) {
+                        $items->where('is_available', true)
+                            ->whereHas('foodTags', fn ($ft) => $ft->whereIn('slug', $foodTags));
+                    });
+                }
+            });
         }
 
         // restaurante precisa ter pelo menos 1 prato que atenda a TODAS as restricoes
@@ -64,15 +83,6 @@ class DiscoveryController extends Controller
                 foreach ($dietaryTags as $slug) {
                     $items->whereHas('dietaryTags', fn ($dt) => $dt->where('slug', $slug));
                 }
-            });
-        }
-
-        // food_tags e' "ou" (qualquer prato com qualquer uma das tags) -- diferente de
-        // dietary_tags, que exige 1 prato so satisfazendo TODAS as restricoes ao mesmo tempo.
-        if ($foodTags = array_filter((array) $request->input('food_tags', []))) {
-            $query->whereHas('menus.categories.items', function ($items) use ($foodTags) {
-                $items->where('is_available', true)
-                    ->whereHas('foodTags', fn ($ft) => $ft->whereIn('slug', $foodTags));
             });
         }
 
