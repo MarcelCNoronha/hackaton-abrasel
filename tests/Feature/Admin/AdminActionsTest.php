@@ -142,4 +142,17 @@ class AdminActionsTest extends TestCase
 
         $this->actingAs($admin)->patch(route('admin.claims.approve', $claim))->assertStatus(422);
     }
+
+    public function test_admin_can_toggle_freelancer_access_for_a_user(): void
+    {
+        $admin = $this->admin();
+        $consumer = User::factory()->create(['role' => UserRole::Consumer]);
+        $this->assertFalse($consumer->isFreelancerEnabled());
+
+        $this->actingAs($admin)->patch(route('admin.users.toggle-freelancer', $consumer))->assertRedirect();
+        $this->assertTrue($consumer->fresh()->isFreelancerEnabled());
+
+        $this->actingAs($admin)->patch(route('admin.users.toggle-freelancer', $consumer))->assertRedirect();
+        $this->assertFalse($consumer->fresh()->isFreelancerEnabled());
+    }
 }
