@@ -55,6 +55,7 @@ Route::middleware(['auth', 'role:owner'])->prefix('gestor')->name('owner.')->gro
     Route::post('/menu-categorias/{menuCategory}/itens', [OwnerMenuController::class, 'storeItem'])->name('menu-items.store');
     Route::patch('/menu-itens/{menuItem}', [OwnerMenuController::class, 'updateItem'])->name('menu-items.update');
     Route::delete('/menu-itens/{menuItem}', [OwnerMenuController::class, 'destroyItem'])->name('menu-items.destroy');
+    Route::patch('/menu-itens/{menuItem}/destaque', [OwnerMenuController::class, 'toggleFeatured'])->name('menu-items.toggle-featured');
 
     Route::post('/restaurantes/{restaurant}/qrcode', [OwnerQrCodeController::class, 'store'])->name('qrcode.store');
 

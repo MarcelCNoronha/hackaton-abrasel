@@ -22,7 +22,7 @@ class DiscoveryController extends Controller
 
         $query = Restaurant::query()
             ->where('is_active', true)
-            ->with(['categories', 'cuisines', 'businessHours']);
+            ->with(['categories', 'cuisines', 'businessHours', 'featuredItem']);
 
         if ($hasLocation) {
             $query->selectDistance($lat, $lng);

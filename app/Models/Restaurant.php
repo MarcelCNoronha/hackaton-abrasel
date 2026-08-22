@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -103,6 +104,13 @@ class Restaurant extends Model
     public function menus(): HasMany
     {
         return $this->hasMany(Menu::class);
+    }
+
+    // Fora do Fillable de proposito (como claimed_at) -- so' muda via o toggle dedicado em
+    // Owner\MenuController::toggleFeatured, nunca por update em massa do perfil.
+    public function featuredItem(): BelongsTo
+    {
+        return $this->belongsTo(MenuItem::class, 'featured_menu_item_id');
     }
 
     public function favoritedByUsers(): BelongsToMany

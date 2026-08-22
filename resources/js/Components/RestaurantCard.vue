@@ -27,6 +27,16 @@ const distanceLabel = computed(() => {
     const value = Number(km);
     return value < 1 ? `${Math.round(value * 1000)} m` : `${value.toFixed(1)} km`;
 });
+
+// A foto do prato em destaque (quando o dono escolheu um) vence a foto de capa do
+// restaurante nessa miniatura -- e' exatamente esse espaco que devia diferenciar cada
+// estabelecimento, em vez de repetir a mesma foto/ícone genérico do perfil.
+const featuredItem = computed(() => props.restaurant.featured_item ?? null);
+const thumbPhotoPath = computed(() => featuredItem.value?.main_photo_path ?? props.restaurant.cover_photo_path ?? null);
+
+function formatPrice(value) {
+    return `R$ ${Number(value).toFixed(2).replace('.', ',')}`;
+}
 </script>
 
 <template>
@@ -39,15 +49,19 @@ const distanceLabel = computed(() => {
         <div class="d-flex">
             <div
                 class="restaurant-thumb"
-                :style="restaurant.cover_photo_path ? {} : { background: gradient }"
+                :style="thumbPhotoPath ? {} : { background: gradient }"
             >
                 <img
-                    v-if="restaurant.cover_photo_path"
-                    :src="`/storage/${restaurant.cover_photo_path}`"
-                    :alt="restaurant.name"
+                    v-if="thumbPhotoPath"
+                    :src="`/storage/${thumbPhotoPath}`"
+                    :alt="featuredItem ? `${featuredItem.name} -- ${restaurant.name}` : restaurant.name"
                     class="restaurant-thumb__photo"
                 />
                 <span v-else class="restaurant-thumb__emoji">{{ emojiForRestaurant(restaurant.categories) }}</span>
+                <span v-if="featuredItem" class="restaurant-thumb__badge">
+                    <v-icon icon="mdi-star" size="10" />
+                    Destaque
+                </span>
             </div>
 
             <div class="flex-grow-1 pa-3">
@@ -76,6 +90,12 @@ const distanceLabel = computed(() => {
                         {{ distanceLabel }}
                     </span>
                     <span class="font-weight-bold text-primary">{{ restaurant.price_range }}</span>
+                </div>
+
+                <div v-if="featuredItem" class="mt-2 d-flex align-center ga-1 text-body-2 featured-line">
+                    <v-icon icon="mdi-fire" size="16" color="accent" />
+                    <span class="text-truncate" style="min-width: 0">{{ featuredItem.name }}</span>
+                    <span class="font-weight-bold flex-shrink-0">{{ formatPrice(featuredItem.price) }}</span>
                 </div>
 
                 <div class="mt-2 d-flex flex-wrap ga-1">
@@ -112,11 +132,34 @@ const distanceLabel = computed(() => {
 }
 
 .restaurant-thumb {
+    position: relative;
     width: 96px;
     min-width: 96px;
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.restaurant-thumb__badge {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    background: rgba(28, 18, 12, 0.85);
+    color: #fdf6f0;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 2px 6px;
+    border-top-right-radius: 6px;
+}
+
+.featured-line {
+    color: rgb(var(--v-theme-accent));
+    font-weight: 600;
 }
 
 .restaurant-thumb__photo {

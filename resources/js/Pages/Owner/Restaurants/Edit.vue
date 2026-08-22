@@ -141,6 +141,10 @@ function submitItem() {
     }
 }
 
+function toggleFeatured(item) {
+    router.patch(route('owner.menu-items.toggle-featured', item.id), {}, { preserveScroll: true });
+}
+
 function deleteItem(itemId) {
     if (!confirm('Remover este item do cardápio?')) return;
     itemForm.delete(route('owner.menu-items.destroy', itemId), { preserveScroll: true });
@@ -359,7 +363,13 @@ function submitReply(reviewId) {
                                             </div>
                                         </div>
 
-                                        <v-card v-for="item in category.items" :key="item.id" variant="outlined" class="mb-2">
+                                        <v-card
+                                            v-for="item in category.items"
+                                            :key="item.id"
+                                            variant="outlined"
+                                            class="mb-2"
+                                            :style="item.id === restaurant.featured_menu_item_id ? { borderColor: 'rgb(var(--v-theme-accent))' } : {}"
+                                        >
                                             <v-card-item>
                                                 <template v-if="item.main_photo_path" #prepend>
                                                     <v-img :src="`/storage/${item.main_photo_path}`" width="48" height="48" cover rounded="lg" />
@@ -395,7 +405,17 @@ function submitReply(reviewId) {
                                             </v-card-text>
                                             <v-card-actions>
                                                 <v-chip v-if="!item.is_available" size="small" color="warning" variant="tonal">Indisponível</v-chip>
+                                                <v-chip v-if="item.id === restaurant.featured_menu_item_id" size="small" color="accent" variant="flat" prepend-icon="mdi-star">
+                                                    Destaque
+                                                </v-chip>
                                                 <v-spacer />
+                                                <v-btn
+                                                    variant="text"
+                                                    :color="item.id === restaurant.featured_menu_item_id ? 'accent' : undefined"
+                                                    :icon="item.id === restaurant.featured_menu_item_id ? 'mdi-star' : 'mdi-star-outline'"
+                                                    title="Destacar este item na busca"
+                                                    @click="toggleFeatured(item)"
+                                                />
                                                 <v-btn size="small" variant="text" @click="openEditItemDialog(item)">Editar</v-btn>
                                                 <v-btn size="small" variant="text" color="error" @click="deleteItem(item.id)">Remover</v-btn>
                                             </v-card-actions>
