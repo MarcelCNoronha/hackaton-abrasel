@@ -361,7 +361,7 @@ const jsonLd = computed(() => {
                     <v-card v-for="review in restaurant.reviews" :key="review.id" variant="outlined" class="mb-3">
                         <v-card-item>
                             <v-card-title class="d-flex align-center ga-2">
-                                {{ review.user?.name }}
+                                {{ review.user?.name ?? 'Usuário removido' }}
                                 <v-chip size="x-small" color="secondary" variant="flat" prepend-icon="mdi-check-decagram">
                                     Visita verificada
                                 </v-chip>

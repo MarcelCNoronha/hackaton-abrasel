@@ -597,7 +597,7 @@ function submitReply(reviewId) {
                                 <v-card v-for="review in restaurant.reviews" :key="review.id" variant="outlined" class="mb-3">
                                     <v-card-item>
                                         <v-card-title class="d-flex align-center ga-2">
-                                            {{ review.user?.name }}
+                                            {{ review.user?.name ?? 'Usuário removido' }}
                                             <v-icon icon="mdi-star" size="16" color="accent" /> {{ review.rating }}
                                         </v-card-title>
                                     </v-card-item>
