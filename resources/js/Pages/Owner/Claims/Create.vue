@@ -52,7 +52,9 @@ function submit() {
 
                             <v-textarea
                                 v-model="form.notes"
-                                label="Observações para o administrador (opcional)"
+                                label="Observações para o administrador"
+                                hint="Opcional"
+                                persistent-hint
                                 rows="3"
                                 :error-messages="form.errors.notes"
                             />

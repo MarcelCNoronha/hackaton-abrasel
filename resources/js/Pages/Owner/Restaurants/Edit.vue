@@ -689,7 +689,14 @@ const applicationStatusLabels = {
                                 <h3 class="text-subtitle-1 font-weight-bold mb-3">Publicar vaga</h3>
                                 <v-form @submit.prevent="submitJobPosting" class="mb-6">
                                     <v-text-field v-model="jobPostingForm.title" label="Título da vaga" :error-messages="jobPostingForm.errors.title" />
-                                    <v-textarea v-model="jobPostingForm.description" label="Descrição (turno, remuneração, requisitos...)" rows="2" :error-messages="jobPostingForm.errors.description" />
+                                    <v-textarea
+                                        v-model="jobPostingForm.description"
+                                        label="Descrição"
+                                        hint="Turno, remuneração, requisitos..."
+                                        persistent-hint
+                                        rows="2"
+                                        :error-messages="jobPostingForm.errors.description"
+                                    />
                                     <v-combobox
                                         v-model="jobPostingForm.job_skills"
                                         :items="jobSkillSuggestions"
