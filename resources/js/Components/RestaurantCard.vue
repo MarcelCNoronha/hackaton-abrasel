@@ -37,6 +37,11 @@ const thumbPhotoPath = computed(() => featuredItem.value?.main_photo_path ?? pro
 function formatPrice(value) {
     return `R$ ${Number(value).toFixed(2).replace('.', ',')}`;
 }
+
+// So' a principal, inline com nota/preco -- a lista de chips no rodape ocupava uma linha
+// inteira so' pra isso, deixando o card mais alto (e a miniatura mais "esticada") do que
+// precisava.
+const primaryCuisine = computed(() => props.restaurant.cuisines?.[0] ?? null);
 </script>
 
 <template>
@@ -90,6 +95,7 @@ function formatPrice(value) {
                         {{ distanceLabel }}
                     </span>
                     <span class="font-weight-bold text-primary">{{ restaurant.price_range }}</span>
+                    <span v-if="primaryCuisine">· {{ primaryCuisine.name }}</span>
                 </div>
 
                 <div v-if="featuredItem" class="mt-2 featured-strip">
@@ -106,17 +112,6 @@ function formatPrice(value) {
                         <div class="text-body-2 font-weight-medium text-truncate">{{ featuredItem.name }}</div>
                     </div>
                     <span class="featured-strip__price flex-shrink-0">{{ formatPrice(featuredItem.price) }}</span>
-                </div>
-
-                <div class="mt-2 d-flex flex-wrap ga-1">
-                    <v-chip
-                        v-for="cuisine in restaurant.cuisines?.slice(0, 3)"
-                        :key="cuisine.id"
-                        size="x-small"
-                        variant="tonal"
-                    >
-                        {{ cuisine.name }}
-                    </v-chip>
                 </div>
             </div>
         </div>
