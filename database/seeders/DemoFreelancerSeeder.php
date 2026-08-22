@@ -202,13 +202,18 @@ class DemoFreelancerSeeder extends Seeder
             );
 
             if (isset($scenario['review'])) {
-                $hireRequest->review()->updateOrCreate([], [
+                $review = $hireRequest->review()->updateOrCreate([], [
                     'restaurant_id' => $restaurant->id,
                     'freelancer_profile_id' => $freelancerUser->freelancerProfile->id,
                     'rating' => $scenario['review']['rating'],
                     'feedback_to_freelancer' => $scenario['review']['to_freelancer'],
                     'feedback_to_owners' => $scenario['review']['to_owners'],
                 ]);
+
+                // Simula o freelancer ja tendo confirmado o vinculo -- sem isso a avaliacao de
+                // demonstracao ficaria presa em "pending_approval" pra sempre e nao apareceria
+                // pra outros donos nem contaria pra nota (ver ReviewApprovalStatus).
+                $review->forceFill(['status' => 'approved'])->save();
             }
         }
     }

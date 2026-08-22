@@ -70,6 +70,12 @@ const statusLabels = {
             <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
                 <v-card class="mb-4">
                     <v-card-item>
+                        <template #prepend>
+                            <v-avatar size="56">
+                                <v-img v-if="freelancer.photo_path" :src="`/storage/${freelancer.photo_path}`" :alt="freelancer.user?.name" />
+                                <v-icon v-else icon="mdi-account-circle-outline" size="56" />
+                            </v-avatar>
+                        </template>
                         <v-card-title class="d-flex align-center justify-space-between ga-2">
                             <span>{{ freelancer.headline || freelancer.user?.name }}</span>
                             <v-chip :color="badge.color" size="small" variant="flat">
@@ -121,6 +127,17 @@ const statusLabels = {
                             </v-chip>
                         </v-card-title>
                     </v-card-item>
+                    <v-card-text v-if="hireRequest.review" class="pt-0">
+                        <v-chip
+                            size="small"
+                            :color="hireRequest.review.status === 'approved' ? 'secondary' : hireRequest.review.status === 'rejected' ? 'error' : 'warning'"
+                            variant="tonal"
+                        >
+                            {{ hireRequest.review.status === 'approved' ? 'Vínculo confirmado pelo trabalhador'
+                                : hireRequest.review.status === 'rejected' ? 'Trabalhador contestou o vínculo'
+                                : 'Aguardando confirmação do trabalhador' }}
+                        </v-chip>
+                    </v-card-text>
                     <v-card-actions v-if="hireRequest.status === 'pending' || (hireRequest.status === 'accepted' && !hireRequest.review)">
                         <v-spacer />
                         <v-btn v-if="hireRequest.status === 'pending'" variant="text" color="error" @click="cancelHireRequest(hireRequest)">

@@ -75,6 +75,12 @@ watch(filters, () => {
                     :href="route('owner.freelancers.show', freelancer.id)"
                 >
                     <v-card-item>
+                        <template #prepend>
+                            <v-avatar size="40">
+                                <v-img v-if="freelancer.photo_path" :src="`/storage/${freelancer.photo_path}`" :alt="freelancer.user?.name" />
+                                <v-icon v-else icon="mdi-account-circle-outline" size="40" />
+                            </v-avatar>
+                        </template>
                         <v-card-title class="d-flex align-center justify-space-between ga-2">
                             <span>{{ freelancer.user?.name }}</span>
                             <v-chip :color="availabilityBadge(freelancer.availability_status).color" size="small" variant="flat">

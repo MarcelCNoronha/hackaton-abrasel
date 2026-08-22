@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['user_id', 'headline', 'bio', 'availability_status'])]
+#[Fillable(['user_id', 'headline', 'bio', 'photo_path', 'availability_status'])]
 class FreelancerProfile extends Model
 {
     protected $attributes = [
@@ -44,6 +44,11 @@ class FreelancerProfile extends Model
     public function hireRequests(): HasMany
     {
         return $this->hasMany(HireRequest::class);
+    }
+
+    public function jobApplications(): HasMany
+    {
+        return $this->hasMany(JobApplication::class);
     }
 
     public function reviews(): HasMany

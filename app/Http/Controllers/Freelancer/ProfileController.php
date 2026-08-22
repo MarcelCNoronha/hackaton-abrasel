@@ -8,6 +8,7 @@ use App\Models\FreelancerProfile;
 use App\Models\JobSkill;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Enum;
 use Inertia\Inertia;
@@ -34,6 +35,9 @@ class ProfileController extends Controller
         $data = $request->validate([
             'headline' => ['nullable', 'string', 'max:255'],
             'bio' => ['nullable', 'string', 'max:2000'],
+            // Opcional de proposito -- nem todo freelancer vai ter uma foto na hora de montar
+            // o perfil, e isso nao pode bloquear o resto do cadastro.
+            'photo' => ['nullable', 'image', 'max:4096'],
             'availability_status' => ['required', new Enum(AvailabilityStatus::class)],
             'job_skills' => ['nullable', 'array'],
             'job_skills.*' => ['string', 'max:50'],
@@ -47,6 +51,14 @@ class ProfileController extends Controller
         $jobSkillNames = $data['job_skills'] ?? [];
         $slots = $data['slots'];
         unset($data['job_skills'], $data['slots']);
+
+        if ($request->hasFile('photo')) {
+            if ($profile->photo_path) {
+                Storage::disk('public')->delete($profile->photo_path);
+            }
+            $data['photo_path'] = $request->file('photo')->store('freelancers', 'public');
+        }
+        unset($data['photo']);
 
         $profile->update($data);
         $profile->jobSkills()->sync($this->resolveJobSkillIds($jobSkillNames));

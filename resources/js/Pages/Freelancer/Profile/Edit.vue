@@ -2,6 +2,7 @@
 import { computed, reactive } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import PhotoInputField from '@/Components/PhotoInputField.vue';
 import { availabilityBadge, weekdayNames } from '@/utils/availabilityBadge';
 
 const props = defineProps({
@@ -26,6 +27,7 @@ const slotsByWeekday = computed(() => {
 const form = useForm({
     headline: props.profile.headline ?? '',
     bio: props.profile.bio ?? '',
+    photo: null,
     availability_status: props.profile.availability_status,
     job_skills: (props.profile.job_skills ?? []).map((tag) => tag.name),
     slots: slotsByWeekday.value,
@@ -73,6 +75,17 @@ function submit() {
                                         label="Sobre você"
                                         rows="3"
                                         :error-messages="form.errors.bio"
+                                    />
+                                </v-col>
+                                <v-col cols="12" md="6">
+                                    <PhotoInputField
+                                        v-model="form.photo"
+                                        label="Foto de perfil (opcional)"
+                                        icon="mdi-account-circle-outline"
+                                        :existing-path="profile.photo_path"
+                                        :error-messages="form.errors.photo"
+                                        :preview-width="90"
+                                        :preview-height="90"
                                     />
                                 </v-col>
                                 <v-col cols="12">

@@ -44,7 +44,9 @@ class FreelancerController extends Controller
             'user:id,name,phone',
             'jobSkills',
             'availabilitySlots',
-            'reviews' => fn ($q) => $q->latest()->with('restaurant:id,name'),
+            // So' aprovadas pelo proprio trabalhador -- uma avaliacao pendente ou rejeitada
+            // nunca aparece pra outros donos (ver ReviewApprovalStatus / Freelancer\ReviewApprovalController).
+            'reviews' => fn ($q) => $q->where('status', 'approved')->latest()->with('restaurant:id,name'),
         ]);
 
         // feedback_to_freelancer e' privado -- so' o proprio freelancer ve (Freelancer\HireController).

@@ -10,6 +10,7 @@ const props = defineProps({
     priceRanges: { type: Array, default: () => [] },
     foodTagSuggestions: { type: Array, default: () => [] },
     dietaryTags: { type: Array, default: () => [] },
+    jobSkillSuggestions: { type: Array, default: () => [] },
 });
 
 const weekdayNames = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
@@ -224,6 +225,41 @@ function replyForm(reviewId) {
 function submitReply(reviewId) {
     replyForm(reviewId).post(route('owner.reviews.reply', reviewId), { preserveScroll: true });
 }
+
+// --- Empregabilidade ---
+const jobPostingForm = useForm({
+    restaurant_id: props.restaurant.id,
+    title: '',
+    description: '',
+    job_skills: [],
+});
+
+function submitJobPosting() {
+    jobPostingForm.post(route('owner.job-postings.store'), {
+        preserveScroll: true,
+        onSuccess: () => jobPostingForm.reset(),
+    });
+}
+
+function toggleJobPostingStatus(posting) {
+    router.patch(route('owner.job-postings.close', posting.id), {}, { preserveScroll: true });
+}
+
+function acceptApplication(application) {
+    router.patch(route('owner.job-applications.accept', application.id), {}, { preserveScroll: true });
+}
+
+function declineApplication(application) {
+    if (!confirm('Recusar esta candidatura?')) return;
+    router.patch(route('owner.job-applications.decline', application.id), {}, { preserveScroll: true });
+}
+
+const applicationStatusLabels = {
+    pending: { text: 'Pendente', color: 'warning' },
+    accepted: { text: 'Aceita', color: 'secondary' },
+    declined: { text: 'Recusada', color: undefined },
+    withdrawn: { text: 'Retirada pelo candidato', color: undefined },
+};
 </script>
 
 <template>
@@ -246,6 +282,7 @@ function submitReply(reviewId) {
                         <v-tab value="qrcode">QR Code</v-tab>
                         <v-tab value="cupons">Cupons</v-tab>
                         <v-tab value="avaliacoes">Avaliações</v-tab>
+                        <v-tab value="empregabilidade">Empregabilidade</v-tab>
                     </v-tabs>
 
                     <v-card-text>
@@ -610,6 +647,96 @@ function submitReply(reviewId) {
                                             </v-btn>
                                         </v-form>
                                     </v-card-text>
+                                </v-card>
+                            </v-window-item>
+
+                            <!-- Empregabilidade -->
+                            <v-window-item value="empregabilidade">
+                                <h3 class="text-subtitle-1 font-weight-bold mb-3">Publicar vaga</h3>
+                                <v-form @submit.prevent="submitJobPosting" class="mb-6">
+                                    <v-text-field v-model="jobPostingForm.title" label="Título da vaga" :error-messages="jobPostingForm.errors.title" />
+                                    <v-textarea v-model="jobPostingForm.description" label="Descrição (turno, remuneração, requisitos...)" rows="2" :error-messages="jobPostingForm.errors.description" />
+                                    <v-combobox
+                                        v-model="jobPostingForm.job_skills"
+                                        :items="jobSkillSuggestions"
+                                        label="Habilidades procuradas"
+                                        hint="Ex.: Churrasqueiro(a), Garçom -- digite e aperte Enter para criar uma nova"
+                                        persistent-hint
+                                        multiple
+                                        chips
+                                        closable-chips
+                                        :error-messages="jobPostingForm.errors.job_skills"
+                                    />
+                                    <v-btn type="submit" color="primary" variant="flat" class="mt-2" :loading="jobPostingForm.processing">
+                                        Publicar vaga
+                                    </v-btn>
+                                </v-form>
+
+                                <v-divider class="mb-4" />
+
+                                <h3 class="text-subtitle-1 font-weight-bold mb-3">Vagas deste estabelecimento</h3>
+                                <v-alert v-if="!restaurant.job_postings?.length" type="info" variant="tonal">
+                                    Nenhuma vaga publicada ainda.
+                                </v-alert>
+                                <v-card v-for="posting in restaurant.job_postings" :key="posting.id" variant="outlined" class="mb-4">
+                                    <v-card-item>
+                                        <v-card-title class="d-flex align-center justify-space-between ga-2">
+                                            {{ posting.title }}
+                                            <v-chip size="small" :color="posting.status === 'open' ? 'secondary' : undefined" variant="tonal">
+                                                {{ posting.status === 'open' ? 'Aberta' : 'Encerrada' }}
+                                            </v-chip>
+                                        </v-card-title>
+                                        <v-card-subtitle v-if="posting.description">{{ posting.description }}</v-card-subtitle>
+                                    </v-card-item>
+                                    <v-card-text class="pt-0">
+                                        <v-chip v-for="skill in posting.job_skills" :key="skill.id" size="small" variant="tonal" class="mr-1 mb-2">
+                                            {{ skill.name }}
+                                        </v-chip>
+
+                                        <template v-if="posting.status === 'open' && posting.matching_freelancers?.length">
+                                            <p class="text-caption text-medium-emphasis mt-2 mb-1">Freelancers compatíveis:</p>
+                                            <v-chip
+                                                v-for="freelancer in posting.matching_freelancers"
+                                                :key="freelancer.id"
+                                                size="small"
+                                                variant="outlined"
+                                                class="mr-1 mb-1"
+                                                :href="route('owner.freelancers.show', freelancer.id)"
+                                            >
+                                                <v-icon icon="mdi-star" size="10" start color="accent" />
+                                                {{ freelancer.user?.name }} ({{ Number(freelancer.average_rating).toFixed(1) }})
+                                            </v-chip>
+                                        </template>
+
+                                        <p v-if="!posting.applications?.length" class="text-body-2 text-medium-emphasis mt-3 mb-0">
+                                            Nenhuma candidatura recebida ainda.
+                                        </p>
+                                        <div v-else class="mt-3">
+                                            <p class="text-caption text-medium-emphasis mb-1">Candidaturas:</p>
+                                            <v-card v-for="application in posting.applications" :key="application.id" variant="tonal" class="mb-2">
+                                                <v-card-item>
+                                                    <v-card-title class="d-flex align-center justify-space-between ga-2 text-body-1">
+                                                        {{ application.freelancer_profile?.user?.name }}
+                                                        <v-chip size="small" :color="applicationStatusLabels[application.status]?.color" variant="flat">
+                                                            {{ applicationStatusLabels[application.status]?.text ?? application.status }}
+                                                        </v-chip>
+                                                    </v-card-title>
+                                                    <v-card-subtitle v-if="application.message">{{ application.message }}</v-card-subtitle>
+                                                </v-card-item>
+                                                <v-card-actions v-if="application.status === 'pending'">
+                                                    <v-spacer />
+                                                    <v-btn size="small" variant="text" color="error" @click="declineApplication(application)">Recusar</v-btn>
+                                                    <v-btn size="small" variant="flat" color="primary" @click="acceptApplication(application)">Aceitar</v-btn>
+                                                </v-card-actions>
+                                            </v-card>
+                                        </div>
+                                    </v-card-text>
+                                    <v-card-actions>
+                                        <v-spacer />
+                                        <v-btn size="small" variant="text" @click="toggleJobPostingStatus(posting)">
+                                            {{ posting.status === 'open' ? 'Encerrar vaga' : 'Reabrir vaga' }}
+                                        </v-btn>
+                                    </v-card-actions>
                                 </v-card>
                             </v-window-item>
                         </v-window>

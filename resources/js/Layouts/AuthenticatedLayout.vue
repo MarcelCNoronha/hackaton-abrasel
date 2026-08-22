@@ -63,8 +63,16 @@ function logout() {
                     <v-btn
                         v-if="user.freelancer_enabled_at"
                         variant="text"
+                        :href="route('freelancer.jobs.index')"
+                        :active="route().current('freelancer.jobs.*')"
+                    >
+                        Vagas
+                    </v-btn>
+                    <v-btn
+                        v-if="user.freelancer_enabled_at"
+                        variant="text"
                         :href="route('freelancer.hires.index')"
-                        :active="route().current('freelancer.*')"
+                        :active="route().current('freelancer.hires.*')"
                     >
                         Meus pedidos
                     </v-btn>
@@ -129,8 +137,15 @@ function logout() {
                 />
                 <v-list-item
                     v-if="user.freelancer_enabled_at"
+                    :href="route('freelancer.jobs.index')"
+                    :active="route().current('freelancer.jobs.*')"
+                    title="Vagas"
+                    prepend-icon="mdi-bulletin-board"
+                />
+                <v-list-item
+                    v-if="user.freelancer_enabled_at"
                     :href="route('freelancer.hires.index')"
-                    :active="route().current('freelancer.*')"
+                    :active="route().current('freelancer.hires.*')"
                     title="Meus pedidos"
                     prepend-icon="mdi-briefcase-outline"
                 />

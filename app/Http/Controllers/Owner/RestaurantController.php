@@ -7,6 +7,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Owner\RestaurantProfileRequest;
 use App\Models\DietaryTag;
 use App\Models\FoodTag;
+use App\Models\FreelancerProfile;
+use App\Models\JobPosting;
+use App\Models\JobSkill;
 use App\Models\Restaurant;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -33,13 +36,30 @@ class RestaurantController extends Controller
             'couponCampaigns',
             'reviews' => fn ($query) => $query->latest()->with(['user:id,name', 'reply']),
             'activeQrToken',
+            'jobPostings' => fn ($query) => $query->latest()->with([
+                'jobSkills',
+                'applications' => fn ($applications) => $applications->latest()->with('freelancerProfile.user:id,name,phone'),
+            ]),
         ]);
+
+        // Pra cada vaga aberta, quem ja tem as habilidades pedidas -- pensado pra o dono
+        // conseguir contratar direto (via HireRequest) sem esperar alguem se candidatar.
+        $restaurant->jobPostings->each(function (JobPosting $posting) {
+            $posting->matching_freelancers = $posting->isOpen() && $posting->jobSkills->isNotEmpty()
+                ? FreelancerProfile::whereHas('jobSkills', fn ($s) => $s->whereIn('job_skills.id', $posting->jobSkills->pluck('id')))
+                    ->with('user:id,name')
+                    ->orderByDesc('average_rating')
+                    ->limit(5)
+                    ->get(['id', 'user_id', 'availability_status', 'average_rating', 'reviews_count'])
+                : collect();
+        });
 
         return Inertia::render('Owner/Restaurants/Edit', [
             'restaurant' => $restaurant,
             'priceRanges' => array_column(PriceRange::cases(), 'value'),
             'foodTagSuggestions' => FoodTag::orderBy('position')->pluck('name'),
             'dietaryTags' => DietaryTag::orderBy('position')->get(['id', 'name', 'kind']),
+            'jobSkillSuggestions' => JobSkill::orderBy('position')->pluck('name'),
         ]);
     }
 

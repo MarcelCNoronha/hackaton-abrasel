@@ -733,6 +733,7 @@
         <span class="eyebrow">Novo · Empregabilidade</span>
         <h2>Também conectamos quem serve com quem contrata</h2>
         <p>Sushiman, churrasqueiro(a), cozinheiro(a), garçom -- um espaço pra profissionais do setor aparecerem pros restaurantes de Viçosa, e pros donos acharem gente de confiança rápido.</p>
+        <a class="btn btn-primary" href="{{ route('register') }}" style="margin-top: 1rem">Cadastrar perfil profissional</a>
       </div>
       <div class="grid-2">
         <div class="track reveal">

@@ -105,7 +105,7 @@ class HireFlowTest extends TestCase
         $this->actingAs($stranger)->patch(route('freelancer.hires.accept', $hireRequest))->assertForbidden();
     }
 
-    public function test_review_requires_an_accepted_hire_and_updates_the_average_rating(): void
+    public function test_review_requires_an_accepted_hire_but_does_not_count_until_approved(): void
     {
         [$owner, $restaurant] = $this->ownedRestaurant();
         $freelancer = $this->freelancer();
@@ -125,9 +125,64 @@ class HireFlowTest extends TestCase
             'feedback_to_owners' => 'Recomendo -- profissional confiável.',
         ])->assertRedirect();
 
+        $review = $hireRequest->fresh()->review;
+        $this->assertSame('pending_approval', $review->status->value);
+
+        // Criada mas ainda nao aprovada pelo trabalhador -- nao pode influenciar a media.
+        $profile = $freelancer->fresh()->freelancerProfile;
+        $this->assertSame(0, $profile->reviews_count);
+        $this->assertEquals(0.0, (float) $profile->average_rating);
+
+        $this->actingAs($freelancer)->patch(route('freelancer.reviews.approve', $review))->assertRedirect();
+
         $profile = $freelancer->fresh()->freelancerProfile;
         $this->assertSame(1, $profile->reviews_count);
         $this->assertEquals(5.0, (float) $profile->average_rating);
+    }
+
+    public function test_a_rejected_review_never_counts_towards_the_rating(): void
+    {
+        [$owner, $restaurant] = $this->ownedRestaurant();
+        $freelancer = $this->freelancer();
+        $this->actingAs($owner)->post(route('owner.hire-requests.store', $freelancer->freelancerProfile), ['restaurant_id' => $restaurant->id]);
+        $hireRequest = HireRequest::first();
+        $this->actingAs($freelancer)->patch(route('freelancer.hires.accept', $hireRequest));
+        $this->actingAs($owner)->post(route('owner.freelancer-reviews.store', $hireRequest), ['rating' => 5]);
+        $review = $hireRequest->fresh()->review;
+
+        $this->actingAs($freelancer)->patch(route('freelancer.reviews.reject', $review))->assertRedirect();
+
+        $this->assertSame('rejected', $review->fresh()->status->value);
+        $profile = $freelancer->fresh()->freelancerProfile;
+        $this->assertSame(0, $profile->reviews_count);
+    }
+
+    public function test_only_the_reviewed_freelancer_can_approve_their_own_review(): void
+    {
+        [$owner, $restaurant] = $this->ownedRestaurant();
+        $freelancer = $this->freelancer();
+        $stranger = $this->freelancer();
+        $this->actingAs($owner)->post(route('owner.hire-requests.store', $freelancer->freelancerProfile), ['restaurant_id' => $restaurant->id]);
+        $hireRequest = HireRequest::first();
+        $this->actingAs($freelancer)->patch(route('freelancer.hires.accept', $hireRequest));
+        $this->actingAs($owner)->post(route('owner.freelancer-reviews.store', $hireRequest), ['rating' => 5]);
+        $review = $hireRequest->fresh()->review;
+
+        $this->actingAs($stranger)->patch(route('freelancer.reviews.approve', $review))->assertForbidden();
+    }
+
+    public function test_an_already_decided_review_cannot_be_approved_again(): void
+    {
+        [$owner, $restaurant] = $this->ownedRestaurant();
+        $freelancer = $this->freelancer();
+        $this->actingAs($owner)->post(route('owner.hire-requests.store', $freelancer->freelancerProfile), ['restaurant_id' => $restaurant->id]);
+        $hireRequest = HireRequest::first();
+        $this->actingAs($freelancer)->patch(route('freelancer.hires.accept', $hireRequest));
+        $this->actingAs($owner)->post(route('owner.freelancer-reviews.store', $hireRequest), ['rating' => 5]);
+        $review = $hireRequest->fresh()->review;
+        $this->actingAs($freelancer)->patch(route('freelancer.reviews.approve', $review));
+
+        $this->actingAs($freelancer)->patch(route('freelancer.reviews.reject', $review))->assertStatus(422);
     }
 
     public function test_a_hire_request_can_only_be_reviewed_once(): void
@@ -143,7 +198,22 @@ class HireFlowTest extends TestCase
             ->assertStatus(422);
     }
 
-    public function test_owners_browsing_never_see_the_feedback_meant_for_the_freelancer(): void
+    public function test_a_pending_approval_review_is_invisible_to_other_owners(): void
+    {
+        [$owner, $restaurant] = $this->ownedRestaurant();
+        [$otherOwner] = $this->ownedRestaurant();
+        $freelancer = $this->freelancer();
+        $this->actingAs($owner)->post(route('owner.hire-requests.store', $freelancer->freelancerProfile), ['restaurant_id' => $restaurant->id]);
+        $hireRequest = HireRequest::first();
+        $this->actingAs($freelancer)->patch(route('freelancer.hires.accept', $hireRequest));
+        $this->actingAs($owner)->post(route('owner.freelancer-reviews.store', $hireRequest), ['rating' => 5]);
+
+        $response = $this->actingAs($otherOwner)->get(route('owner.freelancers.show', $freelancer->freelancerProfile));
+
+        $response->assertInertia(fn ($page) => $page->has('freelancer.reviews', 0));
+    }
+
+    public function test_owners_browsing_see_an_approved_review_but_never_the_freelancers_private_feedback(): void
     {
         [$owner, $restaurant] = $this->ownedRestaurant();
         [$otherOwner] = $this->ownedRestaurant();
@@ -156,6 +226,7 @@ class HireFlowTest extends TestCase
             'feedback_to_freelancer' => 'Segredo so pro freelancer.',
             'feedback_to_owners' => 'Referencia publica pros donos.',
         ]);
+        $this->actingAs($freelancer)->patch(route('freelancer.reviews.approve', $hireRequest->fresh()->review));
 
         $response = $this->actingAs($otherOwner)->get(route('owner.freelancers.show', $freelancer->freelancerProfile));
 

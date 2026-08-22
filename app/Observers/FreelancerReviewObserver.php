@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Enums\ReviewApprovalStatus;
 use App\Models\FreelancerProfile;
 use App\Models\FreelancerReview;
 
@@ -24,7 +25,10 @@ class FreelancerReviewObserver
     // corrigir avaliacoes que ja existiam antes deste observer existir.
     public static function recalculate(int $freelancerProfileId): void
     {
+        // So' avaliacoes aprovadas pelo proprio trabalhador contam -- uma pendente ou
+        // rejeitada nao pode influenciar a nota publica.
         $stats = FreelancerReview::where('freelancer_profile_id', $freelancerProfileId)
+            ->where('status', ReviewApprovalStatus::Approved)
             ->selectRaw('count(*) as count, avg(rating) as avg_rating')
             ->first();
 
