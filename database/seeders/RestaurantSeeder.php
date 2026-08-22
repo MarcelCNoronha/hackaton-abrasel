@@ -320,25 +320,35 @@ class RestaurantSeeder extends Seeder
 
     private function createRestaurant(array $data): void
     {
-        $restaurant = Restaurant::updateOrCreate(
-            ['slug' => Str::slug($data['name'])],
-            [
-                'name' => $data['name'],
-                'description' => "{$data['name']} -- dado de demonstração para a tela de descoberta (Hackathon ABRASEL / Rota Gastronômica Inteligente de Viçosa).",
-                'address_neighborhood' => $data['neighborhood'],
-                'address_city' => 'Viçosa',
-                'address_state' => 'MG',
-                'latitude' => $data['lat'],
-                'longitude' => $data['lng'],
-                'phone' => '+55 31 90000-0000',
-                'whatsapp' => '+55 31 90000-0000',
-                'price_range' => $data['price_range'],
-                'average_rating' => $data['rating'],
-                'reviews_count' => $data['reviews'],
-                'verified_reviews_count' => $data['reviews'],
-                'is_active' => true,
-            ]
-        );
+        $slug = Str::slug($data['name']);
+
+        // Uma vez criado, este seeder nunca mais toca num restaurante existente -- rodar de
+        // novo (ex.: so' pra adicionar um restaurante novo a lista) nao pode apagar um nome,
+        // endereco ou cardapio que um gestor real ja tenha editado pelo proprio painel depois
+        // do seed inicial. createMenu() em particular apaga e recria TODAS as
+        // categorias/itens do zero; isso so' e' seguro na primeira vez, antes de existir
+        // qualquer edicao real por cima.
+        if (Restaurant::where('slug', $slug)->exists()) {
+            return;
+        }
+
+        $restaurant = Restaurant::create([
+            'name' => $data['name'],
+            'slug' => $slug,
+            'description' => "{$data['name']} -- dado de demonstração para a tela de descoberta (Hackathon ABRASEL / Rota Gastronômica Inteligente de Viçosa).",
+            'address_neighborhood' => $data['neighborhood'],
+            'address_city' => 'Viçosa',
+            'address_state' => 'MG',
+            'latitude' => $data['lat'],
+            'longitude' => $data['lng'],
+            'phone' => '+55 31 90000-0000',
+            'whatsapp' => '+55 31 90000-0000',
+            'price_range' => $data['price_range'],
+            'average_rating' => $data['rating'],
+            'reviews_count' => $data['reviews'],
+            'verified_reviews_count' => $data['reviews'],
+            'is_active' => true,
+        ]);
 
         $category = Category::where('slug', Str::slug($data['category']))->first();
         if ($category) {
