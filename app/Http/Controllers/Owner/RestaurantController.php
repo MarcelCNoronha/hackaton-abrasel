@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Owner;
 
 use App\Enums\PriceRange;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Owner\RestaurantProfileRequest;
 use App\Models\DietaryTag;
 use App\Models\FoodTag;
 use App\Models\Restaurant;
@@ -11,7 +12,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rules\Enum;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -43,24 +43,11 @@ class RestaurantController extends Controller
         ]);
     }
 
-    public function update(Request $request, Restaurant $restaurant): RedirectResponse
+    public function update(RestaurantProfileRequest $request, Restaurant $restaurant): RedirectResponse
     {
         $this->authorizeOwner($request, $restaurant);
 
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string', 'max:2000'],
-            'address_street' => ['nullable', 'string', 'max:255'],
-            'address_number' => ['nullable', 'string', 'max:20'],
-            'address_neighborhood' => ['nullable', 'string', 'max:255'],
-            'address_city' => ['nullable', 'string', 'max:255'],
-            'address_state' => ['nullable', 'string', 'max:2'],
-            'phone' => ['nullable', 'string', 'max:20'],
-            'whatsapp' => ['nullable', 'string', 'max:20'],
-            'price_range' => ['nullable', new Enum(PriceRange::class)],
-            'cover_photo' => ['nullable', 'image', 'max:4096'],
-            'banner_photo' => ['nullable', 'image', 'max:4096'],
-        ]);
+        $data = $request->validated();
 
         if ($request->hasFile('cover_photo')) {
             $data['cover_photo_path'] = $this->replacePhoto($request->file('cover_photo'), $restaurant->cover_photo_path, 'restaurants');
