@@ -26,14 +26,29 @@ class DiscoveryTest extends TestCase
         ]);
     }
 
-    public function test_home_page_lists_active_restaurants_without_login(): void
+    public function test_home_page_starts_with_an_empty_list_but_a_full_map_without_login(): void
     {
+        // Lista vazia por escolha ate' selecionar algo (ver DiscoveryController) -- senao ela
+        // cresceria sem limite conforme mais restaurantes se cadastrassem. O mapa e' diferente:
+        // continua trazendo todo mundo, pra dar pra explorar livremente pelos pinos.
         $this->get('/restaurantes')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('Discover/Index')
-                ->has('restaurants', 10)
+                ->has('restaurants', 0)
+                ->has('mapRestaurants', 10)
             );
+    }
+
+    public function test_selecting_an_establishment_type_populates_the_list_and_matches_the_map(): void
+    {
+        $response = $this->get('/restaurantes?category=pizzaria');
+
+        $response->assertInertia(fn (Assert $page) => $page
+            ->component('Discover/Index')
+            ->has('restaurants', 4)
+            ->has('mapRestaurants', 4)
+        );
     }
 
     public function test_within_distance_filter_excludes_far_restaurants(): void

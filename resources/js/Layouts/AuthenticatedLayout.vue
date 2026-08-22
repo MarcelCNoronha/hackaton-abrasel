@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import { useTheme } from 'vuetify';
 
@@ -12,6 +12,8 @@ const theme = useTheme();
 onMounted(() => {
     theme.change('vicosaFoodDark');
 });
+
+const drawerOpen = ref(false);
 
 function logout() {
     router.post(route('logout'));
@@ -29,48 +31,90 @@ function logout() {
                     <span class="text-h6 font-weight-bold d-none d-sm-inline" style="letter-spacing: -0.02em">{{ appName }}</span>
                 </Link>
 
-                <v-btn variant="text" :href="route('discover')" :active="route().current('discover')">Descobrir</v-btn>
-                <v-btn variant="text" :href="route('dashboard')" :active="route().current('dashboard')">Dashboard</v-btn>
-                <v-btn
-                    v-if="['owner', 'admin'].includes(user.role)"
-                    variant="text"
-                    :href="route('owner.dashboard')"
-                    :active="route().current('owner.*')"
-                >
-                    Painel do estabelecimento
-                </v-btn>
-                <v-btn
-                    v-else
-                    variant="text"
-                    :href="route('owner.claims.create')"
-                    :active="route().current('owner.claims.*')"
-                >
-                    Cadastrar restaurante
-                </v-btn>
-                <v-btn
-                    v-if="user.role === 'admin'"
-                    variant="text"
-                    :href="route('admin.dashboard')"
-                    :active="route().current('admin.*')"
-                >
-                    Administração
-                </v-btn>
+                <!-- Nav horizontal so' a partir de md -- em telas menores esses botoes nao
+                     cabem lado a lado e quebravam o app-bar; vira menu lateral abaixo. -->
+                <template v-if="$vuetify.display.mdAndUp">
+                    <v-btn variant="text" :href="route('discover')" :active="route().current('discover')">Descobrir</v-btn>
+                    <v-btn variant="text" :href="route('dashboard')" :active="route().current('dashboard')">Dashboard</v-btn>
+                    <v-btn
+                        v-if="['owner', 'admin'].includes(user.role)"
+                        variant="text"
+                        :href="route('owner.dashboard')"
+                        :active="route().current('owner.*')"
+                    >
+                        Painel do estabelecimento
+                    </v-btn>
+                    <v-btn
+                        v-else
+                        variant="text"
+                        :href="route('owner.claims.create')"
+                        :active="route().current('owner.claims.*')"
+                    >
+                        Cadastrar restaurante
+                    </v-btn>
+                    <v-btn
+                        v-if="user.role === 'admin'"
+                        variant="text"
+                        :href="route('admin.dashboard')"
+                        :active="route().current('admin.*')"
+                    >
+                        Administração
+                    </v-btn>
 
-                <v-spacer />
+                    <v-spacer />
 
-                <v-menu>
-                    <template #activator="{ props: menuProps }">
-                        <v-btn variant="text" v-bind="menuProps" append-icon="mdi-chevron-down">
-                            {{ user.name }}
-                        </v-btn>
-                    </template>
-                    <v-list density="compact">
-                        <v-list-item :href="route('profile.edit')" title="Perfil" />
-                        <v-list-item title="Sair" @click="logout" />
-                    </v-list>
-                </v-menu>
+                    <v-menu>
+                        <template #activator="{ props: menuProps }">
+                            <v-btn variant="text" v-bind="menuProps" append-icon="mdi-chevron-down">
+                                {{ user.name }}
+                            </v-btn>
+                        </template>
+                        <v-list density="compact">
+                            <v-list-item :href="route('profile.edit')" title="Perfil" />
+                            <v-list-item title="Sair" @click="logout" />
+                        </v-list>
+                    </v-menu>
+                </template>
+
+                <template v-else>
+                    <v-spacer />
+                    <v-app-bar-nav-icon @click="drawerOpen = true" />
+                </template>
             </v-container>
         </v-app-bar>
+
+        <v-navigation-drawer v-model="drawerOpen" temporary location="right" width="280">
+            <v-list density="compact" nav>
+                <v-list-item :title="user.name" :subtitle="user.email" class="mb-2" />
+                <v-divider class="mb-2" />
+                <v-list-item :href="route('discover')" :active="route().current('discover')" title="Descobrir" prepend-icon="mdi-compass-outline" />
+                <v-list-item :href="route('dashboard')" :active="route().current('dashboard')" title="Dashboard" prepend-icon="mdi-view-dashboard-outline" />
+                <v-list-item
+                    v-if="['owner', 'admin'].includes(user.role)"
+                    :href="route('owner.dashboard')"
+                    :active="route().current('owner.*')"
+                    title="Painel do estabelecimento"
+                    prepend-icon="mdi-storefront-outline"
+                />
+                <v-list-item
+                    v-else
+                    :href="route('owner.claims.create')"
+                    :active="route().current('owner.claims.*')"
+                    title="Cadastrar restaurante"
+                    prepend-icon="mdi-storefront-outline"
+                />
+                <v-list-item
+                    v-if="user.role === 'admin'"
+                    :href="route('admin.dashboard')"
+                    :active="route().current('admin.*')"
+                    title="Administração"
+                    prepend-icon="mdi-shield-crown-outline"
+                />
+                <v-divider class="my-2" />
+                <v-list-item :href="route('profile.edit')" title="Perfil" prepend-icon="mdi-account-outline" />
+                <v-list-item title="Sair" prepend-icon="mdi-logout" @click="logout" />
+            </v-list>
+        </v-navigation-drawer>
 
         <v-main>
             <div v-if="$slots.header" class="page-header">

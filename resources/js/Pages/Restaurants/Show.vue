@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { Head } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 
@@ -73,6 +73,8 @@ const heroStyle = computed(() => {
     const pair = gradients[props.restaurant.id % gradients.length];
     return { background: `linear-gradient(135deg, ${pair[0]}, ${pair[1]})` };
 });
+
+const reviewsDialog = ref(false);
 </script>
 
 <template>
@@ -84,22 +86,50 @@ const heroStyle = computed(() => {
                 <div class="d-flex flex-wrap align-center justify-space-between ga-3">
                     <div>
                         <div class="d-flex flex-wrap align-center ga-2 mb-2">
-                            <v-chip
-                                :color="restaurant.is_open_now ? 'secondary' : undefined"
-                                :variant="restaurant.is_open_now ? 'flat' : 'outlined'"
-                                size="small"
-                                class="hero-chip"
-                            >
-                                <v-icon icon="mdi-circle" size="8" start color="white" />
-                                {{ restaurant.is_open_now ? 'Aberto agora' : 'Fechado agora' }}
-                            </v-chip>
+                            <v-menu>
+                                <template #activator="{ props: menuProps }">
+                                    <v-chip
+                                        :color="restaurant.is_open_now ? 'secondary' : undefined"
+                                        :variant="restaurant.is_open_now ? 'flat' : 'outlined'"
+                                        size="small"
+                                        class="hero-chip"
+                                        v-bind="menuProps"
+                                        style="cursor: pointer"
+                                        append-icon="mdi-chevron-down"
+                                    >
+                                        <v-icon icon="mdi-circle" size="8" start color="white" />
+                                        {{ restaurant.is_open_now ? 'Aberto agora' : 'Fechado agora' }}
+                                    </v-chip>
+                                </template>
+                                <v-card min-width="220">
+                                    <v-list density="compact">
+                                        <v-list-item
+                                            v-for="hours in sortedHours"
+                                            :key="hours.id"
+                                            :class="{ 'font-weight-bold': hours.weekday === today }"
+                                        >
+                                            <div class="d-flex justify-space-between" style="width: 100%">
+                                                <span>{{ weekdayNames[hours.weekday] }}</span>
+                                                <span>
+                                                    {{
+                                                        hours.is_closed
+                                                            ? 'Fechado'
+                                                            : `${hours.opens_at?.slice(0, 5)} – ${hours.closes_at?.slice(0, 5)}`
+                                                    }}
+                                                </span>
+                                            </div>
+                                        </v-list-item>
+                                    </v-list>
+                                </v-card>
+                            </v-menu>
                         </div>
                         <h1 class="text-h4 font-weight-bold text-white mb-1">{{ restaurant.name }}</h1>
                         <div class="d-flex flex-wrap align-center ga-3 text-white hero-meta">
-                            <span class="d-flex align-center ga-1">
+                            <span class="d-flex align-center ga-1 hero-meta-trigger" @click="reviewsDialog = true">
                                 <v-icon icon="mdi-star" size="18" />
                                 {{ Number(restaurant.average_rating).toFixed(1) }}
                                 ({{ restaurant.reviews_count }} avaliações)
+                                <v-icon icon="mdi-chevron-down" size="14" />
                             </span>
                             <span class="font-weight-bold">{{ restaurant.price_range }}</span>
                             <span v-if="restaurant.distance_km != null" class="d-flex align-center ga-1">
@@ -110,6 +140,18 @@ const heroStyle = computed(() => {
                                         : Number(restaurant.distance_km).toFixed(1) + ' km'
                                 }}
                             </span>
+                            <v-menu v-if="address">
+                                <template #activator="{ props: menuProps }">
+                                    <span class="d-flex align-center ga-1 hero-meta-trigger" v-bind="menuProps">
+                                        <v-icon icon="mdi-map-marker-outline" size="18" />
+                                        Endereço
+                                        <v-icon icon="mdi-chevron-down" size="14" />
+                                    </span>
+                                </template>
+                                <v-card min-width="240" max-width="320">
+                                    <v-card-text>{{ address }}</v-card-text>
+                                </v-card>
+                            </v-menu>
                         </div>
                     </div>
 
@@ -142,18 +184,16 @@ const heroStyle = computed(() => {
                 {{ restaurant.description }}
             </p>
 
-            <v-row>
-                <v-col cols="12" md="8">
-                    <div class="d-flex align-center ga-2 mb-4">
-                        <v-icon icon="mdi-book-open-variant" color="primary" />
-                        <h2 id="cardapio" class="text-h5 font-weight-bold">Cardápio</h2>
-                    </div>
+            <div class="d-flex align-center ga-2 mb-4">
+                <v-icon icon="mdi-book-open-variant" color="primary" />
+                <h2 class="text-h5 font-weight-bold">Cardápio</h2>
+            </div>
 
-                    <v-alert v-if="!restaurant.menus?.length" type="info" variant="tonal" class="mb-6">
-                        Cardápio ainda não cadastrado.
-                    </v-alert>
+            <v-alert v-if="!restaurant.menus?.length" type="info" variant="tonal" class="mb-6">
+                Cardápio ainda não cadastrado.
+            </v-alert>
 
-                    <div v-for="menu in restaurant.menus" :key="menu.id" class="mb-6">
+            <div v-for="menu in restaurant.menus" :key="menu.id" class="mb-6">
                         <div v-for="category in menu.categories" :key="category.id" class="mb-5">
                             <h3 class="text-subtitle-1 font-weight-bold mb-2 text-primary">
                                 {{ category.name }}
@@ -208,12 +248,15 @@ const heroStyle = computed(() => {
                             </v-card>
                         </div>
                     </div>
+        </v-container>
 
-                    <div class="d-flex align-center ga-2 mb-4 mt-8">
-                        <v-icon icon="mdi-message-star-outline" color="primary" />
-                        <h2 class="text-h5 font-weight-bold">Avaliações</h2>
-                    </div>
-
+        <v-dialog v-model="reviewsDialog" max-width="640" scrollable>
+            <v-card>
+                <v-card-title class="d-flex align-center justify-space-between">
+                    Avaliações
+                    <v-btn icon="mdi-close" variant="text" size="small" @click="reviewsDialog = false" />
+                </v-card-title>
+                <v-card-text style="max-height: 70vh">
                     <v-alert v-if="!restaurant.reviews?.length" type="info" variant="tonal">
                         Ainda não há avaliações verificadas para este estabelecimento.
                     </v-alert>
@@ -238,48 +281,9 @@ const heroStyle = computed(() => {
                             </div>
                         </v-card-text>
                     </v-card>
-                </v-col>
-
-                <v-col cols="12" md="4">
-                    <v-card variant="outlined" class="mb-4">
-                        <v-card-item>
-                            <template #prepend>
-                                <v-icon icon="mdi-map-marker-outline" color="primary" />
-                            </template>
-                            <v-card-title class="text-subtitle-1">Endereço</v-card-title>
-                        </v-card-item>
-                        <v-card-text>{{ address || 'Endereço não informado' }}</v-card-text>
-                    </v-card>
-
-                    <v-card variant="outlined">
-                        <v-card-item>
-                            <template #prepend>
-                                <v-icon icon="mdi-clock-outline" color="primary" />
-                            </template>
-                            <v-card-title class="text-subtitle-1">Horário de funcionamento</v-card-title>
-                        </v-card-item>
-                        <v-list density="compact">
-                            <v-list-item
-                                v-for="hours in sortedHours"
-                                :key="hours.id"
-                                :class="{ 'font-weight-bold': hours.weekday === today }"
-                            >
-                                <div class="d-flex justify-space-between" style="width: 100%">
-                                    <span>{{ weekdayNames[hours.weekday] }}</span>
-                                    <span>
-                                        {{
-                                            hours.is_closed
-                                                ? 'Fechado'
-                                                : `${hours.opens_at?.slice(0, 5)} – ${hours.closes_at?.slice(0, 5)}`
-                                        }}
-                                    </span>
-                                </div>
-                            </v-list-item>
-                        </v-list>
-                    </v-card>
-                </v-col>
-            </v-row>
-        </v-container>
+                </v-card-text>
+            </v-card>
+        </v-dialog>
     </PublicLayout>
 </template>
 
@@ -294,6 +298,14 @@ const heroStyle = computed(() => {
 
 .hero-meta {
     opacity: 0.95;
+}
+
+.hero-meta-trigger {
+    cursor: pointer;
+}
+
+.hero-meta-trigger:hover {
+    text-decoration: underline;
 }
 
 .menu-item-card {

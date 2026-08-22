@@ -97,11 +97,31 @@ class DiscoveryController extends Controller
             default => $query->orderByDesc('average_rating'),
         };
 
-        $restaurants = $query->limit(60)->get();
+        // Sem nenhum filtro selecionado ainda, a LISTA fica vazia -- a tela pede pra escolher
+        // um tipo/busca primeiro (ver Discover/Index.vue) -- mas o mapa continua mostrando
+        // todos os estabelecimentos ativos, pra dar pra explorar livremente clicando nos
+        // pinos. A partir do momento que algum filtro e' selecionado, o mapa passa a mostrar
+        // exatamente os mesmos resultados da lista (mesmo dataset, sem query extra).
+        $hasAnyFilter = $q !== '' || $category || $cuisines || $dietaryTags || $foodTags
+            || $priceRange || $minRating || $request->boolean('open_now') || $request->filled('radius_km');
+
+        $restaurants = $hasAnyFilter ? $query->limit(60)->get() : collect();
         $restaurants->each(fn (Restaurant $r) => $r->is_open_now = $r->isOpenAt());
+
+        if ($hasAnyFilter) {
+            $mapRestaurants = $restaurants;
+        } else {
+            $mapQuery = Restaurant::query()->where('is_active', true)->with(['categories', 'cuisines', 'businessHours']);
+            if ($hasLocation) {
+                $mapQuery->selectDistance($lat, $lng);
+            }
+            $mapRestaurants = $mapQuery->limit(200)->get();
+            $mapRestaurants->each(fn (Restaurant $r) => $r->is_open_now = $r->isOpenAt());
+        }
 
         return Inertia::render('Discover/Index', [
             'restaurants' => $restaurants,
+            'mapRestaurants' => $mapRestaurants,
             'categories' => Category::orderBy('position')->get(),
             'cuisines' => Cuisine::orderBy('position')->get(),
             'dietaryTags' => DietaryTag::orderBy('position')->get(),

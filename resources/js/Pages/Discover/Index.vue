@@ -12,6 +12,7 @@ function toggleCategory(slug) {
 
 const props = defineProps({
     restaurants: { type: Array, default: () => [] },
+    mapRestaurants: { type: Array, default: () => [] },
     categories: { type: Array, default: () => [] },
     cuisines: { type: Array, default: () => [] },
     dietaryTags: { type: Array, default: () => [] },
@@ -43,6 +44,10 @@ const activeFilterCount = computed(
         (filters.min_rating ? 1 : 0) +
         (filters.open_now ? 1 : 0),
 );
+
+// Espelha DiscoveryController@index's $hasAnyFilter -- decide se mostra a lista (vazia por
+// escolha, ate' selecionar algo, pra nao virar uma lista infinita) ou o convite pra filtrar.
+const hasAnyFilter = computed(() => filters.q.trim() !== '' || activeFilterCount.value > 0);
 
 const userLocation = ref(
     props.filters.lat && props.filters.lng
@@ -125,7 +130,7 @@ function applyFilters({ immediate = false } = {}) {
                 lat: userLocation.value?.lat,
                 lng: userLocation.value?.lng,
             },
-            { preserveState: true, preserveScroll: true, replace: true, only: ['restaurants', 'filters'] },
+            { preserveState: true, preserveScroll: true, replace: true, only: ['restaurants', 'mapRestaurants', 'filters'] },
         );
     };
 
@@ -315,28 +320,35 @@ function clearFilters() {
 
             <div class="results-area">
                 <div class="results-list">
-                    <div class="results-count">
-                        <strong>{{ restaurants.length }}</strong>
-                        {{ restaurants.length === 1 ? 'estabelecimento encontrado' : 'estabelecimentos encontrados' }}
-                    </div>
+                    <template v-if="hasAnyFilter">
+                        <div class="results-count">
+                            <strong>{{ restaurants.length }}</strong>
+                            {{ restaurants.length === 1 ? 'estabelecimento encontrado' : 'estabelecimentos encontrados' }}
+                        </div>
 
-                    <v-alert v-if="restaurants.length === 0" type="info" variant="tonal" class="mx-4">
-                        Nenhum estabelecimento encontrado com esses filtros. Tente ampliar a distância ou remover algum filtro.
+                        <v-alert v-if="restaurants.length === 0" type="info" variant="tonal" class="mx-4">
+                            Nenhum estabelecimento encontrado com esses filtros. Tente ampliar a distância ou remover algum filtro.
+                        </v-alert>
+
+                        <RestaurantCard
+                            v-for="restaurant in restaurants"
+                            :key="restaurant.id"
+                            :restaurant="restaurant"
+                            :highlighted="hoveredRestaurantId === restaurant.id"
+                            @mouseenter="hoveredRestaurantId = restaurant.id"
+                            @mouseleave="hoveredRestaurantId = null"
+                        />
+                    </template>
+
+                    <v-alert v-else type="info" variant="tonal" class="mx-4">
+                        Escolha um tipo de estabelecimento acima ou busque algo pra ver os restaurantes --
+                        o mapa ao lado já mostra todos, pode explorar clicando nos pinos.
                     </v-alert>
-
-                    <RestaurantCard
-                        v-for="restaurant in restaurants"
-                        :key="restaurant.id"
-                        :restaurant="restaurant"
-                        :highlighted="hoveredRestaurantId === restaurant.id"
-                        @mouseenter="hoveredRestaurantId = restaurant.id"
-                        @mouseleave="hoveredRestaurantId = null"
-                    />
                 </div>
 
                 <div class="results-map">
                     <RestaurantMap
-                        :restaurants="restaurants"
+                        :restaurants="mapRestaurants"
                         :center="mapCenter"
                         :user-location="userLocation"
                         :highlighted-id="hoveredRestaurantId"
