@@ -4,8 +4,12 @@ namespace Database\Seeders;
 
 use App\Enums\AvailabilityStatus;
 use App\Enums\HireRequestStatus;
+use App\Enums\JobApplicationStatus;
+use App\Enums\JobPostingStatus;
 use App\Enums\UserRole;
 use App\Models\HireRequest;
+use App\Models\JobApplication;
+use App\Models\JobPosting;
 use App\Models\JobSkill;
 use App\Models\Restaurant;
 use App\Models\User;
@@ -25,6 +29,7 @@ class DemoFreelancerSeeder extends Seeder
     {
         $freelancers = $this->createFreelancers();
         $this->createHireRequestsAndReviews($freelancers);
+        $this->createJobPostings($freelancers);
     }
 
     /**
@@ -214,6 +219,111 @@ class DemoFreelancerSeeder extends Seeder
                 // demonstracao ficaria presa em "pending_approval" pra sempre e nao apareceria
                 // pra outros donos nem contaria pra nota (ver ReviewApprovalStatus).
                 $review->forceFill(['status' => 'approved'])->save();
+            }
+        }
+    }
+
+    /**
+     * Vagas de demonstracao (aba Empregabilidade em Owner/Restaurants/Edit.vue e a lista de
+     * vagas abertas do freelancer) com candidaturas em estados variados -- inclusive uma ja
+     * aceita, pra mostrar como a candidatura vira HireRequest (mesmo efeito colateral de
+     * Owner\JobApplicationController::accept(), replicado aqui a mao por ser seeder).
+     *
+     * @param  array<string, User>  $freelancers
+     */
+    private function createJobPostings(array $freelancers): void
+    {
+        $postings = [
+            [
+                'restaurant' => 'sushi-mirim',
+                'title' => 'Sushiman para fins de semana',
+                'description' => 'Reforço no balcão de sushi nas sextas, sábados e domingos. Experiência com corte de peixe é essencial.',
+                'skills' => ['Sushiman'],
+                'status' => JobPostingStatus::Open,
+                'applicants' => [
+                    ['freelancer' => 'Rafael Andrade', 'status' => JobApplicationStatus::Pending, 'message' => 'Tenho disponibilidade pros três dias, já trabalho com rodízio japonês.'],
+                ],
+            ],
+            [
+                'restaurant' => 'restaurante-villa-alfa',
+                'title' => 'Garçom/Garçonete para o salão',
+                'description' => 'Vaga para atendimento de mesas no horário de almoço, de segunda a sexta.',
+                'skills' => ['Garçom/Garçonete'],
+                'status' => JobPostingStatus::Open,
+                'applicants' => [
+                    ['freelancer' => 'Camila Rodrigues', 'status' => JobApplicationStatus::Pending, 'message' => null],
+                    ['freelancer' => 'Larissa Souza', 'status' => JobApplicationStatus::Pending, 'message' => 'Tenho experiência nas duas funções, salão e cozinha.'],
+                ],
+            ],
+            [
+                'restaurant' => 'fabrica-hamburgueria-artesanal',
+                'title' => 'Auxiliar de cozinha -- meio período',
+                'description' => 'Apoio no pré-preparo e organização durante o turno da noite.',
+                'skills' => ['Auxiliar de Cozinha'],
+                'status' => JobPostingStatus::Open,
+                'applicants' => [
+                    ['freelancer' => 'Diego Santos', 'status' => JobApplicationStatus::Pending, 'message' => null],
+                ],
+            ],
+            [
+                'restaurant' => 'beco-das-flores',
+                'title' => 'Confeiteiro(a) para produção de sobremesas',
+                'description' => 'Produção de bolos e sobremesas para o cardápio fixo, 3x por semana.',
+                'skills' => ['Confeiteiro(a)'],
+                'status' => JobPostingStatus::Open,
+                'applicants' => [
+                    ['freelancer' => 'Patrícia Lima', 'status' => JobApplicationStatus::Accepted, 'message' => 'Já produzo em escala pra outros estabelecimentos, posso mandar fotos do portfólio.'],
+                ],
+            ],
+            [
+                'restaurant' => 'choperia-e-churrascaria-devan',
+                'title' => 'Churrasqueiro(a) para eventos de fim de ano',
+                'description' => 'Vaga encerrada -- equipe de eventos já completa.',
+                'skills' => ['Churrasqueiro(a)'],
+                'status' => JobPostingStatus::Closed,
+                'applicants' => [
+                    ['freelancer' => 'Marcos Vinícius', 'status' => JobApplicationStatus::Declined, 'message' => null],
+                ],
+            ],
+        ];
+
+        foreach ($postings as $data) {
+            $restaurant = Restaurant::where('slug', $data['restaurant'])->first();
+            $owner = User::where('email', "dono.{$data['restaurant']}@vicosafood.test")->first();
+
+            if (! $restaurant || ! $owner) {
+                $this->command?->warn("Pulando vaga '{$data['title']}' -- restaurante/dono nao encontrado.");
+
+                continue;
+            }
+
+            $posting = JobPosting::updateOrCreate(
+                ['restaurant_id' => $restaurant->id, 'title' => $data['title']],
+                ['created_by' => $owner->id, 'description' => $data['description'], 'status' => $data['status']]
+            );
+
+            $skillIds = JobSkill::whereIn('slug', array_map(Str::slug(...), $data['skills']))->pluck('id');
+            $posting->jobSkills()->sync($skillIds);
+
+            foreach ($data['applicants'] as $applicant) {
+                $freelancerUser = $freelancers[$applicant['freelancer']] ?? null;
+
+                if (! $freelancerUser) {
+                    continue;
+                }
+
+                $jobApplication = JobApplication::updateOrCreate(
+                    ['job_posting_id' => $posting->id, 'freelancer_profile_id' => $freelancerUser->freelancerProfile->id],
+                    ['message' => $applicant['message'], 'status' => $applicant['status']]
+                );
+
+                if ($applicant['status'] === JobApplicationStatus::Accepted && ! $jobApplication->hire_request_id) {
+                    $hireRequest = HireRequest::updateOrCreate(
+                        ['restaurant_id' => $restaurant->id, 'freelancer_profile_id' => $freelancerUser->freelancerProfile->id],
+                        ['requested_by' => $owner->id, 'status' => HireRequestStatus::Accepted, 'responded_at' => now()]
+                    );
+                    $jobApplication->update(['hire_request_id' => $hireRequest->id]);
+                }
             }
         }
     }
