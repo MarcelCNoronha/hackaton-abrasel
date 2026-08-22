@@ -4,12 +4,16 @@ namespace Database\Seeders;
 
 use App\Enums\UserRole;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
+    // WithoutModelEvents removida de proposito -- ReviewObserver/FreelancerReviewObserver
+    // precisam disparar durante o seed pra average_rating/reviews_count refletirem as
+    // avaliacoes de demonstracao de verdade, em vez de ficarem presos nos numeros ficticios
+    // que RestaurantSeeder usa so' como valor inicial (achado ao notar freelancers com
+    // avaliacao real ainda mostrando nota 0 -- o mesmo ja acontecia com os restaurantes,
+    // so' nao tinha sido percebido porque o baseline generico parecia plausivel).
 
     /**
      * Seed the application's database.
@@ -24,6 +28,7 @@ class DatabaseSeeder extends Seeder
             JobSkillSeeder::class,
             RestaurantSeeder::class,
             DemoActivitySeeder::class,
+            DemoFreelancerSeeder::class,
         ]);
 
         // updateOrCreate (nao Factory) -- Factory::definition() chama fake(), que quebra em
