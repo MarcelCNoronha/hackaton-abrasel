@@ -112,11 +112,16 @@
     font-size: 1rem;
   }
 
-  .nav-links { display: flex; align-items: center; justify-content: space-between; gap: 1.25rem; flex: 1; min-width: 0; }
-  .nav-links a.section-link { color: var(--text-secondary); text-decoration: none; font-size: 0.92rem; white-space: nowrap; }
-  .nav-links a.section-link:hover { color: var(--text-primary); }
-  .nav-cta { display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0; }
+  .nav-sections a.section-link { color: var(--text-secondary); text-decoration: none; font-size: 0.92rem; white-space: nowrap; }
+  .nav-sections a.section-link:hover { color: var(--text-primary); }
+  .nav-cta { display: flex; align-items: center; flex-wrap: wrap; gap: 0.75rem; }
+  /* flex-basis:100% + order forcam essa linha a vir sempre sozinha, numa segunda fileira --
+     tentar dividir a MESMA fileira com marca+botoes (flex:1 pra cobrir o espaco restante)
+     colava esses links direto no nome do app sempre que sobrava pouco espaco, e enfiar tudo
+     numa fileira so' cortava o botao "Descobrir restaurantes" pra fora da tela no mobile. */
   .nav-sections {
+    order: 3;
+    flex-basis: 100%;
     display: flex;
     align-items: center;
     gap: 1.75rem;
@@ -543,16 +548,14 @@
       <span class="mark">🍽️</span>
       <span>VicosaFood</span>
     </a>
-    <nav class="nav-links">
-      <div class="nav-sections">
-        <a class="section-link" href="#como-funciona">Como funciona</a>
-        <a class="section-link" href="#recursos">Recursos</a>
-        <a class="section-link" href="#para-restaurantes">Para restaurantes</a>
-      </div>
-      <div class="nav-cta">
-        <a class="btn btn-ghost" href="{{ route('login') }}">Entrar</a>
-        <a class="btn btn-primary" href="{{ route('discover') }}">Descobrir restaurantes</a>
-      </div>
+    <div class="nav-cta">
+      <a class="btn btn-ghost" href="{{ route('login') }}">Entrar</a>
+      <a class="btn btn-primary" href="{{ route('discover') }}">Descobrir restaurantes</a>
+    </div>
+    <nav class="nav-sections">
+      <a class="section-link" href="#como-funciona">Como funciona</a>
+      <a class="section-link" href="#recursos">Recursos</a>
+      <a class="section-link" href="#para-restaurantes">Para restaurantes</a>
     </nav>
   </div>
 </header>
