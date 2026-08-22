@@ -22,9 +22,13 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    # Nao monta nada em public/storage -- e' onde docker/entrypoint.sh cria o symlink pro
+    # disco "public" (storage/app/public, dentro do volume storage_data acima). Um volume
+    # montado ali por cima impediria esse symlink de existir (o Docker sempre materializa
+    # um bind/volume mount como diretorio real, nunca preserva o que a imagem tinha ali),
+    # deixando qualquer upload gravado mas inacessivel via /storage/... -- ver nginx abaixo.
     volumes:
       - storage_data:/var/www/html/storage/app
-      - public_storage:/var/www/html/public/storage
       - public_assets:/srv/public
     mem_limit: 512m
     mem_reservation: 128m
@@ -52,7 +56,6 @@ services:
         condition: service_healthy
     volumes:
       - storage_data:/var/www/html/storage/app
-      - public_storage:/var/www/html/public/storage
     mem_limit: 256m
     mem_reservation: 64m
     cpus: 0.3
@@ -75,7 +78,9 @@ services:
       # for the other apps — required because the zone's SSL/TLS mode is Full (strict).
       - /etc/ssl/cloudflare:/etc/nginx/ssl:ro
       - public_assets:/srv/public:ro
-      - public_storage:/srv/storage
+      # Mesmo volume que "app" usa pra storage/app -- storage/app/public e' o disco "public"
+      # do Laravel, dai o prod.conf apontar o alias pra "/srv/storage/public/", nao a raiz.
+      - storage_data:/srv/storage:ro
     mem_limit: 64m
     mem_reservation: 16m
     cpus: 0.2
@@ -121,5 +126,4 @@ volumes:
   postgres_data:
   redis_data:
   storage_data:
-  public_storage:
   public_assets:
